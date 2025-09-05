@@ -63,7 +63,7 @@ buildNumber.properties
 # CMake
 cmake-build-*/
 
-# File-based project format
+# File-based project displayOption
 *.iws
 
 # IntelliJ
