@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ikm.server.database.entity;
+package dev.ikm.server.database;
 
-public enum DatabaseType {
+public enum Type {
     SA("Open SpinedArrayStore"),
     MV("Open MV Store");
 
     private final String name;
 
-    DatabaseType(String name) {
+    Type(String name) {
         this.name = name;
     }
 

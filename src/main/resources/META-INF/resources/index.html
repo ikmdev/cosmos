@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quarkus HTMX Demo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+<h1>HTMX with Quarkus</h1>
+
+<div id="target-div">
+    <p>This content will be replaced by a fragment from the server.</p>
+</div>
+
+<button hx-get="/api/rest/hello" hx-target="#target-div" hx-swap="outerHTML">
+    Load from Server
+</button>
+</body>
+</html>
