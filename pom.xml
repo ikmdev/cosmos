@@ -9,10 +9,10 @@
     </parent>
 
     <groupId>dev.ikm.server</groupId>
-    <artifactId>pulsar</artifactId>
+    <artifactId>cosmos</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
-    <name>IKE Pulsar: Data Server</name>
+    <name>Cosmos: An IKE Server</name>
 
     <description>IKE data server providing REST and GraphQL capabilities.</description>
 
@@ -43,7 +43,7 @@
     </developers>
 
     <scm>
-        <url>https://github.com/ikmdev/pulsar</url>
+        <url>https://github.com/ikmdev/cosmos</url>
     </scm>
     <issueManagement>
         <system>GitHub</system>
@@ -69,8 +69,8 @@
 	    <quarkus-resteasy-reactive-jackson.version>3.15.6.2</quarkus-resteasy-reactive-jackson.version>
 
 		<!-- Misc -->
-	    <jackson-datatype-eclipse-collections.version>2.20.0</jackson-datatype-eclipse-collections.version>
 	    <jboss-threads.version>3.9.1</jboss-threads.version>
+	    <lucene-core.version>10.3.0</lucene-core.version>
 
         <!-- Maven Properties -->
         <skipITs>true</skipITs>
@@ -133,11 +133,6 @@
 
 			<!-- Misc. -->
 	        <dependency>
-		        <groupId>com.fasterxml.jackson.datatype</groupId>
-		        <artifactId>jackson-datatype-eclipse-collections</artifactId>
-		        <version>${jackson-datatype-eclipse-collections.version}</version>
-	        </dependency>
-	        <dependency>
 		        <groupId>org.jboss.threads</groupId>
 		        <artifactId>jboss-threads</artifactId>
 		        <version>${jboss-threads.version}</version>
@@ -145,7 +140,7 @@
 	        <dependency>
 		        <groupId>org.apache.lucene</groupId>
 		        <artifactId>lucene-core</artifactId>
-		        <version>10.3.0</version>
+		        <version>${lucene-core.version}</version>
 	        </dependency>
         </dependencies>
     </dependencyManagement>
@@ -199,18 +194,20 @@
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-undertow</artifactId>
 	    </dependency>
-
-	    <!-- Misc. -->
 	    <dependency>
-		    <groupId>com.fasterxml.jackson.datatype</groupId>
-		    <artifactId>jackson-datatype-eclipse-collections</artifactId>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+	    </dependency>
+	    <dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-security</artifactId>
 	    </dependency>
 
+	    <!-- Misc. -->
 	    <dependency>
 		    <groupId>org.jboss.threads</groupId>
 		    <artifactId>jboss-threads</artifactId>
 	    </dependency>
-
 	    <dependency>
 		    <groupId>org.apache.lucene</groupId>
 		    <artifactId>lucene-core</artifactId>
