@@ -1,11 +1,11 @@
-package dev.ikm.server.cosmos.home;
+package dev.ikm.server.cosmos.webapp;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class HomeController {
+public class IndexController {
 
 	@GetMapping("/")
 	public String home(Model model) {
@@ -13,6 +13,6 @@ public class HomeController {
 		model.addAttribute("message", "Hello from Thymeleaf!");
 
 		// Return the name of the template to be rendered
-		return "home"; // Corresponds to src/main/resources/templates/home.html
+		return "index";
 	}
 }
