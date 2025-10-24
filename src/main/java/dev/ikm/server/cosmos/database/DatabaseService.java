@@ -1,5 +1,6 @@
 package dev.ikm.server.cosmos.database;
 
+import dev.ikm.server.cosmos.config.DatabaseConfig;
 import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.common.service.ServiceKeys;
 import dev.ikm.tinkar.common.service.ServiceProperties;

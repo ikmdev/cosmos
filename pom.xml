@@ -61,12 +61,9 @@
         <eclipse-collections-api.version>12.0.0.M3-r3</eclipse-collections-api.version>
         <protobuf-java.version>4.30.2-r2</protobuf-java.version>
 
-        <!-- Quarkus -->
+        <!-- Spring -->
 	    <spring-boot.version>3.5.5</spring-boot.version>
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.25.4</quarkus.platform.version>
-	    <quarkus-resteasy-reactive-jackson.version>3.15.6.2</quarkus-resteasy-reactive-jackson.version>
+	    <thymeleaf-layout-dialect.version>3.4.0</thymeleaf-layout-dialect.version>
 
 		<!-- Misc -->
 	    <jboss-threads.version>3.9.1</jboss-threads.version>
@@ -129,6 +126,11 @@
 		        <version>${spring-boot.version}</version>
 		        <type>pom</type>
 		        <scope>import</scope>
+	        </dependency>
+	        <dependency>
+		        <groupId>nz.net.ultraq.thymeleaf</groupId>
+		        <artifactId>thymeleaf-layout-dialect</artifactId>
+		        <version>${thymeleaf-layout-dialect.version}</version>
 	        </dependency>
 
 			<!-- Misc. -->
@@ -201,6 +203,16 @@
 	    <dependency>
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-security</artifactId>
+	    </dependency>
+	    <dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-devtools</artifactId>
+		    <scope>runtime</scope>
+		    <optional>true</optional>
+	    </dependency>
+	    <dependency>
+		    <groupId>nz.net.ultraq.thymeleaf</groupId>
+		    <artifactId>thymeleaf-layout-dialect</artifactId>
 	    </dependency>
 
 	    <!-- Misc. -->

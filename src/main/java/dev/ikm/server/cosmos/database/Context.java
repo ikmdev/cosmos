@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.database;
 
-import dev.ikm.server.cosmos.coordinate.LanguageCoord;
-import dev.ikm.server.cosmos.coordinate.NavigationCoord;
-import dev.ikm.server.cosmos.coordinate.StampCoord;
+import dev.ikm.server.cosmos.api.coordinate.LanguageCoord;
+import dev.ikm.server.cosmos.api.coordinate.NavigationCoord;
+import dev.ikm.server.cosmos.api.coordinate.StampCoord;
 import dev.ikm.tinkar.coordinate.language.LanguageCoordinateRecord;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculator;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculatorWithCache;
