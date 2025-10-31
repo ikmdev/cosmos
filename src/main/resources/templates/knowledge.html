@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}">
+<head>
+    <title>Knowledge</title>
+</head>
+<body>
+
+<header id="header-content" layout:fragment="header-content" th:replace="~{fragments/navigation :: navigation-content}"></header>
+
+<main id="main-content" class="container flex-shrink-0" th:fragment="main-content" layout:fragment="main-content">
+    <h1>Knowledge View</h1>
+    <p>This is the content for the Knowledge page.</p>
+</main>
+
+<footer id="footer-content" class="footer mt-auto py-3 bg-light" layout:fragment="footer-content" th:replace="~{fragments/footer :: #footer-content}"></footer>
+
+</body>
+</html>

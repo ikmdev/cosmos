@@ -9,6 +9,6 @@ public class MainController {
 
 	@GetMapping("/")
 	public String getMainPage(Model model) {
-		return "/layouts/home";
+		return "redirect:/home";
 	}
 }

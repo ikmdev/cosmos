@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ultraq.net.nz/thymeleaf/layout ">
+<head>
+    <title>Navigation</title>
+</head>
+
+<body>
+
+<header id="header-content" th:fragment="navigation-content" hx-swap-oob="true">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Cosmos</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'home' ? 'active' : ''}"
+                           href="/home"
+                           hx-get="/home"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'perspective' ? 'active' : ''}"
+                           href="/perspective"
+                           hx-get="/perspective"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Perspective</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'data' ? 'active' : ''}"
+                           href="/data"
+                           hx-get="/data"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'knowledge' ? 'active' : ''}"
+                           href="/knowledge"
+                           hx-get="/knowledge"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Knowledge</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'quality' ? 'active' : ''}"
+                           href="/quality"
+                           hx-get="/quality"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Quality</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'query' ? 'active' : ''}"
+                           href="/query"
+                           hx-get="/query"
+                           hx-target="#main-content"
+                           hx-swap="outerHTML"
+                           hx-push-url="true">Query</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+</body>
+</html>

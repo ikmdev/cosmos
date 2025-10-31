@@ -64,6 +64,7 @@
         <!-- Spring -->
 	    <spring-boot.version>3.5.5</spring-boot.version>
 	    <thymeleaf-layout-dialect.version>3.4.0</thymeleaf-layout-dialect.version>
+	    <htmx-spring-boot-thymeleaf.version>4.0.1</htmx-spring-boot-thymeleaf.version>
 
 		<!-- Misc -->
 	    <jboss-threads.version>3.9.1</jboss-threads.version>
@@ -132,6 +133,11 @@
 		        <artifactId>thymeleaf-layout-dialect</artifactId>
 		        <version>${thymeleaf-layout-dialect.version}</version>
 	        </dependency>
+	        <dependency>
+		        <groupId>io.github.wimdeblauwe</groupId>
+		        <artifactId>htmx-spring-boot-thymeleaf</artifactId>
+		        <version>${htmx-spring-boot-thymeleaf.version}</version>
+	        </dependency>
 
 			<!-- Misc. -->
 	        <dependency>
@@ -178,7 +184,6 @@
         <dependency>
             <groupId>${tinkar-jpms-deps.groupId}</groupId>
             <artifactId>eclipse-collections-api</artifactId>
-            <version>${eclipse-collections-api.version}</version>
         </dependency>
 
         <!-- Spring -->
@@ -213,6 +218,10 @@
 	    <dependency>
 		    <groupId>nz.net.ultraq.thymeleaf</groupId>
 		    <artifactId>thymeleaf-layout-dialect</artifactId>
+	    </dependency>
+	    <dependency>
+		    <groupId>io.github.wimdeblauwe</groupId>
+		    <artifactId>htmx-spring-boot-thymeleaf</artifactId>
 	    </dependency>
 
 	    <!-- Misc. -->

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ultraq.net.nz/thymeleaf/layout ">
+<head>
+    <title>Footer</title>
+</head>
+
+<body>
+
+<footer id="footer-content" class="footer mt-auto py-3 bg-light" th:fragment="footer-content" hx-swap-oob="true">
+    <div class="container">
+        <span class="text-muted" th:text="${footerText}"></span>
+    </div>
+</footer>
+
+</body>
+</html>
