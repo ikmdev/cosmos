@@ -5,14 +5,11 @@
 <head>
     <title>Footer</title>
 </head>
-
 <body>
-
-<footer id="footer-content" class="footer mt-auto py-3 bg-light" th:fragment="footer-content" hx-swap-oob="true">
-    <div class="container">
+<footer>
+    <div id="footer-content" th:fragment="footer-content" hx-swap-oob="true" class="container">
         <span class="text-muted" th:text="${footerText}"></span>
     </div>
 </footer>
-
 </body>
 </html>

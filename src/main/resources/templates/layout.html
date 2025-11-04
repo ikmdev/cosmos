@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en" class="h-100" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ultraq.net.nz/thymeleaf/layout ">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,24 +14,27 @@
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
             integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
             crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/morph@3.14.7/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.1/dist/cdn.min.js"></script>
 
     <style>
         body {
             padding-top: 56px;
         }
 
-        .footer {
-            background-color: #f5f5f5;
-        }
     </style>
 </head>
-<body class="d-flex flex-column h-100">
-
-<header id="header-content" layout:fragment="header-content"></header>
-
-<main id="main-content" layout:fragment="main-content"></main>
-
-<footer id="footer-content" layout:fragment="footer-content"></footer>
-
+<body class="d-flex flex-column h-100" hx-ext="alpine-morph">
+<header>
+    <div id="header-content" layout:fragment="header-content"></div>
+</header>
+<main>
+    <div class="container flex-shrink-0">
+        <div id="main-content" layout:fragment="main-content"></div>
+    </div>
+</main>
+<footer class="footer mt-auto py-3 bg-light">
+    <div id="footer-content" layout:fragment="footer-content"></div>
+</footer>
 </body>
 </html>
