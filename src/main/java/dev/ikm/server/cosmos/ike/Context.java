@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.database;
+package dev.ikm.server.cosmos.ike;
 
 import dev.ikm.server.cosmos.api.coordinate.LanguageCoord;
 import dev.ikm.server.cosmos.api.coordinate.NavigationCoord;

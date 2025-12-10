@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.perspective;
+package dev.ikm.server.cosmos.view;
 
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 @Controller
-public class PerspectiveController {
+public class ViewController {
 
-	Logger LOG = LoggerFactory.getLogger(PerspectiveController.class);
+	Logger LOG = LoggerFactory.getLogger(ViewController.class);
 
 	@GetMapping("/perspective")
 	public String getPerspective(Model model) {

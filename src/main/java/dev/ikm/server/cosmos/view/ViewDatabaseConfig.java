@@ -1,17 +1,16 @@
-package dev.ikm.server.cosmos.config;
+package dev.ikm.server.cosmos.view;
 
-import dev.ikm.server.cosmos.database.Type;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
 @Configuration
-@ConfigurationProperties(prefix = "database")
-public class DatabaseConfig {
+@ConfigurationProperties(prefix = "cosmos.view.database")
+public class ViewDatabaseConfig {
 
 	private File directory;
-	private Type type;
+	private String name;
 
 	public File getDirectory() {
 		return directory;
@@ -21,11 +20,11 @@ public class DatabaseConfig {
 		this.directory = directory;
 	}
 
-	public Type getType() {
-		return type;
+	public String getName() {
+		return name;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setName(String name) {
+		this.name = name;
 	}
 }

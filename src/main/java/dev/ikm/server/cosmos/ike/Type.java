@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ikm.server.cosmos.database;
+package dev.ikm.server.cosmos.ike;
 
 public enum Type {
     SA("Open SpinedArrayStore"),

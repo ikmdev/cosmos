@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.semantic;
 
-import dev.ikm.server.cosmos.database.Context;
+import dev.ikm.server.cosmos.ike.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

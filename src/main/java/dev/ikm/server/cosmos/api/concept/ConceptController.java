@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.concept;
 
-import dev.ikm.server.cosmos.database.Context;
+import dev.ikm.server.cosmos.ike.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +47,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateFQN(uuid);
+		return conceptService.retrieveFullyQualifiedName(uuid);
 	}
 
 	@GetMapping("/{uuid}/syn")
@@ -57,7 +57,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateSYN(uuid);
+		return conceptService.retrieveSynonym(uuid);
 	}
 
 	@GetMapping("/{uuid}/def")
@@ -67,7 +67,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateDEF(uuid);
+		return conceptService.retrieveDefinition(uuid);
 	}
 
 	@GetMapping("/{uuid}/children")
@@ -77,7 +77,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateChildren(uuid);
+		return conceptService.retrieveChildren(uuid);
 	}
 
 	@GetMapping("/{uuid}/parents")
@@ -87,7 +87,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateParents(uuid);
+		return conceptService.retrieveParents(uuid);
 	}
 
 	@GetMapping("/{uuid}/descendants")
@@ -97,7 +97,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateDescendants(uuid);
+		return conceptService.retrieveDescendants(uuid);
 	}
 
 	@GetMapping("/{uuid}/ancestors")
@@ -107,7 +107,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateAncestors(uuid);
+		return conceptService.retrieveAncestors(uuid);
 	}
 
 	@GetMapping("/{uuid}/kinds")
@@ -117,7 +117,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateKinds(uuid);
+		return conceptService.retrieveKinds(uuid);
 	}
 
 	@GetMapping("/{uuid}/identifiers")
@@ -127,7 +127,7 @@ public class ConceptController {
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
 		context.setViewContext(stampId, langId, navId);
-		return conceptService.calculateIdentifiers(uuid);
+		return conceptService.retrieveIdentifiers(uuid);
 	}
 
 	@GetMapping("/{uuid}/semantics")

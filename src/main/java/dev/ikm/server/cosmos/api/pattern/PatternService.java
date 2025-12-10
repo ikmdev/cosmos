@@ -1,7 +1,7 @@
 package dev.ikm.server.cosmos.api.pattern;
 
-import dev.ikm.server.cosmos.database.Context;
-import dev.ikm.server.cosmos.database.IkeRepository;
+import dev.ikm.server.cosmos.api.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
@@ -22,32 +22,32 @@ import java.util.UUID;
 public class PatternService {
 
 	private final IkeRepository ikeRepository;
-	private final Context context;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public PatternService(IkeRepository ikeRepository, Context context) {
+	public PatternService(IkeRepository ikeRepository, CalculatorService calculatorService) {
 		this.ikeRepository = ikeRepository;
-		this.context = context;
+		this.calculatorService = calculatorService;
 	}
 
-	public PatternChronologyDTO retrievePatternWithAllVersions(UUID uuid) {
-		Optional<PatternEntity<? extends PatternEntityVersion>> optionalPatternEntity = ikeRepository.findPatternById(PublicIds.of(uuid));
+	public PatternChronologyDTO retrievePatternWithAllVersions(UUID id) {
+		Optional<PatternEntity<? extends PatternEntityVersion>> optionalPatternEntity = ikeRepository.findPatternById(id);
 		return new PatternChronologyDTO(
-				PublicIds.of(uuid).asUuidList().toList(),
+				ikeRepository.getIds(id),
 				null,
 				optionalPatternEntity.map(patternEntity ->
 								patternEntity.versions().stream()
 										.map(patternEntityVersion ->
 												new PatternVersionDTO(
-														patternEntityVersion.stamp().publicId().asUuidList().toList(),
-														patternEntityVersion.semanticMeaning().publicId().asUuidList().toList(),
-														patternEntityVersion.semanticPurpose().publicId().asUuidList().toList(),
+														ikeRepository.getIds(patternEntityVersion.stamp()),
+														ikeRepository.getIds(patternEntityVersion.semanticMeaning()),
+														ikeRepository.getIds(patternEntityVersion.semanticPurpose()),
 														patternEntityVersion.fieldDefinitions().stream()
 																.map(fieldDefinitionForEntity ->
 																		new FieldDefinitionDTO(
-																				fieldDefinitionForEntity.dataType().publicId().asUuidList().toList(),
-																				fieldDefinitionForEntity.meaning().publicId().asUuidList().toList(),
-																				fieldDefinitionForEntity.purpose().publicId().asUuidList().toList(),
+																				ikeRepository.getIds(fieldDefinitionForEntity.dataType()),
+																				ikeRepository.getIds(fieldDefinitionForEntity.meaning()),
+																				ikeRepository.getIds(fieldDefinitionForEntity.purpose()),
 																				fieldDefinitionForEntity.indexInPattern()
 																		)
 																)
@@ -58,22 +58,22 @@ public class PatternService {
 		);
 	}
 
-	public PatternChronologyDTO retrievePatternWithLatestVersion(UUID uuid) {
-		Latest<PatternEntityVersion> latestPatternEntityVersion = ikeRepository.findLatestPatternById(PublicIds.of(uuid), context.getStampCalculator());
+	public PatternChronologyDTO retrievePatternWithLatestVersion(UUID id) {
+		Latest<PatternEntityVersion> latestPatternEntityVersion = ikeRepository.findLatestPatternById(id);
 		if (latestPatternEntityVersion.isPresent()) {
 			PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
 			return new PatternChronologyDTO(
-					patternEntityVersion.publicId().asUuidList().toList(),
+					ikeRepository.getIds(id),
 					new PatternVersionDTO(
-							patternEntityVersion.stamp().publicId().asUuidList().toList(),
-							patternEntityVersion.semanticMeaning().publicId().asUuidList().toList(),
-							patternEntityVersion.semanticPurpose().publicId().asUuidList().toList(),
+							ikeRepository.getIds(patternEntityVersion.stamp()),
+							ikeRepository.getIds(patternEntityVersion.semanticMeaning()),
+							ikeRepository.getIds(patternEntityVersion.semanticPurpose()),
 							patternEntityVersion.fieldDefinitions().stream()
 									.map(fieldDefinitionForEntity ->
 											new FieldDefinitionDTO(
-													fieldDefinitionForEntity.dataType().publicId().asUuidList().toList(),
-													fieldDefinitionForEntity.meaning().publicId().asUuidList().toList(),
-													fieldDefinitionForEntity.purpose().publicId().asUuidList().toList(),
+													ikeRepository.getIds(fieldDefinitionForEntity.dataType()),
+													ikeRepository.getIds(fieldDefinitionForEntity.meaning()),
+													ikeRepository.getIds(fieldDefinitionForEntity.purpose()),
 													fieldDefinitionForEntity.indexInPattern()
 											)
 									)
@@ -83,43 +83,26 @@ public class PatternService {
 			);
 		} else {
 			return new PatternChronologyDTO(
-					PublicIds.of(uuid).asUuidList().toList(),
+					ikeRepository.getIds(id),
 					null,
 					null
 			);
 		}
 	}
 
-	public List<List<UUID>> retrieveSemantics(UUID uuid) {
-		List<List<UUID>> patternIds = new ArrayList<>();
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		PrimitiveData.get().forEachSemanticNidForComponent(
-				Entity.nid(conceptPublicId),
-				semanticNid -> {
-					patternIds.add(PrimitiveData.publicId(semanticNid).asUuidList().toList());
-				});
-		return patternIds;
+	public List<List<UUID>> retrieveSemantics(UUID id) {
+		return ikeRepository.findAssociatedSemanticIds(id);
 	}
 
-	public String calculateFQN(UUID uuid) {
-		PublicId patternPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getFullyQualifiedNameText(Entity.nid(patternPublicId))
-				.orElse("");
+	public String calculateFQN(UUID id) {
+		return calculatorService.calculateFQN(id);
 	}
 
-	public String calculateSYN(UUID uuid) {
-		PublicId patternPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getRegularDescriptionText(Entity.nid(patternPublicId))
-				.orElse("");
+	public String calculateSYN(UUID id) {
+		return calculatorService.calculateSYN(id);
 	}
 
-	public String calculateDEF(UUID uuid) {
-		PublicId patternPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getDefinitionDescriptionText(Entity.nid(patternPublicId))
-				.orElse("");
+	public String calculateDEF(UUID id) {
+		return calculatorService.calculateDEF(id);
 	}
-
 }

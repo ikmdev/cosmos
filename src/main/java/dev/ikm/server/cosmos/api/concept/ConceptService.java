@@ -1,20 +1,13 @@
 package dev.ikm.server.cosmos.api.concept;
 
-import dev.ikm.server.cosmos.database.Context;
-import dev.ikm.server.cosmos.database.IkeRepository;
-import dev.ikm.tinkar.common.id.PublicId;
-import dev.ikm.tinkar.common.id.PublicIds;
-import dev.ikm.tinkar.common.service.PrimitiveData;
+import dev.ikm.server.cosmos.api.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.ConceptEntity;
 import dev.ikm.tinkar.entity.ConceptEntityVersion;
-import dev.ikm.tinkar.entity.Entity;
-import dev.ikm.tinkar.entity.Field;
-import dev.ikm.tinkar.terms.TinkarTermV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,18 +17,18 @@ import java.util.UUID;
 public class ConceptService {
 
 	private final IkeRepository ikeRepository;
-	private final Context context;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public ConceptService(IkeRepository ikeRepository, Context context) {
+	public ConceptService(IkeRepository ikeRepository, CalculatorService calculatorService) {
 		this.ikeRepository = ikeRepository;
-		this.context = context;
+		this.calculatorService = calculatorService;
 	}
 
-	public ConceptChronologyDTO retrieveConceptWithAllVersions(UUID uuid) {
-		Optional<ConceptEntity<? extends ConceptEntityVersion>> optionalConceptEntity = ikeRepository.findConceptById(PublicIds.of(uuid));
+	public ConceptChronologyDTO retrieveConceptWithAllVersions(UUID id) {
+		Optional<ConceptEntity<? extends ConceptEntityVersion>> optionalConceptEntity = ikeRepository.findConceptById(id);
 		return new ConceptChronologyDTO(
-				PublicIds.of(uuid).asUuidList().toList(),
+				ikeRepository.getIds(id),
 				null,
 				optionalConceptEntity.map(conceptEntity -> conceptEntity.versions().stream()
 								.map(conceptEntityVersion ->
@@ -45,120 +38,61 @@ public class ConceptService {
 		);
 	}
 
-	public ConceptChronologyDTO retrieveConceptWithLatestVersion(UUID uuid) {
-		Latest<ConceptEntityVersion> latestConceptEntityVersion = ikeRepository.findLatestConceptById(PublicIds.of(uuid), context.getStampCalculator());
+	public ConceptChronologyDTO retrieveConceptWithLatestVersion(UUID id) {
+		Latest<ConceptEntityVersion> latestConceptEntityVersion = ikeRepository.findLatestConceptById(id);
 		if (latestConceptEntityVersion.isPresent()) {
 			ConceptEntityVersion conceptEntityVersion = latestConceptEntityVersion.get();
 			return new ConceptChronologyDTO(
-					PublicIds.of(uuid).asUuidList().toList(),
-					new ConceptVersionDTO(
-							conceptEntityVersion.stamp().publicId().asUuidList().toList()
-					),
+					ikeRepository.getIds(id),
+					new ConceptVersionDTO(ikeRepository.getIds(conceptEntityVersion.stamp())),
 					null);
 		} else {
 			return new ConceptChronologyDTO(
-					PublicIds.of(uuid).asUuidList().toList(),
+					ikeRepository.getIds(id),
 					null,
 					null);
 		}
 	}
 
-	public List<List<UUID>> retrieveSemantics(UUID uuid) {
-		List<List<UUID>> semanticIds = new ArrayList<>();
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		PrimitiveData.get().forEachSemanticNidForComponent(
-				Entity.nid(conceptPublicId),
-				semanticNid -> {
-					semanticIds.add(PrimitiveData.publicId(semanticNid).asUuidList().toList());
-				});
-		return semanticIds;
+	public List<List<UUID>> retrieveSemantics(UUID id) {
+		return ikeRepository.findAssociatedSemanticIds(id);
 	}
 
-	public String calculateFQN(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getFullyQualifiedNameText(Entity.nid(conceptPublicId))
-				.orElse("");
+	public String retrieveFullyQualifiedName(UUID id) {
+		return calculatorService.calculateFQN(id);
 	}
 
-	public String calculateSYN(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getRegularDescriptionText(Entity.nid(conceptPublicId))
-				.orElse("");
+	public String retrieveSynonym(UUID id) {
+		return calculatorService.calculateSYN(id);
 	}
 
-	public String calculateDEF(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getLanguageCalculator()
-				.getDefinitionDescriptionText(Entity.nid(conceptPublicId))
-				.orElse("");
+	public String retrieveDefinition(UUID id) {
+		return calculatorService.calculateDEF(id);
 	}
 
-	public List<List<UUID>> calculateChildren(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getNavigationCalculator()
-				.childrenOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
+	public List<List<UUID>> retrieveChildren(UUID id) {
+		return calculatorService.calculateChildren(id);
+	}
+
+	public List<List<UUID>> retrieveParents(UUID id) {
+		return calculatorService.calculateParents(id);
+	}
+
+	public List<List<UUID>> retrieveDescendants(UUID id) {
+		return calculatorService.calculateDescendants(id);
+	}
+
+	public List<List<UUID>> retrieveAncestors(UUID id) {
+		return calculatorService.calculateAncestors(id);
+	}
+
+	public List<List<UUID>> retrieveKinds(UUID id) {
+		return calculatorService.calculateKinds(id);
+	}
+
+	public List<IdentifierSemanticDTO> retrieveIdentifiers(UUID id) {
+		return ikeRepository.findIdentifiers(id).entrySet().stream()
+				.map(entry -> new IdentifierSemanticDTO(entry.getValue(), entry.getKey()))
 				.toList();
-	}
-
-	public List<List<UUID>> calculateParents(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getNavigationCalculator()
-				.parentsOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
-				.toList();
-	}
-
-	public List<List<UUID>> calculateDescendants(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getNavigationCalculator()
-				.descendentsOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
-				.toList();
-	}
-
-	public List<List<UUID>> calculateAncestors(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getNavigationCalculator()
-				.ancestorsOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
-				.toList();
-	}
-
-	public List<List<UUID>> calculateKinds(UUID uuid) {
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		return context.getNavigationCalculator()
-				.kindOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
-				.toList();
-	}
-
-	public List<IdentifierSemanticDTO> calculateIdentifiers(UUID uuid) {
-		List<IdentifierSemanticDTO> identifiers = new ArrayList<>();
-		PublicId conceptPublicId = PublicIds.of(uuid);
-		PrimitiveData.get().forEachSemanticNidForComponentOfPattern(
-				Entity.nid(conceptPublicId),
-				TinkarTermV2.IDENTIFIER_PATTERN.nid(),
-				identifierSemanticNid -> {
-					Latest<Field<PublicId>> latestSource = context.getStampCalculator().getFieldForSemanticWithMeaning(identifierSemanticNid, TinkarTermV2.IDENTIFIER_SOURCE);
-					Latest<Field<String>> latestValue = context.getStampCalculator().getFieldForSemanticWithMeaning(identifierSemanticNid, TinkarTermV2.IDENTIFIER_VALUE);
-					if (latestSource.isPresent() && latestValue.isPresent()) {
-						identifiers.add(new IdentifierSemanticDTO(latestValue.get().value(), latestSource.get().value().asUuidList().toList()));
-					}
-				}
-		);
-		return identifiers;
 	}
 }

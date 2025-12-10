@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.config;
+package dev.ikm.server.cosmos.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

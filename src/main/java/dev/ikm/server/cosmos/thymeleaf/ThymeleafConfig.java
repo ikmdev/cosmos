@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.config;
+package dev.ikm.server.cosmos.thymeleaf;
 
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.springframework.context.annotation.Bean;
