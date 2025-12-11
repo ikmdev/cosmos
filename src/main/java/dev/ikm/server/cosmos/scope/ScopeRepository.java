@@ -1,13 +1,9 @@
-package dev.ikm.server.cosmos.view;
+package dev.ikm.server.cosmos.scope;
 
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 import org.springframework.stereotype.Repository;
 
-import java.util.concurrent.ConcurrentMap;
-
 @Repository
-public class ViewRepository {
+public class ScopeRepository {
 //
 //	private final ViewDatabaseConfig viewDatabaseConfig;
 //	private final ConcurrentMap<String, ViewDTO> viewDB;

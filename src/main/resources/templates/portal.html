@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}">
+<head>
+    <title>Portal</title>
+</head>
+<body>
+<header>
+    <div id="header-content" layout:fragment="header-content"
+         th:replace="~{fragments/navigation :: navigation-content}"></div>
+</header>
+<main>
+    <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
+        <h1>Portal</h1>
+        <p>AI prompt style interaction with the cosmos.</p>
+    </div>
+</main>
+<footer>
+    <div id="footer-content" layout:fragment="footer-content" th:replace="~{fragments/footer :: #footer-content}"></div>
+</footer>
+</body>
+</html>

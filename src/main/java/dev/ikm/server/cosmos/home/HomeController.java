@@ -16,7 +16,7 @@ public class HomeController {
 	@GetMapping("/home")
 	public String getHome(Model model) {
 		model.addAttribute("activePage", "home");
-		model.addAttribute("footerText", "Home Footer");
+		model.addAttribute("footerText", "Explore your knowledge universe");
 		return "home";
 	}
 
@@ -25,7 +25,7 @@ public class HomeController {
 	public FragmentsRendering getHomeWithFragments(Model model) {
 		model.addAttribute("titleDisplayName", "Home");
 		model.addAttribute("activePage", "home");
-		model.addAttribute("footerText", "Home Footer");
+		model.addAttribute("footerText", "Explore your knowledge universe");
 		return FragmentsRendering
 				.with("home :: main-content")
 				.fragment("fragments/title :: title-content")

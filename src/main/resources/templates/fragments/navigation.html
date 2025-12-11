@@ -10,7 +10,13 @@
     <div id="header-content" th:fragment="navigation-content" hx-swap-oob="true">
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Cosmos</a>
+                <a class="navbar-brand"
+                   th:classappend="${activePage == 'home' ? 'active' : ''}"
+                   href="/home"
+                   hx-get="/home"
+                   hx-target="#main-content"
+                   hx-swap="morph"
+                   hx-push-url="true">Cosmos</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                         aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -19,48 +25,48 @@
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'home' ? 'active' : ''}"
-                               href="/home"
-                               hx-get="/home"
+                               th:classappend="${activePage == 'scope' ? 'active' : ''}"
+                               href="/scope"
+                               hx-get="/scope"
                                hx-target="#main-content"
                                hx-swap="morph"
-                               hx-push-url="true">Home</a>
+                               hx-push-url="true">Scope</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'perspective' ? 'active' : ''}"
-                               href="/perspective"
-                               hx-get="/perspective"
+                               th:classappend="${activePage == 'discovery' ? 'active' : ''}"
+                               href="/discovery"
+                               hx-get="/discovery"
                                hx-target="#main-content"
                                hx-swap="morph"
-                               hx-push-url="true">Perspective</a>
+                               hx-push-url="true">Discovery</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'data' ? 'active' : ''}"
-                               href="/data"
-                               hx-get="/data"
+                               th:classappend="${activePage == 'constellations' ? 'active' : ''}"
+                               href="/constellations"
+                               hx-get="/constellations"
                                hx-target="#main-content"
                                hx-swap="morph"
-                               hx-push-url="true">Data</a>
+                               hx-push-url="true">Constellations</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'knowledge' ? 'active' : ''}"
-                               href="/knowledge"
-                               hx-get="/knowledge"
+                               th:classappend="${activePage == 'synthesize' ? 'active' : ''}"
+                               href="/synthesize"
+                               hx-get="/synthesize"
                                hx-target="#main-content"
                                hx-swap="morph"
-                               hx-push-url="true">Knowledge</a>
+                               hx-push-url="true">Synthesize</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'quality' ? 'active' : ''}"
-                               href="/quality"
-                               hx-get="/quality"
+                               th:classappend="${activePage == 'portal' ? 'active' : ''}"
+                               href="/portal"
+                               hx-get="/portal"
                                hx-target="#main-content"
                                hx-swap="morph"
-                               hx-push-url="true">Quality</a>
+                               hx-push-url="true">Portal</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
@@ -70,6 +76,15 @@
                                hx-target="#main-content"
                                hx-swap="morph"
                                hx-push-url="true">Query</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:classappend="${activePage == 'rules' ? 'active' : ''}"
+                               href="/rules"
+                               hx-get="/rules"
+                               hx-target="#main-content"
+                               hx-swap="morph"
+                               hx-push-url="true">Rules</a>
                         </li>
                     </ul>
                 </div>

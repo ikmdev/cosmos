@@ -1,9 +1,9 @@
-package dev.ikm.server.cosmos.view;
+package dev.ikm.server.cosmos.scope;
 
 import dev.ikm.server.cosmos.api.coordinate.LanguageCoord;
 import dev.ikm.server.cosmos.api.coordinate.NavigationCoord;
 import dev.ikm.server.cosmos.api.coordinate.StampCoord;
 
-public record ViewDTO(StampCoord stamp,
-					  LanguageCoord lang,
-					  NavigationCoord nav) { }
+public record ScopeDTO(StampCoord stamp,
+					   LanguageCoord lang,
+					   NavigationCoord nav) { }

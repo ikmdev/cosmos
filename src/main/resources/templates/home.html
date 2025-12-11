@@ -13,37 +13,128 @@
 </header>
 <main>
     <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
-        <h1>Welcome Home!</h1>
-        <table class="table table-striped table-hover">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>John</td>
-                <td>Doe</td>
-                <td>@social</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="row mt-3 mb-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="row g-0">
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h1 class="card-title">Project Cosmos</h1>
+                                <p class="card-text">Cosmos is a comprehensive, AI-powered knowledge management platform
+                                    designed to transform unstructured information into a structured, navigable universe
+                                    of understanding.
+                                    The application allows users to precisely Scope their active knowledge base, then
+                                    leverage tools like Constellations to map relationships and build dynamic knowledge
+                                    graphs. Users can Query and explore data through customized Discovery
+                                    configurations, generate insights via Synthesize functions, and interact
+                                    conversationally with their data using the AI Interface. By applying robust Rules
+                                    and automation logic, Cosmos empowers users to manage complexity, extract actionable
+                                    intelligence, and master their collective knowledge efficiently.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <img src="/img/comos.png" class="img-fluid rounded-end h-100" style="object-fit: cover;"
+                                 alt="...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Scope</h4>
+                        <p class="card-text">The Scope page is where you define the boundaries of your current
+                            exploration. Use this area to select, filter, and constrain the specific subsets of
+                            knowledge you wish to work with. Anything you do within the app—from running a query to
+                            building a constellation—will only operate within the field of view defined here.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Discovery</h4>
+                        <p class="card-text">The Discovery configuration center allows you to tailor how knowledge is
+                            visually presented and navigated. Adjust settings here to configure search result relevance,
+                            data visualization preferences, and exploration pathways, ensuring that you can easily
+                            uncover insights hidden within the Cosmos in a way that makes sense to you.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Constellations</h4>
+                        <p class="card-text">This is your knowledge mapping workbench. On the Constellations page, you
+                            can actively build, visualize, and refine knowledge graphs. Connect disparate pieces of
+                            information, map relationships, and sculpt raw data into structured, navigable
+                            constellations of understanding.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Synthesize</h4>
+                        <p class="card-text">The Synthesize function is designed to distill vast knowledge into
+                            manageable insights. Utilize this page to generate automated summaries, abstract key
+                            concepts, or simplify complex information representations, making the core insights of your
+                            data readily accessible.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Portal</h4>
+                        <p class="card-text">The Portal page serves as your gateway to the core intelligence of the
+                            application. This is where you directly interact with the Cosmos AI using natural language
+                            prompts. Use the Portal to ask questions, generate content, and receive dynamic,
+                            conversational responses based on your scoped knowledge.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Query</h4>
+                        <p class="card-text">For precise and structured information retrieval, the Query page provides
+                            advanced tools. Use structured language or visual query builders here to perform complex,
+                            targeted searches across your active knowledge base, allowing for high-precision data
+                            retrieval.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">Rules</h4>
+                        <p class="card-text">The Rules section allows you to define and manage automation and logic
+                            within your system. Configure triggers and conditions here to apply consistent logic across
+                            your data—for instance, automatically tagging new information, alerting you to data
+                            anomalies, or enforcing governance policies within the Cosmos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
     </div>
 </main>
 <footer>

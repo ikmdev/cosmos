@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.view;
+package dev.ikm.server.cosmos.scope;
 
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
@@ -9,25 +9,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 @Controller
-public class ViewController {
+public class ScopeController {
 
-	Logger LOG = LoggerFactory.getLogger(ViewController.class);
+	Logger LOG = LoggerFactory.getLogger(ScopeController.class);
 
-	@GetMapping("/perspective")
+	@GetMapping("/scope")
 	public String getPerspective(Model model) {
-		model.addAttribute("activePage", "perspective");
-		model.addAttribute("footerText", "Perspective Footer");
-		return "perspective";
+		model.addAttribute("activePage", "scope");
+		model.addAttribute("footerText", "Defining your field of view");
+		return "scope";
 	}
 
 	@HxRequest
-	@GetMapping("/perspective")
+	@GetMapping("/scope")
 	public FragmentsRendering getPerspectiveWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Perspective");
-		model.addAttribute("activePage", "perspective");
-		model.addAttribute("footerText", "Perspective Footer");
+		model.addAttribute("titleDisplayName", "Scope");
+		model.addAttribute("activePage", "scope");
+		model.addAttribute("footerText", "Defining your field of view");
 		return FragmentsRendering
-				.with("perspective :: main-content")
+				.with("scope :: main-content")
 				.fragment("fragments/title :: title-content")
 				.fragment("fragments/navigation :: navigation-content")
 				.fragment("fragments/footer :: footer-content")
