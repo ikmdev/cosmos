@@ -6,7 +6,7 @@ import dev.ikm.tinkar.coordinate.language.LanguageCoordinateRecord;
 import java.util.List;
 import java.util.UUID;
 
-public enum LanguageCoord {
+public enum Language {
 	ANY_LANG_REG("Any Language Regular Name", List.of(UUID.fromString("456ed121-e492-403e-8448-351a4645b7cd")), Coordinates.Language.AnyLanguageRegularName()),
 	ANY_LANG_FQN("Any Language Fully Qualified Name", List.of(UUID.fromString("f4b46e0b-9622-452f-89f2-64e4dab8ef37")), Coordinates.Language.AnyLanguageFullyQualifiedName()),
 	ANY_LANG_DEF("Any Language Definition", List.of(UUID.fromString("1b46224b-91c1-4bfe-8428-a1e895649216")), Coordinates.Language.AnyLanguageDefinition()),
@@ -21,7 +21,7 @@ public enum LanguageCoord {
 	private final List<UUID> uuids;
 	private final LanguageCoordinateRecord record;
 
-	LanguageCoord(String name, List<UUID> uuids, LanguageCoordinateRecord record) {
+	Language(String name, List<UUID> uuids, LanguageCoordinateRecord record) {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
@@ -39,7 +39,7 @@ public enum LanguageCoord {
 	}
 
 	public static LanguageCoordinateRecord toRecord(UUID uuid) {
-		for (LanguageCoord coord : LanguageCoord.values()) {
+		for (Language coord : Language.values()) {
 			if (coord.uuids.contains(uuid)) {
 				return coord.getRecord();
 			}

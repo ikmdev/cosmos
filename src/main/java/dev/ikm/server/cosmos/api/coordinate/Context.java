@@ -1,8 +1,5 @@
-package dev.ikm.server.cosmos.ike;
+package dev.ikm.server.cosmos.api.coordinate;
 
-import dev.ikm.server.cosmos.api.coordinate.LanguageCoord;
-import dev.ikm.server.cosmos.api.coordinate.NavigationCoord;
-import dev.ikm.server.cosmos.api.coordinate.StampCoord;
 import dev.ikm.tinkar.coordinate.language.LanguageCoordinateRecord;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculator;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculatorWithCache;
@@ -27,9 +24,9 @@ public class Context {
 	private NavigationCoordinateRecord navigationCoordinateRecord;
 
 	public void setViewContext(UUID stampId, UUID languageId, UUID navigationId) {
-		this.stampCoordinateRecord = StampCoord.toRecord(stampId);
-		this.languageCoordinateRecord = LanguageCoord.toRecord(languageId);
-		this.navigationCoordinateRecord = NavigationCoord.toRecord(navigationId);
+		this.stampCoordinateRecord = Stamp.toRecord(stampId);
+		this.languageCoordinateRecord = Language.toRecord(languageId);
+		this.navigationCoordinateRecord = Navigation.toRecord(navigationId);
 	}
 
 	public StampCalculator getStampCalculator() {

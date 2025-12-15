@@ -14,8 +14,8 @@ public class CoordinateController {
 	@GetMapping("/language")
 	public List<CoordinateDTO> getLanguageCoordinates() {
 		List<CoordinateDTO> coordinates = new ArrayList<>();
-		for(LanguageCoord languageCoord : LanguageCoord.values()) {
-			coordinates.add(new CoordinateDTO(languageCoord.getName(), languageCoord.getUuids()));
+		for(Language language : Language.values()) {
+			coordinates.add(new CoordinateDTO(language.getName(), language.getUuids()));
 		}
 		return coordinates;
 	}
@@ -23,8 +23,8 @@ public class CoordinateController {
 	@GetMapping("/navigation")
 	public List<CoordinateDTO> getNavigationCoordinates() {
 		List<CoordinateDTO> coordinates = new ArrayList<>();
-		for(NavigationCoord navigationCoord : NavigationCoord.values()) {
-			coordinates.add(new CoordinateDTO(navigationCoord.getName(), navigationCoord.getUuids()));
+		for(Navigation navigation : Navigation.values()) {
+			coordinates.add(new CoordinateDTO(navigation.getName(), navigation.getUuids()));
 		}
 		return coordinates;
 	}
@@ -32,8 +32,8 @@ public class CoordinateController {
 	@GetMapping("/stamp")
 	public List<CoordinateDTO> getStampCoordinates() {
 		List<CoordinateDTO> coordinates = new ArrayList<>();
-		for(StampCoord stampCoord : StampCoord.values()) {
-			coordinates.add(new CoordinateDTO(stampCoord.getName(), stampCoord.getUuids()));
+		for(Stamp stamp : Stamp.values()) {
+			coordinates.add(new CoordinateDTO(stamp.getName(), stamp.getUuids()));
 		}
 		return coordinates;
 	}

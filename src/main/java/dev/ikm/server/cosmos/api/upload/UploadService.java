@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.upload;
 
-import dev.ikm.server.cosmos.ike.Context;
+import dev.ikm.server.cosmos.api.coordinate.Context;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

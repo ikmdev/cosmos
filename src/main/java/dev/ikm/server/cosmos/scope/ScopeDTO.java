@@ -1,9 +1,16 @@
 package dev.ikm.server.cosmos.scope;
 
-import dev.ikm.server.cosmos.api.coordinate.LanguageCoord;
-import dev.ikm.server.cosmos.api.coordinate.NavigationCoord;
-import dev.ikm.server.cosmos.api.coordinate.StampCoord;
+import dev.ikm.server.cosmos.api.coordinate.CoordinateDTO;
+import dev.ikm.server.cosmos.api.coordinate.Language;
+import dev.ikm.server.cosmos.api.coordinate.Navigation;
+import dev.ikm.server.cosmos.api.coordinate.Stamp;
 
-public record ScopeDTO(StampCoord stamp,
-					   LanguageCoord lang,
-					   NavigationCoord nav) { }
+import java.util.UUID;
+
+public record ScopeDTO(
+		UUID id,
+		String name,
+		CoordinateDTO stampCoordinate,
+		CoordinateDTO languageCoordinate,
+		CoordinateDTO navigationCoordinate) {
+}

@@ -6,7 +6,7 @@ import dev.ikm.tinkar.coordinate.navigation.NavigationCoordinateRecord;
 import java.util.List;
 import java.util.UUID;
 
-public enum NavigationCoord {
+public enum Navigation {
 
 	INFERRED("Inferred Navigation", List.of(UUID.fromString("10f727e4-adac-4a94-80f5-00614692aa46")), Coordinates.Navigation.inferred().toNavigationCoordinateRecord()),
 	STATED("Stated Navigation", List.of(UUID.fromString("2ea11ae5-d715-48aa-839c-84e27fa5394c")), Coordinates.Navigation.inferred().toNavigationCoordinateRecord()),;
@@ -15,7 +15,7 @@ public enum NavigationCoord {
 	private final List<UUID> uuids;
 	private final NavigationCoordinateRecord record;
 
-	NavigationCoord(String name, List<UUID> uuids,  NavigationCoordinateRecord record) {
+	Navigation(String name, List<UUID> uuids, NavigationCoordinateRecord record) {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
@@ -34,7 +34,7 @@ public enum NavigationCoord {
 	}
 
 	public static NavigationCoordinateRecord toRecord(UUID uuid) {
-		for (NavigationCoord coord : NavigationCoord.values()) {
+		for (Navigation coord : Navigation.values()) {
 			if (coord.uuids.contains(uuid)) {
 				return coord.getRecord();
 			}

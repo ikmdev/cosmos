@@ -11,9 +11,76 @@
 </header>
 <main>
     <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
-        <h1>Scope</h1>
-        <p>This is the content for the Scope page.</p>
-    </div>
+        <div class="row mt-3 mb-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        Create a new Scope
+                    </div>
+                    <div class="card-body">
+                        <form
+                                action="#"
+                                th:action="@{/scope}"
+                                th:object="${scopeForm}"
+                                method="post"
+                                hx-post="/scope"
+                                hx-target="#scopes-container"
+                                hx-swap="morph"
+                                hx-trigger="submit">
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <input th:field="*{name}" type="text" class="form-control" id="nameInput"
+                                           placeholder="Default Name">
+                                    <label for="nameInput">Name</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <select th:field="*{selectedStampCoordinateId}" class="form-select" id="stampSelect"
+                                            aria-label="Floating label select example">
+                                        <option
+                                                th:each="stampCoordinate : ${scopeForm.stampCoordinates()}"
+                                                th:value="${stampCoordinate.id().get(0)}"
+                                                th:text="${stampCoordinate.name()}"></option>
+                                    </select>
+                                    <label for="stampSelect">Status Time Author Module Path (STAMP)</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <select th:field="*{selectedLanguageCoordinateId}" class="form-select"
+                                            id="languageSelect">
+                                        <option
+                                                th:each="languageCoordinate : ${scopeForm.languageCoordinates()}"
+                                                th:value="${languageCoordinate.id().get(0)}"
+                                                th:text="${languageCoordinate.name()}"></option>
+                                    </select>
+                                    <label for="stampSelect">Language</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <select th:field="*{selectedNavigationCoordinateId}" class="form-select"
+                                            id="navigationSelect">
+                                        <option
+                                                th:each="navigationCoordinate : ${scopeForm.navigationCoordinates()}"
+                                                th:value="${navigationCoordinate.id().get(0)}"
+                                                th:text="${navigationCoordinate.name()}"></option>
+                                    </select>
+                                    <label for="navigationSelect">Navigation</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <table id="scopes-container" class="table table-striped table-hover">
+
+                </table>
+            </div>
+        </div>
 </main>
 <footer>
     <div id="footer-content" layout:fragment="footer-content" th:replace="~{fragments/footer :: #footer-content}"></div>

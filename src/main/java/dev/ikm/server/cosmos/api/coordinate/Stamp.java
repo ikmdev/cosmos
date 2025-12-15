@@ -6,7 +6,7 @@ import dev.ikm.tinkar.coordinate.stamp.StampCoordinateRecord;
 import java.util.List;
 import java.util.UUID;
 
-public enum StampCoord {
+public enum Stamp {
 
 	DEV_LATEST("Latest on the Development Path", List.of(UUID.fromString("1767ad74-0b89-4601-b293-89dc0c51917a")), Coordinates.Stamp.DevelopmentLatest()),
 	DEV_LATEST_ACTIVE_ONLY("Latest Active on the Development Path", List.of(UUID.fromString("6a5091d1-d30a-4a31-bfc1-bcf09639574e")), Coordinates.Stamp.DevelopmentLatestActiveOnly()),
@@ -18,7 +18,7 @@ public enum StampCoord {
 	private final List<UUID> uuids;
 	private final StampCoordinateRecord record;
 
-	StampCoord(String name, List<UUID> uuids,  StampCoordinateRecord record) {
+	Stamp(String name, List<UUID> uuids, StampCoordinateRecord record) {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
@@ -37,7 +37,7 @@ public enum StampCoord {
 	}
 
 	public static StampCoordinateRecord toRecord(UUID uuid) {
-		for (StampCoord coord : StampCoord.values()) {
+		for (Stamp coord : Stamp.values()) {
 			if (coord.uuids.contains(uuid)) {
 				return coord.getRecord();
 			}
