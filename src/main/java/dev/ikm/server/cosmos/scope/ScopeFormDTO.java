@@ -10,8 +10,8 @@ public record ScopeFormDTO(
 		List<CoordinateDTO> stampCoordinates,
 		List<CoordinateDTO> languageCoordinates,
 		List<CoordinateDTO> navigationCoordinates,
-		UUID selectedStampCoordinateId,
-		UUID selectedLanguageCoordinateId,
-		UUID selectedNavigationCoordinateId
+		List<UUID> selectedStampCoordinateId,
+		List<UUID> selectedLanguageCoordinateId,
+		List<UUID> selectedNavigationCoordinateId
 ) {
 }

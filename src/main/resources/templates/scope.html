@@ -40,7 +40,7 @@
                                             aria-label="Floating label select example">
                                         <option
                                                 th:each="stampCoordinate : ${scopeForm.stampCoordinates()}"
-                                                th:value="${stampCoordinate.id().get(0)}"
+                                                th:value="${#strings.listJoin(stampCoordinate.id(), ',')}"
                                                 th:text="${stampCoordinate.name()}"></option>
                                     </select>
                                     <label for="stampSelect">Status Time Author Module Path (STAMP)</label>
@@ -52,7 +52,7 @@
                                             id="languageSelect">
                                         <option
                                                 th:each="languageCoordinate : ${scopeForm.languageCoordinates()}"
-                                                th:value="${languageCoordinate.id().get(0)}"
+                                                th:value="${#strings.listJoin(languageCoordinate.id(), ',')}"
                                                 th:text="${languageCoordinate.name()}"></option>
                                     </select>
                                     <label for="stampSelect">Language</label>
@@ -64,7 +64,7 @@
                                             id="navigationSelect">
                                         <option
                                                 th:each="navigationCoordinate : ${scopeForm.navigationCoordinates()}"
-                                                th:value="${navigationCoordinate.id().get(0)}"
+                                                th:value="${#strings.listJoin(navigationCoordinate.id(), ',')}"
                                                 th:text="${navigationCoordinate.name()}"></option>
                                     </select>
                                     <label for="navigationSelect">Navigation</label>
