@@ -4,8 +4,13 @@ import dev.ikm.server.cosmos.api.coordinate.Language;
 import dev.ikm.server.cosmos.api.coordinate.Navigation;
 import dev.ikm.server.cosmos.api.coordinate.Stamp;
 
-public record ScopeEntity(String name,
-						  Stamp stamp,
-						  Language language,
-						  Navigation navigation) {
+import java.io.Serializable;
+import java.util.UUID;
+
+public record ScopeEntity(
+		UUID id,
+		String name,
+		Stamp stamp,
+		Language language,
+		Navigation navigation) implements Serializable {
 }

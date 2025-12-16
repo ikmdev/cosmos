@@ -1,5 +1,8 @@
 package dev.ikm.server.cosmos.scope;
 
+import dev.ikm.server.cosmos.api.coordinate.Language;
+import dev.ikm.server.cosmos.api.coordinate.Navigation;
+import dev.ikm.server.cosmos.api.coordinate.Stamp;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.mapdb.DB;
@@ -50,6 +53,12 @@ public class ScopeDatabaseConfig {
 					.fileDB(dbFile.toFile())
 					.fileMmapEnable()
 					.make();
+
+			//Create Default Scope
+			UUID defaultId = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
+			ConcurrentMap<UUID, ScopeEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
+			dbMap.put(defaultId, new ScopeEntity(defaultId, "Default Scope", Stamp.DEV_LATEST, Language.US_ENG_REG, Navigation.INFERRED));
+
 			LOG.info("Scope database initialized");
 		} else {
 			throw new RuntimeException("Scope database directory does not exist");

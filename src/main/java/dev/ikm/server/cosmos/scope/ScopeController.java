@@ -19,10 +19,13 @@ public class ScopeController {
 	Logger LOG = LoggerFactory.getLogger(ScopeController.class);
 
 	private final CoordinateService coordinateService;
+	private final ScopeService scopeService;
+
 
 	@Autowired
-	public ScopeController(CoordinateService coordinateService) {
+	public ScopeController(CoordinateService coordinateService, ScopeService scopeService) {
 		this.coordinateService = coordinateService;
+		this.scopeService = scopeService;
 	}
 
 	@GetMapping("/scope")
@@ -41,6 +44,7 @@ public class ScopeController {
 				null,
 				null);
 		model.addAttribute("scopeForm", scopeFormDTO);
+		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return "scope";
 	}
 
@@ -62,6 +66,7 @@ public class ScopeController {
 				null,
 				null);
 		model.addAttribute("scopeForm", scopeFormDTO);
+		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return FragmentsRendering
 				.with("scope :: main-content")
 				.fragment("fragments/title :: title-content")
@@ -73,7 +78,14 @@ public class ScopeController {
 	@HxRequest
 	@PostMapping("/scope")
 	public FragmentsRendering createScope(@ModelAttribute("scopeForm") ScopeFormDTO scopeFormDTO, Model model) {
-		return FragmentsRendering.with("scope :: main-content")
+		//Create a new Scope
+		scopeService.createScope(
+				scopeFormDTO.name(),
+				scopeFormDTO.selectedStampCoordinateId(),
+				scopeFormDTO.selectedLanguageCoordinateId(),
+				scopeFormDTO.selectedNavigationCoordinateId());
+
+		return FragmentsRendering.with("fragments/scope-table-row :: scope-row")
 				.build();
 	}
 
