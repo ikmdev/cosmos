@@ -85,7 +85,7 @@ public class ScopeController {
 				scopeFormDTO.selectedNavigationCoordinateId());
 		model.addAttribute("newScope", newScope);
 		return FragmentsRendering
-				.with("fragments/scope/scope-table-row :: new-scope-row")
+				.with("fragments/scope/scope-table-row :: new-scope-row") //TODO: let's replace the whole body and let the idomorph extension figure out which row to really change
 				.build();
 	}
 

@@ -1,16 +1,21 @@
-# Title
+# Project Cosmos
 
-|| Description about the Project ||
-
-### Team Ownership - Product Owner
-
-Team Ownership - Product Owner
+Cosmos is a comprehensive, AI-powered knowledge management platform
+designed to transform unstructured information into a structured, navigable universe
+of understanding.
+The application allows users to precisely Scope their active knowledge base, then
+leverage tools like Constellations to map relationships and build dynamic knowledge
+graphs. Users can Query and explore data through customized Discovery
+configurations, generate insights via Synthesize functions, and interact
+conversationally with their data using the AI Interface. By applying robust Rules
+and automation logic, Cosmos empowers users to manage complexity, extract actionable
+intelligence, and master their collective knowledge efficiently.
 
 ## Getting Started
 
 Required for running this:
 
-1. Download and install Java 23 (Azul)
+1. Download and install Java 25 (Azul)
 
 ## Building and Running
 

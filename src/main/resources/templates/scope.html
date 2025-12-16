@@ -36,7 +36,7 @@
                                     <div class="mb-3">
                                         <div class="form-floating">
                                             <input th:field="*{name}" type="text" class="form-control" id="nameInput"
-                                                   placeholder="Default Name" autocomplete="false">
+                                                   placeholder="Default Name" autocomplete="off">
                                             <label for="nameInput">Name</label>
                                         </div>
                                     </div>
@@ -62,7 +62,7 @@
                                                         th:value="${#strings.listJoin(languageCoordinate.id(), ',')}"
                                                         th:text="${languageCoordinate.name()}"></option>
                                             </select>
-                                            <label for="stampSelect">Language</label>
+                                            <label for="languageSelect">Language</label>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -100,20 +100,9 @@
                             </tr>
                             </thead>
                             <tbody id="scopes-table-body">
-                            <tr th:each="scope : ${scopes}" th:id="${'scope-' + scope.id()}">
-                                <td th:text="${scope.name()}"></td>
-                                <td th:text="${scope.stampCoordinate().name()}"></td>
-                                <td th:text="${scope.languageCoordinate().name()}"></td>
-                                <td th:text="${scope.navigationCoordinate().name()}"></td>
-                                <td class="text-center">
-                                    <button class="btn btn-danger btn-sm"
-                                            th:attr="hx-delete=@{/scope/{id}(id=${scope.id})}"
-                                            hx-confirm="Are you sure you want to delete this scope?"
-                                            hx-target="closest tr"
-                                            hx-swap="outerHTML"><i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            <th:block th:each="individualScope : ${scopes}">
+                                <tr th:replace="~{fragments/scope/scope-table-row :: scope-row(scope=${individualScope})}"></tr>
+                            </th:block>
                             </tbody>
                         </table>
                     </div>
