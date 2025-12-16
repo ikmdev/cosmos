@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<form th:fragment="scope-form"
+      action="#"
+      th:action="@{/scope}"
+      th:object="${scopeForm}"
+      method="post"
+      hx-post="/scope"
+      hx-target="#scopes-table-body"
+      hx-swap="beforeend"
+      hx-trigger="submit">
+    <div class="mb-3">
+        <div class="form-floating">
+            <input th:field="*{name}" type="text" class="form-control" id="nameInput"
+                   placeholder="Default Name" autocomplete="off">
+            <label for="nameInput">Name</label>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="form-floating">
+            <select th:field="*{selectedStampCoordinateId}" class="form-select"
+                    id="stampSelect"
+                    aria-label="Floating label select example">
+                <option
+                        th:each="stampCoordinate : ${scopeForm.stampCoordinates()}"
+                        th:value="${#strings.listJoin(stampCoordinate.id(), ',')}"
+                        th:text="${stampCoordinate.name()}"></option>
+            </select>
+            <label for="stampSelect">Status Time Author Module Path (STAMP)</label>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="form-floating">
+            <select th:field="*{selectedLanguageCoordinateId}" class="form-select"
+                    id="languageSelect">
+                <option
+                        th:each="languageCoordinate : ${scopeForm.languageCoordinates()}"
+                        th:value="${#strings.listJoin(languageCoordinate.id(), ',')}"
+                        th:text="${languageCoordinate.name()}"></option>
+            </select>
+            <label for="languageSelect">Language</label>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="form-floating">
+            <select th:field="*{selectedNavigationCoordinateId}" class="form-select"
+                    id="navigationSelect">
+                <option
+                        th:each="navigationCoordinate : ${scopeForm.navigationCoordinates()}"
+                        th:value="${#strings.listJoin(navigationCoordinate.id(), ',')}"
+                        th:text="${navigationCoordinate.name()}"></option>
+            </select>
+            <label for="navigationSelect">Navigation</label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+</body>
+</html>
