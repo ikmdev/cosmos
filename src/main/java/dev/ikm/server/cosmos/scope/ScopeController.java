@@ -10,7 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 @Controller
@@ -79,13 +78,14 @@ public class ScopeController {
 	@PostMapping("/scope")
 	public FragmentsRendering createScope(@ModelAttribute("scopeForm") ScopeFormDTO scopeFormDTO, Model model) {
 		//Create a new Scope
-		scopeService.createScope(
+		ScopeDTO newScope = scopeService.saveNewScope(
 				scopeFormDTO.name(),
 				scopeFormDTO.selectedStampCoordinateId(),
 				scopeFormDTO.selectedLanguageCoordinateId(),
 				scopeFormDTO.selectedNavigationCoordinateId());
-
-		return FragmentsRendering.with("fragments/scope-table-row :: scope-row")
+		model.addAttribute("newScope", newScope);
+		return FragmentsRendering
+				.with("fragments/scope/scope-table-row :: new-scope-row")
 				.build();
 	}
 

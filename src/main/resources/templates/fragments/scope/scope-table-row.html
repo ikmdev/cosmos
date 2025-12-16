@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <head>
-    <title>Navigation</title>
+    <title>Scope Table Row</title>
 </head>
 <body>
 <header></header>
 <main>
 </main>
-<tr th:fragment="scope-row">
-
+<tr th:fragment="new-scope-row" th:id="${'scope-' + newScope.id()}">
+    <td th:text="${newScope.name()}"></td>
+    <td th:text="${newScope.stampCoordinate().name()}"></td>
+    <td th:text="${newScope.languageCoordinate().name()}"></td>
+    <td th:text="${newScope.navigationCoordinate().name()}"></td>
+    <td class="text-center">
+        <button class="btn btn-danger btn-sm"
+                th:attr="hx-delete=@{/scope/{id}(id=${newScope.id})}"
+                hx-confirm="Are you sure you want to delete this scope?"
+                hx-target="closest tr"
+                hx-swap="outerHTML"><i class="bi bi-trash"></i>
+        </button>
+    </td>
 </tr>
 </body>
 </html>

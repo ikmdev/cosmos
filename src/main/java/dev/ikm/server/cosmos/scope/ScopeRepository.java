@@ -21,7 +21,7 @@ public class ScopeRepository {
 	}
 
 	public void createScope(ScopeEntity scopeEntity) {
-		scopeDatabaseConfig.getScopeDB().put(UUID.randomUUID(), scopeEntity);
+			scopeDatabaseConfig.getScopeDB().put(UUID.randomUUID(), scopeEntity);
 	}
 
 	public ScopeEntity readScope(UUID id) {

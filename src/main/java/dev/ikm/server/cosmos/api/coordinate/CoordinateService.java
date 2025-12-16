@@ -11,16 +11,14 @@ import java.util.UUID;
 public class CoordinateService {
 
 	public Optional<Stamp> stampCoordinate(List<UUID> ids) {
-		return Arrays.stream(Stamp.values())
-				.filter(stamp -> {
-					for (UUID id : ids) {
-						if (!stamp.getUuids().contains(id)) {
-							return true;
-						}
-					}
-					return false;
-				})
-				.findFirst();
+		for (Stamp stamp : Stamp.values()) {
+			for (UUID id : ids) {
+				if (stamp.getUuids().contains(id)) {
+					return Optional.of(stamp);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	public CoordinateDTO stampCoordinate(Stamp stamp) {
@@ -34,16 +32,14 @@ public class CoordinateService {
 	}
 
 	public Optional<Language> languageCoordinate(List<UUID> ids) {
-		return Arrays.stream(Language.values())
-				.filter(language -> {
-					for (UUID id : ids) {
-						if (!language.getUuids().contains(id)) {
-							return true;
-						}
-					}
-					return false;
-				})
-				.findFirst();
+		for (Language language : Language.values()) {
+			for (UUID id : ids) {
+				if (language.getUuids().contains(id)) {
+					return Optional.of(language);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	public CoordinateDTO languageCoordinate(Language language) {
@@ -57,16 +53,14 @@ public class CoordinateService {
 	}
 
 	public Optional<Navigation> navigationCoordinate(List<UUID> ids) {
-		return Arrays.stream(Navigation.values())
-				.filter(navigation -> {
-					for (UUID id : ids) {
-						if (!navigation.getUuids().contains(id)) {
-							return true;
-						}
-					}
-					return false;
-				})
-				.findFirst();
+		for (Navigation navigation : Navigation.values()) {
+			for (UUID id : ids) {
+				if (navigation.getUuids().contains(id)) {
+					return Optional.of(navigation);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	public CoordinateDTO navigationCoordinate(Navigation navigation) {

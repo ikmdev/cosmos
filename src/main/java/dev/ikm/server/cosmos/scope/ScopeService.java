@@ -3,6 +3,9 @@ package dev.ikm.server.cosmos.scope;
 
 import dev.ikm.server.cosmos.api.coordinate.CoordinateDTO;
 import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
+import dev.ikm.server.cosmos.api.coordinate.Language;
+import dev.ikm.server.cosmos.api.coordinate.Navigation;
+import dev.ikm.server.cosmos.api.coordinate.Stamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,19 +24,22 @@ public class ScopeService {
 		this.coordinateService = coordinateService;
 	}
 
-	public void createScope(String name,
-							List<UUID> stampId,
-							List<UUID> languageId,
-							List<UUID> navigationId) {
+	public ScopeDTO saveNewScope(String name,
+							 List<UUID> stampId,
+							 List<UUID> languageId,
+							 List<UUID> navigationId) {
+		UUID id = UUID.randomUUID();
+		Stamp stamp = coordinateService.stampCoordinate(stampId).get();
+		Language language = coordinateService.languageCoordinate(languageId).get();
+		Navigation navigation = coordinateService.navigationCoordinate(navigationId).get();
 
-		scopeRepository.createScope(
-				new ScopeEntity(
-						UUID.randomUUID(),
-						name,
-						coordinateService.stampCoordinate(stampId).get(),
-						coordinateService.languageCoordinate(languageId).get(),
-						coordinateService.navigationCoordinate(navigationId).get()
-				));
+		scopeRepository.createScope(new ScopeEntity(id, name, stamp, language, navigation));
+
+		CoordinateDTO stampCoordinate = coordinateService.stampCoordinate(stamp);
+		CoordinateDTO languageCoordinate = coordinateService.languageCoordinate(language);
+		CoordinateDTO navigationCoordinate = coordinateService.navigationCoordinate(navigation);
+
+		return new ScopeDTO(id, name, stampCoordinate, languageCoordinate, navigationCoordinate);
 	}
 
 	public List<ScopeDTO> retrieveAllScopes() {
