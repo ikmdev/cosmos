@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
@@ -28,6 +29,7 @@ public class ScopeDatabaseConfig {
 	private DB database;
 	private File directory;
 	private String name;
+	private ConcurrentMap<UUID, ScopeEntity> scopeDB;
 
 	public File getDirectory() {
 		return directory;
@@ -57,7 +59,9 @@ public class ScopeDatabaseConfig {
 			//Create Default Scope
 			UUID defaultId = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
 			ConcurrentMap<UUID, ScopeEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
-			dbMap.put(defaultId, new ScopeEntity(defaultId, "Default Scope", Stamp.DEV_LATEST, Language.US_ENG_REG, Navigation.INFERRED));
+			if (!dbMap.containsKey(defaultId)) {
+				dbMap.put(defaultId, new ScopeEntity(defaultId, Instant.now(), "Default Scope", Stamp.DEV_LATEST, Language.US_ENG_REG, Navigation.INFERRED));
+			}
 
 			LOG.info("Scope database initialized");
 		} else {
@@ -74,9 +78,6 @@ public class ScopeDatabaseConfig {
 
 	@Bean
 	public ConcurrentMap<UUID, ScopeEntity> getScopeDB() {
-		if (database == null) {
-			throw new RuntimeException("Scope Database not initialized");
-		}
 		return database
 				.hashMap(name, Serializer.UUID, Serializer.JAVA)
 				.createOrOpen();

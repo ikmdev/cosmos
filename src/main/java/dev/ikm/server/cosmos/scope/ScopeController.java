@@ -7,10 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.FragmentsRendering;
+
+import java.util.UUID;
 
 @Controller
 public class ScopeController {
@@ -76,7 +81,7 @@ public class ScopeController {
 
 	@HxRequest
 	@PostMapping("/scope")
-	public FragmentsRendering createScope(@ModelAttribute("scopeForm") ScopeFormDTO scopeFormDTO, Model model) {
+	public FragmentsRendering postScope(@ModelAttribute("scopeForm") ScopeFormDTO scopeFormDTO, Model model) {
 		//Create a new Scope
 		ScopeDTO newScope = scopeService.saveNewScope(
 				scopeFormDTO.name(),
@@ -85,8 +90,15 @@ public class ScopeController {
 				scopeFormDTO.selectedNavigationCoordinateId());
 		model.addAttribute("newScope", newScope);
 		return FragmentsRendering
-				.with("fragments/scope/scope-table-row :: new-scope-row") //TODO: let's replace the whole body and let the idomorph extension figure out which row to really change
+				.with("fragments/scope/scope-table-row :: new-scope-row")
 				.build();
 	}
 
+	@HxRequest
+	@DeleteMapping("/scope/{id}")
+	@ResponseBody
+	public String deleteScope(@PathVariable("id") UUID id) {
+		scopeService.removeScope(id);
+		return "";
+	}
 }

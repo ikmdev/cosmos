@@ -21,6 +21,7 @@
             <td th:text="${scope.navigationCoordinate().name()}"></td>
             <td class="text-center">
                 <button class="btn btn-danger btn-sm"
+                        th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
                         th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
                         hx-confirm="Are you sure you want to delete this scope?"
                         hx-target="closest tr"

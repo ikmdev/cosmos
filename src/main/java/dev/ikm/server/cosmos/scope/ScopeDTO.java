@@ -2,6 +2,7 @@ package dev.ikm.server.cosmos.scope;
 
 import dev.ikm.server.cosmos.api.coordinate.CoordinateDTO;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record ScopeDTO(

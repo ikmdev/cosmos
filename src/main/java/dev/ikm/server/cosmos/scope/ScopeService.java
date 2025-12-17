@@ -9,6 +9,8 @@ import dev.ikm.server.cosmos.api.coordinate.Stamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +35,7 @@ public class ScopeService {
 		Language language = coordinateService.languageCoordinate(languageId).get();
 		Navigation navigation = coordinateService.navigationCoordinate(navigationId).get();
 
-		scopeRepository.createScope(new ScopeEntity(id, name, stamp, language, navigation));
+		scopeRepository.createScope(new ScopeEntity(id, Instant.now(), name, stamp, language, navigation));
 
 		CoordinateDTO stampCoordinate = coordinateService.stampCoordinate(stamp);
 		CoordinateDTO languageCoordinate = coordinateService.languageCoordinate(language);
@@ -44,6 +46,7 @@ public class ScopeService {
 
 	public List<ScopeDTO> retrieveAllScopes() {
 		return scopeRepository.readAll().stream()
+				.sorted(Comparator.comparing(ScopeEntity::modified))
 				.map(scopeEntity ->
 						new ScopeDTO(scopeEntity.id(),
 								scopeEntity.name(),
@@ -54,13 +57,14 @@ public class ScopeService {
 				.toList();
 	}
 
-	public void removeScope(ScopeDTO scopeDTO) {
-		scopeRepository.deleteScope(scopeDTO.id());
+	public void removeScope(UUID id) {
+		scopeRepository.deleteScope(id);
 	}
 
 	public void updateScope(ScopeDTO scopeDTO) {
 		scopeRepository.updateScope(scopeDTO.id(), new ScopeEntity(
 				scopeDTO.id(),
+				Instant.now(),
 				scopeDTO.name(),
 				coordinateService.stampCoordinate(scopeDTO.stampCoordinate().id()).get(),
 				coordinateService.languageCoordinate(scopeDTO.languageCoordinate().id()).get(),
