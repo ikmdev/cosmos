@@ -13,24 +13,27 @@ public class PortalController {
 
 	Logger LOG = LoggerFactory.getLogger(PortalController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "portal");
+		model.addAttribute("titleDisplayName", "Portal");
+		model.addAttribute("footerText", "Gateway to the Cosmos AI");
+	}
+
 	@GetMapping("/portal")
 	public String getQuality(Model model) {
-		model.addAttribute("activePage", "portal");
-		model.addAttribute("footerText", "Gateway to the Cosmos AI");
+		addSharedModelAttributes(model);
 		return "portal";
 	}
 
 	@HxRequest
 	@GetMapping("/portal")
 	public FragmentsRendering getQualityWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Portal");
-		model.addAttribute("activePage", "portal");
-		model.addAttribute("footerText", "Gateway to the Cosmos AI");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("portal :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }

@@ -13,24 +13,27 @@ public class SynthesizeController {
 
 	Logger LOG = LoggerFactory.getLogger(SynthesizeController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "synthesize");
+		model.addAttribute("titleDisplayName", "Synthesize");
+		model.addAttribute("footerText", "Distilling insights from complexity");
+	}
+
 	@GetMapping("/synthesize")
 	public String getQuality(Model model) {
-		model.addAttribute("activePage", "synthesize");
-		model.addAttribute("footerText", "Distilling insights from complexity");
+		addSharedModelAttributes(model);
 		return "synthesize";
 	}
 
 	@HxRequest
 	@GetMapping("/synthesize")
 	public FragmentsRendering getQualityWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Synthesize");
-		model.addAttribute("activePage", "synthesize");
-		model.addAttribute("footerText", "Distilling insights from complexity");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("synthesize :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }

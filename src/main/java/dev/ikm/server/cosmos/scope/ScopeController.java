@@ -32,11 +32,15 @@ public class ScopeController {
 		this.scopeService = scopeService;
 	}
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "scope");
+		model.addAttribute("titleDisplayName", "Scope");
+		model.addAttribute("footerText", "Defining your field of view");
+	}
+
 	@GetMapping("/scope")
 	public String getScope(Model model) {
-		//Minimum needed data to fully render page
-		model.addAttribute("activePage", "scope");
-		model.addAttribute("footerText", "Defining your field of view");
+		addSharedModelAttributes(model);
 
 		//Add to model the enumerations for Stamp, Language, and Navigation coordinates
 		ScopeFormDTO scopeFormDTO = new ScopeFormDTO(
@@ -48,17 +52,13 @@ public class ScopeController {
 				null,
 				null);
 		model.addAttribute("scopeForm", scopeFormDTO);
-		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return "scope";
 	}
 
 	@HxRequest
 	@GetMapping("/scope")
 	public FragmentsRendering getScopeWithFragments(Model model) {
-		//Minimum needed data to fully render page
-		model.addAttribute("titleDisplayName", "Scope");
-		model.addAttribute("activePage", "scope");
-		model.addAttribute("footerText", "Defining your field of view");
+		addSharedModelAttributes(model);
 
 		//Add to model the enumerations for Stamp, Language, and Navigation coordinates
 		ScopeFormDTO scopeFormDTO = new ScopeFormDTO(
@@ -70,12 +70,11 @@ public class ScopeController {
 				null,
 				null);
 		model.addAttribute("scopeForm", scopeFormDTO);
-		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return FragmentsRendering
 				.with("scope :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 

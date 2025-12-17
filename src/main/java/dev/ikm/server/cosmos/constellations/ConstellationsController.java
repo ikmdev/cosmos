@@ -13,24 +13,27 @@ public class ConstellationsController {
 
 	Logger LOG = LoggerFactory.getLogger(ConstellationsController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "constellations");
+		model.addAttribute("titleDisplayName", "Constellations");
+		model.addAttribute("footerText", "Mapping the stars of knowledge");
+	}
+
 	@GetMapping("/constellations")
 	public String getKnowledge(Model model) {
-		model.addAttribute("activePage", "constellations");
-		model.addAttribute("footerText", "Mapping the stars of knowledge");
+		addSharedModelAttributes(model);
 		return "constellations";
 	}
 
 	@HxRequest
 	@GetMapping("/constellations")
 	public FragmentsRendering getKnowledgeWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Constellations");
-		model.addAttribute("activePage", "constellations");
-		model.addAttribute("footerText", "Mapping the stars of knowledge");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("constellations :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }

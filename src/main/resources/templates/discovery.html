@@ -8,16 +8,22 @@
 <body>
 <header>
     <div id="header-content" layout:fragment="header-content"
-         th:replace="~{fragments/navigation :: navigation-content}"></div>
+         th:replace="~{fragments/layout/navigation :: navigation-content}"></div>
 </header>
 <main>
     <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
-        <h1>Discovery</h1>
-        <p>This is the content for the discovery.</p>
+        <div class="row mt-3 mb-3">
+            <div class="col-md-3 ">
+                <div th:replace="~{fragments/discovery/discovery-search-panel :: search-panel}"></div>
+            </div>
+            <div class="col-md-9">
+
+            </div>
+        </div>
     </div>
 </main>
 <footer>
-    <div id="footer-content" layout:fragment="footer-content" th:replace="~{fragments/footer :: #footer-content}"></div>
+    <div id="footer-content" layout:fragment="footer-content" th:replace="~{fragments/layout/footer :: #footer-content}"></div>
 </footer>
 </body>
 </html>

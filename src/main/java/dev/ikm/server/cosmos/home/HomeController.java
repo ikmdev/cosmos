@@ -13,24 +13,27 @@ public class HomeController {
 
 	Logger LOG = LoggerFactory.getLogger(HomeController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "home");
+		model.addAttribute("titleDisplayName", "Home");
+		model.addAttribute("footerText", "Explore your knowledge universe");
+	}
+
 	@GetMapping("/home")
 	public String getHome(Model model) {
-		model.addAttribute("activePage", "home");
-		model.addAttribute("footerText", "Explore your knowledge universe");
+		addSharedModelAttributes(model);
 		return "home";
 	}
 
 	@HxRequest
 	@GetMapping("/home")
 	public FragmentsRendering getHomeWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Home");
-		model.addAttribute("activePage", "home");
-		model.addAttribute("footerText", "Explore your knowledge universe");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("home :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }

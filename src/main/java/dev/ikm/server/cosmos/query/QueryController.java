@@ -13,24 +13,27 @@ public class QueryController {
 
 	Logger LOG = LoggerFactory.getLogger(QueryController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "query");
+		model.addAttribute("titleDisplayName", "Query");
+		model.addAttribute("footerText", "Precise knowledge retrieval");
+	}
+
 	@GetMapping("/query")
 	public String getQuery(Model model) {
-		model.addAttribute("activePage", "query");
-		model.addAttribute("footerText", "Precise knowledge retrieval");
+		addSharedModelAttributes(model);
 		return "query";
 	}
 
 	@HxRequest
 	@GetMapping("/query")
 	public FragmentsRendering getQueryWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Query");
-		model.addAttribute("activePage", "query");
-		model.addAttribute("footerText", "Precise knowledge retrieval");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("query :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }

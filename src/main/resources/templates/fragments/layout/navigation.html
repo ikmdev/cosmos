@@ -15,7 +15,7 @@
                    href="/home"
                    hx-get="/home"
                    hx-target="#main-content"
-                   hx-swap="morph"
+                   hx-swap="outerHTML"
                    hx-push-url="true">Cosmos</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                         aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,6 +85,19 @@
                                hx-target="#main-content"
                                hx-swap="outerHTML"
                                hx-push-url="true">Rules</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <div data-bs-theme="dark">
+                            <select class="form-select" id="scopeSelect" name="scopeId" aria-label="Select Scope">
+                                <option value="" th:selected="${activeScope == null}">Select Scope</option>
+                                <option th:each="scope : ${scopes}"
+                                        th:value="${scope.id()}"
+                                        th:text="${scope.name()}"
+                                        th:selected="${activeScope != null and activeScope.id == scope.id}">Scope Name</option>
+                            </select>
+                            </div>
                         </li>
                     </ul>
                 </div>

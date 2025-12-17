@@ -13,24 +13,27 @@ public class RulesController {
 
 	Logger LOG = LoggerFactory.getLogger(RulesController.class);
 
+	private void addSharedModelAttributes(Model model) {
+		model.addAttribute("activePage", "rules");
+		model.addAttribute("titleDisplayName", "Rules");
+		model.addAttribute("footerText", "Automation and logic management");
+	}
+
 	@GetMapping("/rules")
 	public String getQuery(Model model) {
-		model.addAttribute("activePage", "rules");
-		model.addAttribute("footerText", "Automation and logic management");
+		addSharedModelAttributes(model);
 		return "rules";
 	}
 
 	@HxRequest
 	@GetMapping("/rules")
 	public FragmentsRendering getQueryWithFragments(Model model) {
-		model.addAttribute("titleDisplayName", "Rules");
-		model.addAttribute("activePage", "rules");
-		model.addAttribute("footerText", "Automation and logic management");
+		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("rules :: main-content")
-				.fragment("fragments/title :: title-content")
-				.fragment("fragments/navigation :: navigation-content")
-				.fragment("fragments/footer :: footer-content")
+				.fragment("fragments/layout/title :: title-content")
+				.fragment("fragments/layout/navigation :: navigation-content")
+				.fragment("fragments/layout/footer :: footer-content")
 				.build();
 	}
 }
