@@ -46,7 +46,7 @@ public class ScopeService {
 
 	public List<ScopeDTO> retrieveAllScopes() {
 		return scopeRepository.readAll().stream()
-				.sorted(Comparator.comparing(ScopeEntity::modified))
+				.sorted(Comparator.comparing(ScopeEntity::modified).reversed())
 				.map(scopeEntity ->
 						new ScopeDTO(scopeEntity.id(),
 								scopeEntity.name(),
