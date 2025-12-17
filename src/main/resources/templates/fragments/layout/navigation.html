@@ -90,12 +90,14 @@
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <div data-bs-theme="dark">
-                            <select class="form-select" id="scopeSelect" name="scopeId" aria-label="Select Scope">
-                                <option value="" th:selected="${activeScope == null}">Select Scope</option>
+                            <select class="form-select" id="scopeSelect" name="scopeId" aria-label="Select Scope"
+                                    hx-post="/scope/selected"
+                                    hx-trigger="change">
+                                <option value="" th:selected="${activeScopeId == null}">Select Scope</option>
                                 <option th:each="scope : ${scopes}"
                                         th:value="${scope.id()}"
                                         th:text="${scope.name()}"
-                                        th:selected="${activeScope != null and activeScope.id == scope.id}">Scope Name</option>
+                                        th:selected="${activeScopeId != null and activeScopeId == scope.id()}">Scope Name</option>
                             </select>
                             </div>
                         </li>

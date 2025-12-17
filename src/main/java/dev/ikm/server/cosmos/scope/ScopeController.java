@@ -2,9 +2,12 @@ package dev.ikm.server.cosmos.scope;
 
 import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
@@ -91,6 +95,15 @@ public class ScopeController {
 		return FragmentsRendering
 				.with("fragments/scope/scope-table-row :: new-scope-row")
 				.build();
+	}
+
+	@HxRequest
+	@PostMapping("/scope/selected")
+	public ResponseEntity<Void> postSelectedScope(@RequestParam("scopeId") UUID id, HttpServletResponse response, Model model) {
+		Cookie cookie = new Cookie("cosmos-scope-id", id.toString());
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		return ResponseEntity.noContent().build();
 	}
 
 	@HxRequest
