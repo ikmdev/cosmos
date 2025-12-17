@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.concept;
 
-import dev.ikm.server.cosmos.api.calculator.CalculatorService;
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.ConceptEntity;

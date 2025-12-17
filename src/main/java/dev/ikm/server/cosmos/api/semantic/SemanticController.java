@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.semantic;
 
-import dev.ikm.server.cosmos.api.coordinate.Context;
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +16,12 @@ import java.util.UUID;
 public class SemanticController {
 
 	private final SemanticService semanticService;
-	private final Context context;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public SemanticController(SemanticService semanticService, Context context) {
+	public SemanticController(SemanticService semanticService, CalculatorService calculatorService) {
 		this.semanticService = semanticService;
-		this.context = context;
+		this.calculatorService = calculatorService;
 	}
 
 	@GetMapping("/{uuid}")
@@ -37,7 +37,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return semanticService.retrieveSemanticWithLatestVersion(uuid);
 	}
 
@@ -47,7 +47,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return semanticService.calculateUSDialect(uuid);
 	}
 
@@ -57,7 +57,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return semanticService.calculateGBDialect(uuid);
 	}
 

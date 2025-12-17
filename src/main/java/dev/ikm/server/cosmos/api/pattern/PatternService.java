@@ -1,18 +1,13 @@
 package dev.ikm.server.cosmos.api.pattern;
 
-import dev.ikm.server.cosmos.api.calculator.CalculatorService;
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.ike.IkeRepository;
-import dev.ikm.tinkar.common.id.PublicId;
-import dev.ikm.tinkar.common.id.PublicIds;
-import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
-import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.entity.PatternEntity;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

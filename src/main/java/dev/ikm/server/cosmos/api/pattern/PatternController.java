@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.pattern;
 
-import dev.ikm.server.cosmos.api.coordinate.Context;
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +16,12 @@ import java.util.UUID;
 public class PatternController {
 
 	private final PatternService patternService;
-	private final Context context;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public PatternController(PatternService patternService, Context context) {
+	public PatternController(PatternService patternService, CalculatorService calculatorService) {
 		this.patternService = patternService;
-		this.context = context;
+		this.calculatorService = calculatorService;
 	}
 
 	@GetMapping("/{uuid}")
@@ -36,7 +36,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return patternService.retrievePatternWithLatestVersion(uuid);
 	}
 
@@ -46,7 +46,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return patternService.calculateFQN(uuid);
 	}
 
@@ -56,7 +56,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return patternService.calculateSYN(uuid);
 	}
 
@@ -66,7 +66,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return patternService.calculateDEF(uuid);
 	}
 

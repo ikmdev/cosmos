@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.api.stamp;
 
-import dev.ikm.server.cosmos.api.coordinate.Context;
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +16,12 @@ import java.util.UUID;
 public class StampController {
 
 	private final StampService stampService;
-	private final Context context;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public StampController(StampService stampService, Context context) {
+	public StampController(StampService stampService, CalculatorService calculatorService) {
 		this.stampService = stampService;
-		this.context = context;
+		this.calculatorService = calculatorService;
 	}
 
 	@GetMapping("/{uuid}")
@@ -36,7 +36,7 @@ public class StampController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		context.setViewContext(stampId, langId, navId);
+		calculatorService.setViewContext(stampId, langId, navId);
 		return stampService.retrieveStampWithLatestVersion(uuid);
 	}
 
