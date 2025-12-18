@@ -92,8 +92,10 @@ public class ScopeController {
 				scopeFormDTO.selectedLanguageCoordinateId(),
 				scopeFormDTO.selectedNavigationCoordinateId());
 		model.addAttribute("newScope", newScope);
+		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return FragmentsRendering
 				.with("fragments/scope/scope-table-row :: new-scope-row")
+				.fragment("fragments/layout/navigation :: scopeSelector")
 				.build();
 	}
 
@@ -108,9 +110,11 @@ public class ScopeController {
 
 	@HxRequest
 	@DeleteMapping("/scope/{id}")
-	@ResponseBody
-	public String deleteScope(@PathVariable("id") UUID id) {
+	public FragmentsRendering deleteScope(@PathVariable("id") UUID id, Model model) {
 		scopeService.removeScope(id);
-		return "";
+		model.addAttribute("scopes", scopeService.retrieveAllScopes());
+		return FragmentsRendering
+				.with("fragments/layout/navigation :: scopeSelector")
+				.build();
 	}
 }
