@@ -101,11 +101,15 @@ public class ScopeController {
 
 	@HxRequest
 	@PostMapping("/scope/selected")
-	public ResponseEntity<Void> postSelectedScope(@RequestParam("scopeId") UUID id, HttpServletResponse response, Model model) {
+	public FragmentsRendering postSelectedScope(@RequestParam("scopeId") UUID id, HttpServletResponse response, Model model) {
 		Cookie cookie = new Cookie("cosmos-scope-id", id.toString());
 		cookie.setPath("/");
 		response.addCookie(cookie);
-		return ResponseEntity.noContent().build();
+		model.addAttribute("activeScopeId", id);
+		model.addAttribute("scopes", scopeService.retrieveAllScopes());
+		return FragmentsRendering
+				.with("fragments/layout/navigation :: scopeSelector")
+				.build();
 	}
 
 	@HxRequest
