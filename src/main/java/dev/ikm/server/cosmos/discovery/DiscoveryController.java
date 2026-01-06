@@ -1,14 +1,18 @@
 package dev.ikm.server.cosmos.discovery;
 
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.FragmentsRendering;
+
+import java.util.UUID;
 
 @Controller
 public class DiscoveryController {
@@ -17,11 +21,15 @@ public class DiscoveryController {
 
 	private final DiscoveryService discoveryService;
 	private final SearchService searchService;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public DiscoveryController(DiscoveryService discoveryService, SearchService searchService) {
+	public DiscoveryController(DiscoveryService discoveryService,
+							   SearchService searchService,
+							   CalculatorService calculatorService) {
 		this.discoveryService = discoveryService;
 		this.searchService = searchService;
+		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
@@ -50,7 +58,11 @@ public class DiscoveryController {
 
 	@HxRequest
 	@GetMapping("/discovery/search")
-	public String search(@RequestParam("query") String query, Model model) {
+	public String search(
+			@CookieValue(name = "cosmos-scope-id", defaultValue = "none") String scopeSelectionId,
+			@RequestParam("query") String query,
+			Model model) {
+		calculatorService.setScope(UUID.fromString(scopeSelectionId));
 		searchService.search(query);
 		return "discovery-search";
 	}

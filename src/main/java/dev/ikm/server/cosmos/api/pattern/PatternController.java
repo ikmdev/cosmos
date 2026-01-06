@@ -36,7 +36,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return patternService.retrievePatternWithLatestVersion(uuid);
 	}
 
@@ -46,7 +46,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return patternService.calculateFQN(uuid);
 	}
 
@@ -56,7 +56,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return patternService.calculateSYN(uuid);
 	}
 
@@ -66,7 +66,7 @@ public class PatternController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return patternService.calculateDEF(uuid);
 	}
 

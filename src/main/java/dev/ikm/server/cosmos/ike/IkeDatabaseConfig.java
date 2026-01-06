@@ -4,6 +4,8 @@ import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.common.service.PrimitiveDataService;
 import dev.ikm.tinkar.common.service.ServiceKeys;
 import dev.ikm.tinkar.common.service.ServiceProperties;
+import dev.ikm.tinkar.entity.Entity;
+import dev.ikm.tinkar.entity.EntityService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -49,7 +51,7 @@ public class IkeDatabaseConfig {
 		clearAll();
 		LOG.info("Clear database cache");
 
-		//Setup correct database controller by name
+		//Set up the correct database controller by name
 		switch (type) {
 			case SA, MV -> {
 				if (directory.isDirectory() && directory.exists()) {
@@ -84,5 +86,10 @@ public class IkeDatabaseConfig {
 	@Bean
 	public PrimitiveDataService getPrimitiveDataService() {
 		return PrimitiveData.get();
+	}
+
+	@Bean
+	EntityService getEntityService() {
+		return Entity.provider();
 	}
 }

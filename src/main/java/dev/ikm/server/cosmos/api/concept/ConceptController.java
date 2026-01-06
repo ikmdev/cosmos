@@ -36,7 +36,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveConceptWithLatestVersion(uuid);
 	}
 
@@ -46,7 +46,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveFullyQualifiedName(uuid);
 	}
 
@@ -56,7 +56,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveSynonym(uuid);
 	}
 
@@ -66,7 +66,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveDefinition(uuid);
 	}
 
@@ -76,7 +76,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveChildren(uuid);
 	}
 
@@ -86,7 +86,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveParents(uuid);
 	}
 
@@ -96,7 +96,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveDescendants(uuid);
 	}
 
@@ -106,7 +106,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveAncestors(uuid);
 	}
 
@@ -116,7 +116,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveKinds(uuid);
 	}
 
@@ -126,7 +126,7 @@ public class ConceptController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return conceptService.retrieveIdentifiers(uuid);
 	}
 

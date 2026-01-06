@@ -53,7 +53,7 @@
     <properties>
         <!-- Tinkar Properties -->
         <tinkar-core.groupId>dev.ikm.tinkar</tinkar-core.groupId>
-        <tinkar-core.version>1.122.0</tinkar-core.version>
+        <tinkar-core.version>1.125.0</tinkar-core.version>
         <tinkar-starter-data.version>20250729</tinkar-starter-data.version>
 
         <!-- JPMS Properties -->
@@ -68,7 +68,6 @@
 
 		<!-- Misc -->
 	    <jboss-threads.version>3.9.1</jboss-threads.version>
-	    <lucene-core.version>10.3.0</lucene-core.version>
 	    <mapdb.version>3.1.0</mapdb.version>
 
         <!-- Maven Properties -->
@@ -145,11 +144,6 @@
 		        <groupId>org.jboss.threads</groupId>
 		        <artifactId>jboss-threads</artifactId>
 		        <version>${jboss-threads.version}</version>
-	        </dependency>
-	        <dependency>
-		        <groupId>org.apache.lucene</groupId>
-		        <artifactId>lucene-core</artifactId>
-		        <version>${lucene-core.version}</version>
 	        </dependency>
 	        <dependency>
 		        <groupId>org.mapdb</groupId>
@@ -234,10 +228,6 @@
 	    <dependency>
 		    <groupId>org.jboss.threads</groupId>
 		    <artifactId>jboss-threads</artifactId>
-	    </dependency>
-	    <dependency>
-		    <groupId>org.apache.lucene</groupId>
-		    <artifactId>lucene-core</artifactId>
 	    </dependency>
 	    <dependency>
 		    <groupId>org.mapdb</groupId>

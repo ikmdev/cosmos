@@ -26,7 +26,14 @@ public class GlobalControllerAdvice {
 
 	@ModelAttribute("activeScopeId")
 	public UUID addScopeSelectionToModel(
-			@CookieValue(name = "cosmos-scope-id", defaultValue = "none") String scopeSelectionId) {
-		return UUID.fromString(scopeSelectionId);
+			@CookieValue(name = "cosmos-scope-id", required = false) String scopeSelectionId) {
+		if (scopeSelectionId == null) {
+			return null;
+		}
+		try {
+			return UUID.fromString(scopeSelectionId);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 	}
 }

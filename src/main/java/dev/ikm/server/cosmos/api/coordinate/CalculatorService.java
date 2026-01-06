@@ -1,5 +1,9 @@
 package dev.ikm.server.cosmos.api.coordinate;
 
+import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.server.cosmos.scope.ScopeDTO;
+import dev.ikm.server.cosmos.scope.ScopeEntity;
+import dev.ikm.server.cosmos.scope.ScopeService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
@@ -13,6 +17,7 @@ import dev.ikm.tinkar.coordinate.stamp.StampCoordinateRecord;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculatorWithCache;
 import dev.ikm.tinkar.entity.Entity;
+import dev.ikm.tinkar.terms.EntityFacade;
 import org.eclipse.collections.impl.factory.Lists;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
@@ -24,11 +29,24 @@ import java.util.UUID;
 @RequestScope
 public class CalculatorService {
 
+	private final ScopeService scopeService;
+	private final IkeRepository ikeRepository;
+
 	private StampCoordinateRecord stampCoordinateRecord;
 	private LanguageCoordinateRecord languageCoordinateRecord;
 	private NavigationCoordinateRecord navigationCoordinateRecord;
 
-	public void setViewContext(UUID stampId, UUID languageId, UUID navigationId) {
+	public CalculatorService(ScopeService scopeService, IkeRepository ikeRepository) {
+		this.scopeService = scopeService;
+		this.ikeRepository = ikeRepository;
+	}
+
+	public void setScope(UUID scopeId) {
+		ScopeDTO scopeDTO = scopeService.retrieveScope(scopeId);
+		setScope(scopeDTO.stampCoordinate().id().getFirst(), scopeDTO.languageCoordinate().id().getFirst(), scopeDTO.navigationCoordinate().id().getFirst());
+	}
+
+	public void setScope(UUID stampId, UUID languageId, UUID navigationId) {
 		this.stampCoordinateRecord = Stamp.toRecord(stampId);
 		this.languageCoordinateRecord = Language.toRecord(languageId);
 		this.navigationCoordinateRecord = Navigation.toRecord(navigationId);
@@ -46,75 +64,110 @@ public class CalculatorService {
 		return NavigationCalculatorWithCache.getCalculator(stampCoordinateRecord, Lists.immutable.of(languageCoordinateRecord), navigationCoordinateRecord);
 	}
 
+	public String calculateFQN(PublicId publicId) {
+		return getLanguageCalculator()
+				.getFullyQualifiedNameText(Entity.nid(publicId))
+				.orElse("");
+	}
+
+	public String calculateText(PublicId publicId) {
+		EntityFacade facade = ikeRepository.getEntityFacade(publicId);
+		return getLanguageCalculator()
+				.getDescriptionText(facade)
+				.orElse("");
+	}
+
+	public String calculateText(UUID id) {
+		return calculateText(PublicIds.of(id));
+	}
 
 	public String calculateFQN(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateFQN(PublicIds.of(id));
+	}
+
+	public String calculateSYN(PublicId publicId) {
 		return getLanguageCalculator()
-				.getFullyQualifiedNameText(Entity.nid(conceptPublicId))
+				.getRegularDescriptionText(Entity.nid(publicId))
 				.orElse("");
 	}
 
 	public String calculateSYN(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateSYN(PublicIds.of(id));
+	}
+
+	public String calculateDEF(PublicId publicId) {
 		return getLanguageCalculator()
-				.getRegularDescriptionText(Entity.nid(conceptPublicId))
+				.getDefinitionDescriptionText(Entity.nid(publicId))
 				.orElse("");
 	}
 
 	public String calculateDEF(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
-		return getLanguageCalculator()
-				.getDefinitionDescriptionText(Entity.nid(conceptPublicId))
-				.orElse("");
+		return calculateDEF(PublicIds.of(id));
+	}
+
+	public List<List<UUID>> calculateChildren(PublicId publicId) {
+		return getNavigationCalculator()
+				.childrenOf(Entity.nid(publicId))
+				.mapToList(PrimitiveData::publicId)
+				.stream()
+				.map(pId -> pId.asUuidList().stream().toList())
+				.toList();
 	}
 
 	public List<List<UUID>> calculateChildren(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateChildren(PublicIds.of(id));
+	}
+
+	public List<List<UUID>> calculateParents(PublicId publicId) {
 		return getNavigationCalculator()
-				.childrenOf(Entity.nid(conceptPublicId))
+				.parentsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
+				.map(pId -> pId.asUuidList().stream().toList())
 				.toList();
 	}
 
 	public List<List<UUID>> calculateParents(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateParents(PublicIds.of(id));
+	}
+
+	public List<List<UUID>> calculateDescendants(PublicId publicId) {
 		return getNavigationCalculator()
-				.parentsOf(Entity.nid(conceptPublicId))
+				.descendentsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
+				.map(pId -> pId.asUuidList().stream().toList())
 				.toList();
 	}
 
 	public List<List<UUID>> calculateDescendants(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateDescendants(PublicIds.of(id));
+	}
+
+	public List<List<UUID>> calculateAncestors(PublicId publicId) {
 		return getNavigationCalculator()
-				.descendentsOf(Entity.nid(conceptPublicId))
+				.ancestorsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
+				.map(pId -> pId.asUuidList().stream().toList())
 				.toList();
 	}
 
 	public List<List<UUID>> calculateAncestors(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
+		return calculateAncestors(PublicIds.of(id));
+	}
+
+	public List<List<UUID>> calculateKinds(PublicId publicId) {
 		return getNavigationCalculator()
-				.ancestorsOf(Entity.nid(conceptPublicId))
+				.kindOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
+				.map(pId -> pId.asUuidList().stream().toList())
 				.toList();
 	}
 
 	public List<List<UUID>> calculateKinds(UUID id) {
-		PublicId conceptPublicId = PublicIds.of(id);
-		return getNavigationCalculator()
-				.kindOf(Entity.nid(conceptPublicId))
-				.mapToList(PrimitiveData::publicId)
-				.stream()
-				.map(publicId -> publicId.asUuidList().stream().toList())
-				.toList();
+		return calculateKinds(PublicIds.of(id));
 	}
+
 }

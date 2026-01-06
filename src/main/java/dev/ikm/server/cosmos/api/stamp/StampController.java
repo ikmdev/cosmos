@@ -36,7 +36,7 @@ public class StampController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return stampService.retrieveStampWithLatestVersion(uuid);
 	}
 

@@ -44,6 +44,14 @@ public class ScopeService {
 		return new ScopeDTO(id, name, stampCoordinate, languageCoordinate, navigationCoordinate);
 	}
 
+	public ScopeDTO retrieveScope(UUID id) {
+		ScopeEntity scopeEntity = scopeRepository.readScope(id);
+		CoordinateDTO stampCoordinate = coordinateService.stampCoordinate(scopeEntity.stamp());
+		CoordinateDTO languageCoordinate = coordinateService.languageCoordinate(scopeEntity.language());
+		CoordinateDTO navigationCoordinate = coordinateService.navigationCoordinate(scopeEntity.navigation());
+		return new ScopeDTO(scopeEntity.id(), scopeEntity.name(), stampCoordinate, languageCoordinate, navigationCoordinate);
+	}
+
 	public List<ScopeDTO> retrieveAllScopes() {
 		return scopeRepository.readAll().stream()
 				.sorted(Comparator.comparing(ScopeEntity::modified).reversed())

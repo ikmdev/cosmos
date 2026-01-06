@@ -37,7 +37,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return semanticService.retrieveSemanticWithLatestVersion(uuid);
 	}
 
@@ -47,7 +47,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return semanticService.calculateUSDialect(uuid);
 	}
 
@@ -57,7 +57,7 @@ public class SemanticController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setViewContext(stampId, langId, navId);
+		calculatorService.setScope(stampId, langId, navId);
 		return semanticService.calculateGBDialect(uuid);
 	}
 

@@ -46,8 +46,16 @@ public class IkeRepository {
 		this.calculatorService = calculatorService;
 	}
 
+	public EntityFacade getEntityFacade(PublicId publicId) {
+		return EntityFacade.make(Entity.nid(publicId));
+	}
+
 	public List<UUID> getIds(UUID uuid) {
 		return PublicIds.of(uuid).asUuidList().castToList();
+	}
+
+	public List<UUID> getIds(PublicId publicId) {
+		return publicId.asUuidList().castToList();
 	}
 
 	public List<UUID> getIds(Entity<?> entity) {
