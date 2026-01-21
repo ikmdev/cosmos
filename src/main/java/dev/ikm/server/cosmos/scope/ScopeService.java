@@ -1,7 +1,7 @@
 
 package dev.ikm.server.cosmos.scope;
 
-import dev.ikm.server.cosmos.api.coordinate.CoordinateDTO;
+import dev.ikm.server.cosmos.api.coordinate.Coordinate;
 import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
 import dev.ikm.server.cosmos.api.coordinate.Language;
 import dev.ikm.server.cosmos.api.coordinate.Navigation;
@@ -26,10 +26,10 @@ public class ScopeService {
 		this.coordinateService = coordinateService;
 	}
 
-	public ScopeDTO saveNewScope(String name,
-							 List<UUID> stampId,
-							 List<UUID> languageId,
-							 List<UUID> navigationId) {
+	public Scope saveNewScope(String name,
+							  List<UUID> stampId,
+							  List<UUID> languageId,
+							  List<UUID> navigationId) {
 		UUID id = UUID.randomUUID();
 		Stamp stamp = coordinateService.stampCoordinate(stampId).get();
 		Language language = coordinateService.languageCoordinate(languageId).get();
@@ -37,26 +37,26 @@ public class ScopeService {
 
 		scopeRepository.createScope(new ScopeEntity(id, Instant.now(), name, stamp, language, navigation));
 
-		CoordinateDTO stampCoordinate = coordinateService.stampCoordinate(stamp);
-		CoordinateDTO languageCoordinate = coordinateService.languageCoordinate(language);
-		CoordinateDTO navigationCoordinate = coordinateService.navigationCoordinate(navigation);
+		Coordinate stampCoordinate = coordinateService.stampCoordinate(stamp);
+		Coordinate languageCoordinate = coordinateService.languageCoordinate(language);
+		Coordinate navigationCoordinate = coordinateService.navigationCoordinate(navigation);
 
-		return new ScopeDTO(id, name, stampCoordinate, languageCoordinate, navigationCoordinate);
+		return new Scope(id, name, stampCoordinate, languageCoordinate, navigationCoordinate);
 	}
 
-	public ScopeDTO retrieveScope(UUID id) {
+	public Scope retrieveScope(UUID id) {
 		ScopeEntity scopeEntity = scopeRepository.readScope(id);
-		CoordinateDTO stampCoordinate = coordinateService.stampCoordinate(scopeEntity.stamp());
-		CoordinateDTO languageCoordinate = coordinateService.languageCoordinate(scopeEntity.language());
-		CoordinateDTO navigationCoordinate = coordinateService.navigationCoordinate(scopeEntity.navigation());
-		return new ScopeDTO(scopeEntity.id(), scopeEntity.name(), stampCoordinate, languageCoordinate, navigationCoordinate);
+		Coordinate stampCoordinate = coordinateService.stampCoordinate(scopeEntity.stamp());
+		Coordinate languageCoordinate = coordinateService.languageCoordinate(scopeEntity.language());
+		Coordinate navigationCoordinate = coordinateService.navigationCoordinate(scopeEntity.navigation());
+		return new Scope(scopeEntity.id(), scopeEntity.name(), stampCoordinate, languageCoordinate, navigationCoordinate);
 	}
 
-	public List<ScopeDTO> retrieveAllScopes() {
+	public List<Scope> retrieveAllScopes() {
 		return scopeRepository.readAll().stream()
 				.sorted(Comparator.comparing(ScopeEntity::modified).reversed())
 				.map(scopeEntity ->
-						new ScopeDTO(scopeEntity.id(),
+						new Scope(scopeEntity.id(),
 								scopeEntity.name(),
 								coordinateService.stampCoordinate(scopeEntity.stamp()),
 								coordinateService.languageCoordinate(scopeEntity.language()),
@@ -69,14 +69,14 @@ public class ScopeService {
 		scopeRepository.deleteScope(id);
 	}
 
-	public void updateScope(ScopeDTO scopeDTO) {
-		scopeRepository.updateScope(scopeDTO.id(), new ScopeEntity(
-				scopeDTO.id(),
+	public void updateScope(Scope scope) {
+		scopeRepository.updateScope(scope.id(), new ScopeEntity(
+				scope.id(),
 				Instant.now(),
-				scopeDTO.name(),
-				coordinateService.stampCoordinate(scopeDTO.stampCoordinate().id()).get(),
-				coordinateService.languageCoordinate(scopeDTO.languageCoordinate().id()).get(),
-				coordinateService.navigationCoordinate(scopeDTO.navigationCoordinate().id()).get()
+				scope.name(),
+				coordinateService.stampCoordinate(scope.stampCoordinate().id()).get(),
+				coordinateService.languageCoordinate(scope.languageCoordinate().id()).get(),
+				coordinateService.navigationCoordinate(scope.navigationCoordinate().id()).get()
 		));
 	}
 }

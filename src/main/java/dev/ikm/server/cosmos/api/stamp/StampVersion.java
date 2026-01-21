@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record StampChronologyDTO(
-		List<UUID> publicId,
-		StampVersionDTO latestVersion,
-		List<StampVersionDTO> versions) {
+public record StampVersion(
+		List<UUID> statusPublicId,
+		long time,
+		String formattedTime,
+		List<UUID> authorPublicId,
+		List<UUID> modulePublicId,
+		List<UUID> pathPublicId) {
 }

@@ -45,7 +45,7 @@ public class ScopeController {
 		addSharedModelAttributes(model);
 
 		//Add to model the enumerations for Stamp, Language, and Navigation coordinates
-		ScopeFormDTO scopeFormDTO = new ScopeFormDTO(
+		ScopeForm scopeForm = new ScopeForm(
 				"",
 				coordinateService.stampCoordinates(),
 				coordinateService.languageCoordinates(),
@@ -53,7 +53,7 @@ public class ScopeController {
 				null,
 				null,
 				null);
-		model.addAttribute("scopeForm", scopeFormDTO);
+		model.addAttribute("scopeForm", scopeForm);
 		return "scope";
 	}
 
@@ -63,7 +63,7 @@ public class ScopeController {
 		addSharedModelAttributes(model);
 
 		//Add to model the enumerations for Stamp, Language, and Navigation coordinates
-		ScopeFormDTO scopeFormDTO = new ScopeFormDTO(
+		ScopeForm scopeForm = new ScopeForm(
 				"",
 				coordinateService.stampCoordinates(),
 				coordinateService.languageCoordinates(),
@@ -71,7 +71,7 @@ public class ScopeController {
 				null,
 				null,
 				null);
-		model.addAttribute("scopeForm", scopeFormDTO);
+		model.addAttribute("scopeForm", scopeForm);
 		return FragmentsRendering
 				.with("scope :: main-content")
 				.fragment("fragments/layout/title :: title-content")
@@ -82,13 +82,13 @@ public class ScopeController {
 
 	@HxRequest
 	@PostMapping("/scope")
-	public FragmentsRendering postScope(@ModelAttribute("scopeForm") ScopeFormDTO scopeFormDTO, Model model) {
+	public FragmentsRendering postScope(@ModelAttribute("scopeForm") ScopeForm scopeForm, Model model) {
 		//Create a new Scope
-		ScopeDTO newScope = scopeService.saveNewScope(
-				scopeFormDTO.name(),
-				scopeFormDTO.selectedStampCoordinateId(),
-				scopeFormDTO.selectedLanguageCoordinateId(),
-				scopeFormDTO.selectedNavigationCoordinateId());
+		Scope newScope = scopeService.saveNewScope(
+				scopeForm.name(),
+				scopeForm.selectedStampCoordinateId(),
+				scopeForm.selectedLanguageCoordinateId(),
+				scopeForm.selectedNavigationCoordinateId());
 		model.addAttribute("newScope", newScope);
 		model.addAttribute("scopes", scopeService.retrieveAllScopes());
 		return FragmentsRendering
@@ -102,6 +102,7 @@ public class ScopeController {
 	public FragmentsRendering postSelectedScope(@RequestParam("scopeId") UUID id, HttpServletResponse response, Model model) {
 		Cookie cookie = new Cookie("cosmos-scope-id", id.toString());
 		cookie.setPath("/");
+		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
 		model.addAttribute("activeScopeId", id);
 		model.addAttribute("scopes", scopeService.retrieveAllScopes());

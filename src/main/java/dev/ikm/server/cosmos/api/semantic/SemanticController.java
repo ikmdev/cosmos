@@ -25,14 +25,14 @@ public class SemanticController {
 	}
 
 	@GetMapping("/{uuid}")
-	public SemanticChronologyDTO getSemanticWithAllVersions(
+	public SemanticChronology getSemanticWithAllVersions(
 			@PathVariable("uuid") UUID uuid) {
-		SemanticChronologyDTO s = semanticService.retrieveSemanticWithAllVersions(uuid);
+		SemanticChronology s = semanticService.retrieveSemanticWithAllVersions(uuid);
 		return semanticService.retrieveSemanticWithAllVersions(uuid);
 	}
 
 	@GetMapping("/latest/{uuid}")
-	public SemanticChronologyDTO getSemanticWithLatestVersion(
+	public SemanticChronology getSemanticWithLatestVersion(
 			@PathVariable("uuid") UUID uuid,
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,

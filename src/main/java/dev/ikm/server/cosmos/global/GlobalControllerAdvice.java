@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.global;
 
-import dev.ikm.server.cosmos.scope.ScopeDTO;
+import dev.ikm.server.cosmos.scope.Scope;
+import dev.ikm.server.cosmos.scope.ScopeDatabaseConfig;
 import dev.ikm.server.cosmos.scope.ScopeService;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,7 +20,7 @@ public class GlobalControllerAdvice {
 	}
 
 	@ModelAttribute("scopes")
-	public List<ScopeDTO> addScopesToModel() {
+	public List<Scope> addScopesToModel() {
 		return scopeService.retrieveAllScopes();
 	}
 
@@ -28,7 +28,7 @@ public class GlobalControllerAdvice {
 	public UUID addScopeSelectionToModel(
 			@CookieValue(name = "cosmos-scope-id", required = false) String scopeSelectionId) {
 		if (scopeSelectionId == null) {
-			return null;
+			return ScopeDatabaseConfig.DEFAULT_SCOPE_ID;
 		}
 		try {
 			return UUID.fromString(scopeSelectionId);

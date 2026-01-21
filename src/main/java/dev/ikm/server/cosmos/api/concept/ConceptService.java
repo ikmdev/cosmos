@@ -25,29 +25,29 @@ public class ConceptService {
 		this.calculatorService = calculatorService;
 	}
 
-	public ConceptChronologyDTO retrieveConceptWithAllVersions(UUID id) {
+	public ConceptChronology retrieveConceptWithAllVersions(UUID id) {
 		Optional<ConceptEntity<? extends ConceptEntityVersion>> optionalConceptEntity = ikeRepository.findConceptById(id);
-		return new ConceptChronologyDTO(
+		return new ConceptChronology(
 				ikeRepository.getIds(id),
 				null,
 				optionalConceptEntity.map(conceptEntity -> conceptEntity.versions().stream()
 								.map(conceptEntityVersion ->
-										new ConceptVersionDTO(conceptEntityVersion.stamp().publicId().asUuidList().toList()))
+										new ConceptVersion(conceptEntityVersion.stamp().publicId().asUuidList().toList()))
 								.toList())
 						.orElse(Collections.emptyList())
 		);
 	}
 
-	public ConceptChronologyDTO retrieveConceptWithLatestVersion(UUID id) {
+	public ConceptChronology retrieveConceptWithLatestVersion(UUID id) {
 		Latest<ConceptEntityVersion> latestConceptEntityVersion = ikeRepository.findLatestConceptById(id);
 		if (latestConceptEntityVersion.isPresent()) {
 			ConceptEntityVersion conceptEntityVersion = latestConceptEntityVersion.get();
-			return new ConceptChronologyDTO(
+			return new ConceptChronology(
 					ikeRepository.getIds(id),
-					new ConceptVersionDTO(ikeRepository.getIds(conceptEntityVersion.stamp())),
+					new ConceptVersion(ikeRepository.getIds(conceptEntityVersion.stamp())),
 					null);
 		} else {
-			return new ConceptChronologyDTO(
+			return new ConceptChronology(
 					ikeRepository.getIds(id),
 					null,
 					null);
@@ -90,9 +90,9 @@ public class ConceptService {
 		return calculatorService.calculateKinds(id);
 	}
 
-	public List<IdentifierSemanticDTO> retrieveIdentifiers(UUID id) {
+	public List<IdentifierSemantic> retrieveIdentifiers(UUID id) {
 		return ikeRepository.findIdentifiers(id).entrySet().stream()
-				.map(entry -> new IdentifierSemanticDTO(entry.getValue(), entry.getKey()))
+				.map(entry -> new IdentifierSemantic(entry.getValue(), entry.getKey()))
 				.toList();
 	}
 }

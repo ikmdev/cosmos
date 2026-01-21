@@ -25,13 +25,13 @@ public class StampController {
 	}
 
 	@GetMapping("/{uuid}")
-	public StampChronologyDTO getStampWithALlVersions(
+	public StampChronology getStampWithALlVersions(
 			@PathVariable("uuid") UUID uuid) {
 		return stampService.retrieveStampWithAllVersions(uuid);
 	}
 
 	@GetMapping("/latest/{uuid}")
-	public StampChronologyDTO getStampWithLatestVersion(
+	public StampChronology getStampWithLatestVersion(
 			@PathVariable("uuid") UUID uuid,
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,

@@ -13,17 +13,19 @@
 <main>
     <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
         <div class="row mt-3 mb-3">
-            <div class="col-md-3 ">
-                <div th:replace="~{fragments/discovery/discovery-search-panel :: search-panel}"></div>
-            </div>
-            <div class="col-md-9">
-
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body h-100 p-3">
+                        <div th:replace="~{fragments/discovery/discovery-explorer :: explorer}"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </main>
 <footer>
-    <div id="footer-content" layout:fragment="footer-content" th:replace="~{fragments/layout/footer :: #footer-content}"></div>
+    <div id="footer-content" layout:fragment="footer-content"
+         th:replace="~{fragments/layout/footer :: #footer-content}"></div>
 </footer>
 </body>
 </html>

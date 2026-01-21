@@ -25,13 +25,13 @@ public class PatternController {
 	}
 
 	@GetMapping("/{uuid}")
-	public PatternChronologyDTO getPatternWithAllVersions(
+	public PatternChronology getPatternWithAllVersions(
 			@PathVariable("uuid") UUID uuid) {
 		return patternService.retrievePatternWithAllVersions(uuid);
 	}
 
 	@GetMapping("/latest/{uuid}")
-	public PatternChronologyDTO getPatternLatestVersion(
+	public PatternChronology getPatternLatestVersion(
 			@PathVariable("uuid") UUID uuid,
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,

@@ -54,7 +54,7 @@ public class FieldTransformationService {
 						entityVertex.vertexIndex(),
 						entity.publicId().asUuidList().stream().toList(),
 						entityVertex.properties().stream()
-								.map(object -> new PropertyFieldDTO(transformField(object)))
+								.map(object -> new PropertyField(transformField(object)))
 								.toList()
 				);
 			}
@@ -87,14 +87,14 @@ public class FieldTransformationService {
 			case Instant instant -> DateTimeUtil.format(instant, DateTimeUtil.SEC_FORMATTER);
 			case BigDecimal bigDecimal -> bigDecimal.toPlainString();
 			case Component component -> component.publicId().asUuidList().stream().toList();
-			case DiTreeEntity diTreeEntity -> new DiTreeFieldDTO(
+			case DiTreeEntity diTreeEntity -> new DiTreeField(
 					diTreeEntity.vertexMap().stream()
 							.map(entityVertex -> (VertexFieldDTO) transformField(entityVertex))
 							.toList(),
 					diTreeEntity.root().vertexIndex(),
 					transformIntIntList(diTreeEntity.predecessorMap()),
 					transformIntObjectIntListMap(diTreeEntity.successorMap()));
-			case DiGraphEntity<? extends EntityVertex> diGraphEntity -> new DiGraphFieldDTO(
+			case DiGraphEntity<? extends EntityVertex> diGraphEntity -> new DiGraphField(
 					diGraphEntity.vertexMap().stream()
 							.map(entityVertex -> (VertexFieldDTO) transformField(entityVertex))
 							.toList(),
@@ -103,9 +103,9 @@ public class FieldTransformationService {
 							.toList(),
 					transformIntObjectIntListMap(diGraphEntity.successorMap()),
 					transformIntObjectIntListMap(diGraphEntity.predecessorMap()));
-			case PlanarPoint planarPoint -> new PlanarPointFieldDTO(planarPoint.x(), planarPoint.y());
+			case PlanarPoint planarPoint -> new PlanarPointField(planarPoint.x(), planarPoint.y());
 			case SpatialPoint spatialPoint ->
-					new SpatialPointFieldDTO(spatialPoint.x(), spatialPoint.y(), spatialPoint.z());
+					new SpatialPointField(spatialPoint.x(), spatialPoint.y(), spatialPoint.z());
 			default -> value;
 		};
 	}

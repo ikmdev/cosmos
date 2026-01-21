@@ -25,21 +25,21 @@ public class PatternService {
 		this.calculatorService = calculatorService;
 	}
 
-	public PatternChronologyDTO retrievePatternWithAllVersions(UUID id) {
+	public PatternChronology retrievePatternWithAllVersions(UUID id) {
 		Optional<PatternEntity<? extends PatternEntityVersion>> optionalPatternEntity = ikeRepository.findPatternById(id);
-		return new PatternChronologyDTO(
+		return new PatternChronology(
 				ikeRepository.getIds(id),
 				null,
 				optionalPatternEntity.map(patternEntity ->
 								patternEntity.versions().stream()
 										.map(patternEntityVersion ->
-												new PatternVersionDTO(
+												new PatternVersion(
 														ikeRepository.getIds(patternEntityVersion.stamp()),
 														ikeRepository.getIds(patternEntityVersion.semanticMeaning()),
 														ikeRepository.getIds(patternEntityVersion.semanticPurpose()),
 														patternEntityVersion.fieldDefinitions().stream()
 																.map(fieldDefinitionForEntity ->
-																		new FieldDefinitionDTO(
+																		new FieldDefinition(
 																				ikeRepository.getIds(fieldDefinitionForEntity.dataType()),
 																				ikeRepository.getIds(fieldDefinitionForEntity.meaning()),
 																				ikeRepository.getIds(fieldDefinitionForEntity.purpose()),
@@ -53,19 +53,19 @@ public class PatternService {
 		);
 	}
 
-	public PatternChronologyDTO retrievePatternWithLatestVersion(UUID id) {
+	public PatternChronology retrievePatternWithLatestVersion(UUID id) {
 		Latest<PatternEntityVersion> latestPatternEntityVersion = ikeRepository.findLatestPatternById(id);
 		if (latestPatternEntityVersion.isPresent()) {
 			PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
-			return new PatternChronologyDTO(
+			return new PatternChronology(
 					ikeRepository.getIds(id),
-					new PatternVersionDTO(
+					new PatternVersion(
 							ikeRepository.getIds(patternEntityVersion.stamp()),
 							ikeRepository.getIds(patternEntityVersion.semanticMeaning()),
 							ikeRepository.getIds(patternEntityVersion.semanticPurpose()),
 							patternEntityVersion.fieldDefinitions().stream()
 									.map(fieldDefinitionForEntity ->
-											new FieldDefinitionDTO(
+											new FieldDefinition(
 													ikeRepository.getIds(fieldDefinitionForEntity.dataType()),
 													ikeRepository.getIds(fieldDefinitionForEntity.meaning()),
 													ikeRepository.getIds(fieldDefinitionForEntity.purpose()),
@@ -77,7 +77,7 @@ public class PatternService {
 					null
 			);
 		} else {
-			return new PatternChronologyDTO(
+			return new PatternChronology(
 					ikeRepository.getIds(id),
 					null,
 					null

@@ -25,13 +25,13 @@ public class ConceptController {
 	}
 
 	@GetMapping("/{uuid}")
-	public ConceptChronologyDTO getConceptWithAllVersions(
+	public ConceptChronology getConceptWithAllVersions(
 			@PathVariable("uuid") UUID uuid) {
 		return conceptService.retrieveConceptWithAllVersions(uuid);
 	}
 
 	@GetMapping("/latest/{uuid}")
-	public ConceptChronologyDTO getConceptWithLatestVersion(
+	public ConceptChronology getConceptWithLatestVersion(
 			@PathVariable("uuid") UUID uuid,
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
@@ -121,7 +121,7 @@ public class ConceptController {
 	}
 
 	@GetMapping("/{uuid}/identifiers")
-	public List<IdentifierSemanticDTO> getConceptIdentifiers(
+	public List<IdentifierSemantic> getConceptIdentifiers(
 			@PathVariable("uuid") UUID uuid,
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
@@ -133,7 +133,7 @@ public class ConceptController {
 	@GetMapping("/{uuid}/semantics")
 	public List<List<UUID>> getSemanticsForConceptChronology(
 			@PathVariable("uuid") UUID uuid,
-			@RequestParam(value = "meaning", required = false) UUID meaningID) { //TODO
+			@RequestParam(value = "meaning", required = false) UUID meaningID) {
 		return conceptService.retrieveSemantics(uuid);
 	}
 

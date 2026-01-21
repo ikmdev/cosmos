@@ -25,18 +25,18 @@ public class SemanticService {
 		this.fieldTransformationService = fieldTransformationService;
 	}
 
-	public SemanticChronologyDTO retrieveSemanticWithAllVersions(UUID id) {
+	public SemanticChronology retrieveSemanticWithAllVersions(UUID id) {
 		Optional<SemanticEntity<? extends SemanticEntityVersion>> optionalSemanticEntity = ikeRepository.findSemanticById(id);
 		if (optionalSemanticEntity.isPresent()) {
 			SemanticEntity<? extends SemanticEntityVersion> semanticEntity = optionalSemanticEntity.get();
-			return new SemanticChronologyDTO(
+			return new SemanticChronology(
 					ikeRepository.getIds(id),
 					ikeRepository.getIds(semanticEntity.pattern()),
 					ikeRepository.getIds(semanticEntity.referencedComponent()),
 					null,
 					semanticEntity.versions().stream()
 							.map(semanticEntityVersion ->
-									new SemanticVersionDTO(
+									new SemanticVersion(
 											ikeRepository.getIds(semanticEntityVersion.stamp()),
 											semanticEntityVersion.fieldValues().stream()
 													.map(fieldTransformationService::transformField)
@@ -44,7 +44,7 @@ public class SemanticService {
 									))
 							.toList());
 		} else {
-			return new SemanticChronologyDTO(
+			return new SemanticChronology(
 					ikeRepository.getIds(id),
 					null,
 					null,
@@ -53,22 +53,22 @@ public class SemanticService {
 		}
 	}
 
-	public SemanticChronologyDTO retrieveSemanticWithLatestVersion(UUID id) {
+	public SemanticChronology retrieveSemanticWithLatestVersion(UUID id) {
 		Latest<SemanticEntityVersion> latestSemanticEntityVersion = ikeRepository.findLatestSemanticById(id);
 		if (latestSemanticEntityVersion.isPresent()) {
 			SemanticEntityVersion semanticEntityVersion = latestSemanticEntityVersion.get();
-			return new SemanticChronologyDTO(
+			return new SemanticChronology(
 					ikeRepository.getIds(id),
 					ikeRepository.getIds(semanticEntityVersion.pattern()),
 					ikeRepository.getIds(semanticEntityVersion.referencedComponent()),
-					new SemanticVersionDTO(
+					new SemanticVersion(
 							ikeRepository.getIds(semanticEntityVersion.stamp()),
 							semanticEntityVersion.fieldValues().stream()
 									.map(fieldTransformationService::transformField)
 									.toList()),
 					null);
 		} else {
-			return new SemanticChronologyDTO(
+			return new SemanticChronology(
 					ikeRepository.getIds(id),
 					null,
 					null,

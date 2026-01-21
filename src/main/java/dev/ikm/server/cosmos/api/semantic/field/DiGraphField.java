@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DiTreeFieldDTO(
+public record DiGraphField(
 		List<VertexFieldDTO> vertices,
-		int rootIndex,
-		Map<Integer, Integer> predecessors,
-		Map<Integer, List<Integer>> successors) {
+		List<Integer> roots,
+		Map<Integer, List<Integer>> successors,
+		Map<Integer, List<Integer>> predecessors) {
 }

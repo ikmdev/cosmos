@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record SemanticVersionDTO(
+public record SemanticVersion(
 		List<UUID> stampPublicId,
 		List<Object> values) {
 }

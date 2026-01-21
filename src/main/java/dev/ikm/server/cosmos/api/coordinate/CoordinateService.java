@@ -21,13 +21,13 @@ public class CoordinateService {
 		return Optional.empty();
 	}
 
-	public CoordinateDTO stampCoordinate(Stamp stamp) {
-		return new CoordinateDTO(stamp.getName(), stamp.getUuids());
+	public Coordinate stampCoordinate(Stamp stamp) {
+		return new Coordinate(stamp.getName(), stamp.getUuids());
 	}
 
-	public List<CoordinateDTO> stampCoordinates() {
+	public List<Coordinate> stampCoordinates() {
 		return Arrays.stream(Stamp.values())
-				.map(stamp -> new CoordinateDTO(stamp.getName(), stamp.getUuids()))
+				.map(stamp -> new Coordinate(stamp.getName(), stamp.getUuids()))
 				.toList();
 	}
 
@@ -42,13 +42,13 @@ public class CoordinateService {
 		return Optional.empty();
 	}
 
-	public CoordinateDTO languageCoordinate(Language language) {
-		return new CoordinateDTO(language.getName(), language.getUuids());
+	public Coordinate languageCoordinate(Language language) {
+		return new Coordinate(language.getName(), language.getUuids());
 	}
 
-	public List<CoordinateDTO> languageCoordinates() {
+	public List<Coordinate> languageCoordinates() {
 		return Arrays.stream(Language.values())
-				.map(language -> new CoordinateDTO(language.getName(), language.getUuids()))
+				.map(language -> new Coordinate(language.getName(), language.getUuids()))
 				.toList();
 	}
 
@@ -63,13 +63,13 @@ public class CoordinateService {
 		return Optional.empty();
 	}
 
-	public CoordinateDTO navigationCoordinate(Navigation navigation) {
-		return new CoordinateDTO(navigation.getName(), navigation.getUuids());
+	public Coordinate navigationCoordinate(Navigation navigation) {
+		return new Coordinate(navigation.getName(), navigation.getUuids());
 	}
 
-	public List<CoordinateDTO> navigationCoordinates() {
+	public List<Coordinate> navigationCoordinates() {
 		return Arrays.stream(Navigation.values())
-				.map(navigation -> new CoordinateDTO(navigation.getName(), navigation.getUuids()))
+				.map(navigation -> new Coordinate(navigation.getName(), navigation.getUuids()))
 				.toList();
 	}
 

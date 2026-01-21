@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ScopeDatabaseConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ScopeDatabaseConfig.class);
+	public static final UUID DEFAULT_SCOPE_ID = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
 
 	private DB database;
 	private File directory;
@@ -57,10 +58,15 @@ public class ScopeDatabaseConfig {
 					.make();
 
 			//Create Default Scope
-			UUID defaultId = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
 			ConcurrentMap<UUID, ScopeEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
-			if (!dbMap.containsKey(defaultId)) {
-				dbMap.put(defaultId, new ScopeEntity(defaultId, Instant.now(), "Default Scope", Stamp.DEV_LATEST, Language.US_ENG_REG, Navigation.INFERRED));
+			if (!dbMap.containsKey(DEFAULT_SCOPE_ID)) {
+				dbMap.put(DEFAULT_SCOPE_ID, new ScopeEntity(
+						DEFAULT_SCOPE_ID,
+						Instant.now(),
+						"Default Scope",
+						Stamp.DEV_LATEST,
+						Language.US_ENG_REG,
+						Navigation.INFERRED));
 			}
 
 			LOG.info("Scope database initialized");

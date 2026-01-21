@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class UploadController {
 
 	@PostMapping("/single")
-	public UploadReportDTO singlePBZipUpload(@RequestBody UploadReportDTO uploadReportDTO) {
-		return uploadReportDTO;
+	public UploadReport singlePBZipUpload(@RequestBody UploadReport uploadReport) {
+		return uploadReport;
 	}
 
 	@PostMapping("/multiple")
-	public UploadReportDTO multiplePBZipUpload(@RequestBody UploadReportDTO uploadReportDTO) {
-		return uploadReportDTO;
+	public UploadReport multiplePBZipUpload(@RequestBody UploadReport uploadReport) {
+		return uploadReport;
 	}
 }

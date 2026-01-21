@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
+    <!-- Search Section -->
+    <div class="flex-shrink-0 mb-3">
+        <form th:id="${graphId} + '-search-form'" th:object="${discoverySearchForm}" hx-get="/discovery/search" hx-swap="none" hx-trigger="submit">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control border-start-0 ps-0"
+                       name="query"
+                       th:value="${query}"
+                       placeholder="Search Tinkar Knowledge..." aria-label="Search">
+            </div>
+        </form>
+    </div>
+
+    <!-- Graph Section -->
+    <div th:id="${graphId} + '-graph-visualization'" class="flex-grow-1" style="position: relative; overflow: hidden; min-height: 400px;"></div>
+
+    <script th:inline="javascript">
+        {
+            const graphData = /*[[${graphData}]]*/ null;
+            const graphId = /*[[${graphId}]]*/ 'default';
+            const elem = document.getElementById(graphId + "-graph-visualization");
+            const searchForm = document.getElementById(graphId + "-search-form");
+
+            // 1. Initialize Graph Instance
+            const Graph = new ForceGraph(elem)
+                .width(elem.clientWidth)
+                .height(elem.clientHeight)
+                .nodeId('id')
+                .nodeVal('val')
+                .nodeLabel('id')
+                .nodeAutoColorBy('group')
+                .linkSource('source')
+                .linkTarget('target');
+
+            // 2. Handle Search (Direct access to Graph variable!)
+            searchForm.addEventListener('htmx:afterRequest', (evt) => {
+                if (evt.detail.successful && evt.detail.xhr.response) {
+                    try {
+                        const data = JSON.parse(evt.detail.xhr.response);
+                        Graph.graphData(data);
+                    } catch (e) {
+                        console.error("Failed to parse graph data:", e);
+                    }
+                }
+            });
+
+            // 3. Handle Resize
+            new ResizeObserver(entries => {
+                const width = entries[0].contentRect.width;
+                const height = entries[0].contentRect.height;
+                if (width > 0 && height > 0) {
+                    Graph.width(width);
+                    Graph.height(height);
+                }
+            }).observe(elem);
+
+            // 4. Load Initial Data
+            if (graphData) {
+                Graph.graphData(graphData);
+            } else {
+                fetch('../datasets/miserables.json').then(res => res.json()).then(data => Graph.graphData(data));
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.api.pattern;
+package dev.ikm.server.cosmos.api.concept;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record PatternChronologyDTO(
+public record ConceptChronology(
 		List<UUID> publicId,
-		PatternVersionDTO latestVersion,
-		List<PatternVersionDTO> versions) {
+		ConceptVersion latestVersion,
+		List<ConceptVersion> versions) {
 }

@@ -1,15 +1,15 @@
 package dev.ikm.server.cosmos.scope;
 
-import dev.ikm.server.cosmos.api.coordinate.CoordinateDTO;
+import dev.ikm.server.cosmos.api.coordinate.Coordinate;
 
 import java.util.List;
 import java.util.UUID;
 
-public record ScopeFormDTO(
+public record ScopeForm(
 		String name,
-		List<CoordinateDTO> stampCoordinates,
-		List<CoordinateDTO> languageCoordinates,
-		List<CoordinateDTO> navigationCoordinates,
+		List<Coordinate> stampCoordinates,
+		List<Coordinate> languageCoordinates,
+		List<Coordinate> navigationCoordinates,
 		List<UUID> selectedStampCoordinateId,
 		List<UUID> selectedLanguageCoordinateId,
 		List<UUID> selectedNavigationCoordinateId

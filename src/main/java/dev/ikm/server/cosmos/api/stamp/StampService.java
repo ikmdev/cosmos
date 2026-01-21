@@ -23,15 +23,15 @@ public class StampService {
 		this.ikeRepository = ikeRepository;
 	}
 
-	public StampChronologyDTO retrieveStampWithAllVersions(UUID id) {
+	public StampChronology retrieveStampWithAllVersions(UUID id) {
 		Optional<StampEntity<? extends StampEntityVersion>> optionalStampEntity = ikeRepository.findSTAMPById(id);
-		return new StampChronologyDTO(
+		return new StampChronology(
 				ikeRepository.getIds(id),
 				null,
 				optionalStampEntity.map(stampEntity ->
 								stampEntity.versions().stream()
 										.map(stampEntityVersion ->
-												new StampVersionDTO(
+												new StampVersion(
 														ikeRepository.getIds(stampEntityVersion.state()),
 														stampEntityVersion.time(),
 														DateTimeUtil.format(stampEntity.time(), DateTimeUtil.SEC_FORMATTER),
@@ -43,13 +43,13 @@ public class StampService {
 		);
 	}
 
-	public StampChronologyDTO retrieveStampWithLatestVersion(UUID id) {
+	public StampChronology retrieveStampWithLatestVersion(UUID id) {
 		Latest<StampEntityVersion> latestStampEntityVersion = ikeRepository.findLatestSTAMPById(id);
 		if (latestStampEntityVersion.isPresent()) {
 			StampEntityVersion stampEntityVersion = latestStampEntityVersion.get();
-			return new StampChronologyDTO(
+			return new StampChronology(
 					ikeRepository.getIds(id),
-					new StampVersionDTO(
+					new StampVersion(
 							ikeRepository.getIds(stampEntityVersion.state()),
 							stampEntityVersion.time(),
 							DateTimeUtil.format(stampEntityVersion.time(), DateTimeUtil.SEC_FORMATTER),
@@ -58,7 +58,7 @@ public class StampService {
 							ikeRepository.getIds(stampEntityVersion.path())),
 					null);
 		} else {
-			return new StampChronologyDTO(
+			return new StampChronology(
 					ikeRepository.getIds(id),
 					null,
 					null);

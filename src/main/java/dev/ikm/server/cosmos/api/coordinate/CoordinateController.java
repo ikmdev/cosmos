@@ -12,28 +12,28 @@ import java.util.List;
 public class CoordinateController {
 
 	@GetMapping("/language")
-	public List<CoordinateDTO> getLanguageCoordinates() {
-		List<CoordinateDTO> coordinates = new ArrayList<>();
+	public List<Coordinate> getLanguageCoordinates() {
+		List<Coordinate> coordinates = new ArrayList<>();
 		for(Language language : Language.values()) {
-			coordinates.add(new CoordinateDTO(language.getName(), language.getUuids()));
+			coordinates.add(new Coordinate(language.getName(), language.getUuids()));
 		}
 		return coordinates;
 	}
 
 	@GetMapping("/navigation")
-	public List<CoordinateDTO> getNavigationCoordinates() {
-		List<CoordinateDTO> coordinates = new ArrayList<>();
+	public List<Coordinate> getNavigationCoordinates() {
+		List<Coordinate> coordinates = new ArrayList<>();
 		for(Navigation navigation : Navigation.values()) {
-			coordinates.add(new CoordinateDTO(navigation.getName(), navigation.getUuids()));
+			coordinates.add(new Coordinate(navigation.getName(), navigation.getUuids()));
 		}
 		return coordinates;
 	}
 
 	@GetMapping("/stamp")
-	public List<CoordinateDTO> getStampCoordinates() {
-		List<CoordinateDTO> coordinates = new ArrayList<>();
+	public List<Coordinate> getStampCoordinates() {
+		List<Coordinate> coordinates = new ArrayList<>();
 		for(Stamp stamp : Stamp.values()) {
-			coordinates.add(new CoordinateDTO(stamp.getName(), stamp.getUuids()));
+			coordinates.add(new Coordinate(stamp.getName(), stamp.getUuids()));
 		}
 		return coordinates;
 	}

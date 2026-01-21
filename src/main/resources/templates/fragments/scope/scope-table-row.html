@@ -13,7 +13,7 @@
         </th:block>
 
         <!-- Reusable Row Fragment -->
-        <!--/*@thymesVar id="id" type="dev.ikm.server.cosmos.scope.ScopeDTO"*/-->
+        <!--/*@thymesVar id="id" type="dev.ikm.server.cosmos.scope.Scope"*/-->
         <tr th:fragment="scope-row(scope)" th:id="${'scope-' + scope.id()}">
             <td th:text="${scope.name()}"></td>
             <td th:text="${scope.stampCoordinate().name()}"></td>

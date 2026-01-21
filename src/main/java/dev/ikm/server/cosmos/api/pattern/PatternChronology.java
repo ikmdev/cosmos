@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record FieldDefinitionDTO(
-		List<UUID> dataTypePublicId,
-		List<UUID> meaningPublicId,
-		List<UUID> purposePublicId,
-		int index) {
+public record PatternChronology(
+		List<UUID> publicId,
+		PatternVersion latestVersion,
+		List<PatternVersion> versions) {
 }

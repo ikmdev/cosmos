@@ -1,8 +1,7 @@
 package dev.ikm.server.cosmos.api.coordinate;
 
 import dev.ikm.server.cosmos.ike.IkeRepository;
-import dev.ikm.server.cosmos.scope.ScopeDTO;
-import dev.ikm.server.cosmos.scope.ScopeEntity;
+import dev.ikm.server.cosmos.scope.Scope;
 import dev.ikm.server.cosmos.scope.ScopeService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
@@ -42,8 +41,8 @@ public class CalculatorService {
 	}
 
 	public void setScope(UUID scopeId) {
-		ScopeDTO scopeDTO = scopeService.retrieveScope(scopeId);
-		setScope(scopeDTO.stampCoordinate().id().getFirst(), scopeDTO.languageCoordinate().id().getFirst(), scopeDTO.navigationCoordinate().id().getFirst());
+		Scope scope = scopeService.retrieveScope(scopeId);
+		setScope(scope.stampCoordinate().id().getFirst(), scope.languageCoordinate().id().getFirst(), scope.navigationCoordinate().id().getFirst());
 	}
 
 	public void setScope(UUID stampId, UUID languageId, UUID navigationId) {

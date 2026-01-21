@@ -10,5 +10,5 @@ public record VertexFieldDTO(
 		UUID uuid,
 		int index,
 		List<UUID> conceptPublicId,
-		List<PropertyFieldDTO> properties) {
+		List<PropertyField> properties) {
 }

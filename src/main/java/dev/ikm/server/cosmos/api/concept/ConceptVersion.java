@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ConceptVersionDTO(
+public record ConceptVersion(
 		List<UUID> stampPublicId) {
 }
