@@ -4,7 +4,7 @@ import dev.ikm.server.cosmos.api.coordinate.Coordinate;
 
 import java.util.UUID;
 
-public record ScopeDTO(
+public record Scope(
 		UUID id,
 		String name,
 		Coordinate stampCoordinate,

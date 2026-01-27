@@ -26,7 +26,7 @@ Once your new branch has been created, begin development in your newly created b
 Sometimes you don't want to or cannot use the maven plugin, so git can be used directly to create a branch. This works by running the following commands to create your branch:
 
 ```bash
-git pull origin main
+git pull source main
 git checkout -b feature/MYAPP-52-some-short-description
 mvn versions:set -DnewVersion=MYAPP-52-some-short-description
 ```
@@ -36,7 +36,7 @@ Follow the same branch naming convention illustrated above.
 
 To collaborate with others in your feature branch, run the following command to push your changes to a remote branch:
 ```bash
-git push origin HEAD:feature/[MY LOCAL BRANCH NAME]
+git push source HEAD:feature/[MY LOCAL BRANCH NAME]
 ```
 
 This will allow other developers to pull your code. Don't forget to run `git add .` and `git commit -m "[MESSAGE]"` before pushing your code.
@@ -119,7 +119,7 @@ git commit -m "A short comment describing the work since the last commit"
 
 ## Push the changes to the team repo (assuming you have access). Can push more changes later until branch is deleted.
 ## You can then follow the instructions below to create a pull/merge request.
-git push origin feature/MYAPP-52-some-short-description
+git push source feature/MYAPP-52-some-short-description
 
 ## Add another remote
 git remote add myname https://git@mylocation.example

@@ -4,7 +4,8 @@
 <div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
     <!-- Search Section -->
     <div class="flex-shrink-0 mb-3">
-        <form th:id="${graphId} + '-search-form'" th:object="${discoverySearchForm}" hx-get="/discovery/search" hx-swap="none" hx-trigger="submit">
+        <form th:id="${graphId} + '-search-form'" th:object="${discoverySearchForm}" hx-get="/discovery/search"
+              hx-swap="none" hx-trigger="submit">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0">
                   <i class="bi bi-search"></i>
@@ -18,11 +19,12 @@
     </div>
 
     <!-- Graph Section -->
-    <div th:id="${graphId} + '-graph-visualization'" class="flex-grow-1" style="position: relative; overflow: hidden; min-height: 400px;"></div>
+    <div th:id="${graphId} + '-graph-visualization'" class="flex-grow-1"
+         style="position: relative; overflow: hidden; min-height: 400px;"></div>
 
     <script th:inline="javascript">
         {
-            const graphData = /*[[${graphData}]]*/ null;
+            let graphData = /*[[${graphData}]]*/ null;
             const graphId = /*[[${graphId}]]*/ 'default';
             const elem = document.getElementById(graphId + "-graph-visualization");
             const searchForm = document.getElementById(graphId + "-search-form");
@@ -32,11 +34,107 @@
                 .width(elem.clientWidth)
                 .height(elem.clientHeight)
                 .nodeId('id')
-                .nodeVal('val')
-                .nodeLabel('id')
+                .nodeVal('size')
+                .nodeRelSize(8)
+                .nodeLabel('label')
                 .nodeAutoColorBy('group')
                 .linkSource('source')
-                .linkTarget('target');
+                .linkTarget('target')
+                .onNodeClick((node) => {
+                    // Expand (Grow)
+                    const nodeId = node.id;
+                    fetch(`/discovery/expand?nodeId=${encodeURIComponent(nodeId)}`)
+                        .then(res => res.json())
+                        .then(newData => {
+                            const {nodes, links} = Graph.graphData();
+                            const existingNodeIds = new Set(nodes.map(n => n.id));
+                            const uniqueNewNodes = newData.nodes.filter(n => !existingNodeIds.has(n.id));
+
+                            Graph.graphData({
+                                nodes: [...nodes, ...uniqueNewNodes],
+                                links: [...links, ...newData.links]
+                            });
+                        })
+                        .catch(err => console.error("Expansion failed", err));
+                })
+                .onNodeRightClick((node) => {
+                    // Remove (Prune)
+                    const {nodes, links} = Graph.graphData();
+                    const newNodes = nodes.filter(n => n.id !== node.id);
+                    const newLinks = links.filter(l => l.source.id !== node.id && l.target.id !== node.id);
+                    Graph.graphData({nodes: newNodes, links: newLinks});
+                }).nodeCanvasObject((node, ctx, globalScale) => {
+                    const type = node.type;
+                    const fontSize = 12/globalScale;
+                    ctx.font = `${fontSize}px Sans-Serif`;
+                    const textWidth = ctx.measureText(type).width;
+                    const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = node.color;
+                    ctx.fillText(type, node.x, node.y);
+
+                    node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+                })
+                .nodePointerAreaPaint((node, color, ctx) => {
+                    ctx.fillStyle = color;
+                    const bckgDimensions = node.__bckgDimensions;
+                    bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+                })
+                .linkCanvasObjectMode(() => 'after')
+                .linkCanvasObject((link, ctx) => {
+                    const MAX_FONT_SIZE = 4;
+                    const LABEL_NODE_MARGIN = Graph.nodeRelSize() * 1.5;
+
+                    const start = link.source;
+                    const end = link.target;
+                    const label = link.type;
+
+                    // ignore unbound links
+                    if (typeof start !== 'object' || typeof end !== 'object') return;
+
+                    //ignore links with no type label
+                    if (label === undefined) return;
+
+                    // calculate label positioning
+                    const textPos = Object.assign(...['x', 'y'].map(c => ({
+                        [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+                    })));
+
+                    const relLink = { x: end.x - start.x, y: end.y - start.y };
+
+                    const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
+
+                    let textAngle = Math.atan2(relLink.y, relLink.x);
+                    // maintain label vertical orientation for legibility
+                    if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
+                    if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+
+                    // estimate fontSize to fit in link length
+                    ctx.font = '1px Sans-Serif';
+                    const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
+                    ctx.font = `${fontSize}px Sans-Serif`;
+                    const textWidth = ctx.measureText(label).width;
+                    const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+
+                    // draw text label (with background rect)
+                    ctx.save();
+                    ctx.translate(textPos.x, textPos.y);
+                    ctx.rotate(textAngle);
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillRect(- bckgDimensions[0] / 2, - bckgDimensions[1] / 2, ...bckgDimensions);
+
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'darkgrey';
+                    ctx.fillText(label, 0, 0);
+                    ctx.restore();
+                });
 
             // 2. Handle Search (Direct access to Graph variable!)
             searchForm.addEventListener('htmx:afterRequest', (evt) => {
@@ -64,7 +162,17 @@
             if (graphData) {
                 Graph.graphData(graphData);
             } else {
-                fetch('../datasets/miserables.json').then(res => res.json()).then(data => Graph.graphData(data));
+                graphData =
+                    {
+                        "nodes": [
+                            {
+                                "id": "NO DATA",
+                                "group": "99"
+                            }
+                        ],
+                        "links": []
+                    };
+                Graph.graphData(graphData);
             }
         }
     </script>
