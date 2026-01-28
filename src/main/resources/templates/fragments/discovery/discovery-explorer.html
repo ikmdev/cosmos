@@ -4,16 +4,33 @@
 <div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
     <!-- Search Section -->
     <div class="flex-shrink-0 mb-3">
-        <form th:id="${graphId} + '-search-form'" th:object="${discoverySearchForm}" hx-get="/discovery/search"
+        <form th:id="${graphId} + '-search-form'" th:object="${explorerSearchForm}" hx-get="/discovery/search"
               hx-swap="none" hx-trigger="submit">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0">
                   <i class="bi bi-search"></i>
                 </span>
                 <input type="text" class="form-control border-start-0 ps-0"
-                       name="query"
-                       th:value="${query}"
+                       th:field="*{query}"
                        placeholder="Search Tinkar Knowledge..." aria-label="Search">
+                <select class="form-select" th:field="*{maxResults}" style="max-width: 100px;" aria-label="Max Results">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100">100</option>
+                </select>
+                <div class="input-group-text bg-white">
+                    <input class="form-check-input mt-0 me-2" type="checkbox" th:field="*{latestVersionOnly}" id="latest-checkbox">
+                    <label class="form-check-label" for="latest-checkbox">Latest Version Only</label>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" th:id="${graphId} + '-clear-btn'" title="Clear Graph">
+                    <i class="bi bi-trash"></i>
+                </button>
+                <button class="btn btn-outline-secondary" type="button" th:id="${graphId} + '-recenter-btn'" title="Recenter Graph">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
             </div>
         </form>
     </div>
@@ -28,6 +45,8 @@
             const graphId = /*[[${graphId}]]*/ 'default';
             const elem = document.getElementById(graphId + "-graph-visualization");
             const searchForm = document.getElementById(graphId + "-search-form");
+            const clearBtn = document.getElementById(graphId + "-clear-btn");
+            const recenterBtn = document.getElementById(graphId + "-recenter-btn");
 
             // 1. Initialize Graph Instance
             const Graph = new ForceGraph(elem)
@@ -43,7 +62,7 @@
                 .onNodeClick((node) => {
                     // Expand (Grow)
                     const nodeId = node.id;
-                    fetch(`/discovery/expand?nodeId=${encodeURIComponent(nodeId)}`)
+                    fetch(`/discovery/explore?nodeId=${encodeURIComponent(nodeId)}`)
                         .then(res => res.json())
                         .then(newData => {
                             const {nodes, links} = Graph.graphData();
@@ -64,26 +83,39 @@
                     const newLinks = links.filter(l => l.source.id !== node.id && l.target.id !== node.id);
                     Graph.graphData({nodes: newNodes, links: newLinks});
                 }).nodeCanvasObject((node, ctx, globalScale) => {
-                    const type = node.type;
+                    const label = node.type;
+                    const values = node.values || [];
                     const fontSize = 12/globalScale;
                     ctx.font = `${fontSize}px Sans-Serif`;
-                    const textWidth = ctx.measureText(type).width;
-                    const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
 
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    // 1. Draw Circle
+                    const r = 8; // Fixed radius or use (node.size * scalar)
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
                     ctx.fillStyle = node.color;
-                    ctx.fillText(type, node.x, node.y);
+                    ctx.fill();
 
-                    node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+                    // 2. Draw Label (NodeType) above circle
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillStyle = node.color;
+                    ctx.fillText(label, node.x, node.y - r - 2);
+
+                    // 3. Draw Values below circle
+                    ctx.textBaseline = 'top';
+                    ctx.fillStyle = 'black';
+                    values.forEach((val, i) => {
+                        ctx.fillText(val, node.x, node.y + r + 2 + (i * fontSize));
+                    });
+
+                    node.__r = r; // Store radius for pointer area
                 })
                 .nodePointerAreaPaint((node, color, ctx) => {
                     ctx.fillStyle = color;
-                    const bckgDimensions = node.__bckgDimensions;
-                    bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+                    const r = node.__r || 8;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+                    ctx.fill();
                 })
                 .linkCanvasObjectMode(() => 'after')
                 .linkCanvasObject((link, ctx) => {
@@ -146,6 +178,16 @@
                         console.error("Failed to parse graph data:", e);
                     }
                 }
+            });
+
+            // Handle Clear
+            clearBtn.addEventListener('click', () => {
+                Graph.graphData({nodes: [], links: []});
+            });
+
+            // Handle Recenter
+            recenterBtn.addEventListener('click', () => {
+                Graph.zoomToFit(400);
             });
 
             // 3. Handle Resize
