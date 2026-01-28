@@ -75,7 +75,21 @@ public class IkeRepository {
 		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
 	}
 
+	public Latest<ConceptEntityVersion> findLatestConceptById(List<UUID> id) {
+		PublicId publicId = PublicIds.of(id);
+		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
+	}
+
 	public Optional<ConceptEntity<? extends ConceptEntityVersion>> findConceptById(UUID id) {
+		PublicId publicId = PublicIds.of(id);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
+		return optionalEntity
+				.map(entity -> (Entity<? extends EntityVersion>) entity)
+				.filter(entity -> entity instanceof ConceptEntity<? extends ConceptEntityVersion>)
+				.map(entity -> (ConceptEntity<? extends ConceptEntityVersion>) entity);
+	}
+
+	public Optional<ConceptEntity<? extends ConceptEntityVersion>> findConceptById(List<UUID> id) {
 		PublicId publicId = PublicIds.of(id);
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
@@ -89,7 +103,21 @@ public class IkeRepository {
 		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
 	}
 
+	public Latest<SemanticEntityVersion> findLatestSemanticById(List<UUID> id) {
+		PublicId publicId = PublicIds.of(id);
+		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
+	}
+
 	public Optional<SemanticEntity<? extends SemanticEntityVersion>> findSemanticById(UUID id) {
+		PublicId publicId = PublicIds.of(id);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
+		return optionalEntity
+				.map(entity -> (Entity<? extends EntityVersion>) entity)
+				.filter(entity -> entity instanceof SemanticEntity<? extends SemanticEntityVersion>)
+				.map(entity -> (SemanticEntity<? extends SemanticEntityVersion>) entity);
+	}
+
+	public Optional<SemanticEntity<? extends SemanticEntityVersion>> findSemanticById(List<UUID> id) {
 		PublicId publicId = PublicIds.of(id);
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
@@ -103,7 +131,21 @@ public class IkeRepository {
 		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
 	}
 
+	public Latest<PatternEntityVersion> findLatestPatternById(List<UUID> id) {
+		PublicId publicId = PublicIds.of(id);
+		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
+	}
+
 	public Optional<PatternEntity<? extends PatternEntityVersion>> findPatternById(UUID id) {
+		PublicId publicId = PublicIds.of(id);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
+		return optionalEntity
+				.map(entity -> (Entity<? extends EntityVersion>) entity)
+				.filter(entity -> entity instanceof PatternEntity<? extends PatternEntityVersion>)
+				.map(entity -> (PatternEntity<? extends PatternEntityVersion>) entity);
+	}
+
+	public Optional<PatternEntity<? extends PatternEntityVersion>> findPatternById(List<UUID> id) {
 		PublicId publicId = PublicIds.of(id);
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
@@ -117,6 +159,11 @@ public class IkeRepository {
 		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
 	}
 
+	public Latest<StampEntityVersion> findLatestSTAMPById(List<UUID> id) {
+		PublicId publicId = PublicIds.of(id);
+		return calculatorService.getStampCalculator().latest(Entity.nid(publicId));
+	}
+
 	public Optional<StampEntity<? extends StampEntityVersion>> findSTAMPById(UUID id) {
 		PublicId publicId = PublicIds.of(id);
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
@@ -126,7 +173,25 @@ public class IkeRepository {
 				.map(entity -> (StampEntity<? extends StampEntityVersion>) entity);
 	}
 
+	public Optional<StampEntity<? extends StampEntityVersion>> findSTAMPById(List<UUID> id) {
+		PublicId publicId = PublicIds.of(id);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
+		return optionalEntity
+				.map(entity -> (Entity<? extends EntityVersion>) entity)
+				.filter(entity -> entity instanceof StampEntity<? extends StampEntityVersion>)
+				.map(entity -> (StampEntity<? extends StampEntityVersion>) entity);
+	}
+
 	public List<List<UUID>> findAssociatedSemanticIds(UUID id) {
+		List<List<UUID>> semanticIds = new ArrayList<>();
+		PublicId conceptPublicId = PublicIds.of(id);
+		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNidForComponent(
+				Entity.nid(conceptPublicId),
+				semanticNid -> semanticIds.add(PrimitiveData.publicId(semanticNid).asUuidList().toList()));
+		return semanticIds;
+	}
+
+	public List<List<UUID>> findAssociatedSemanticIds(List<UUID> id) {
 		List<List<UUID>> semanticIds = new ArrayList<>();
 		PublicId conceptPublicId = PublicIds.of(id);
 		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNidForComponent(
@@ -156,7 +221,32 @@ public class IkeRepository {
 		return identifierMap;
 	}
 
+	public Map<List<UUID>, String> findIdentifiers(List<UUID> id) {
+		Map<List<UUID>, String> identifierMap = new HashMap<>();
+		PublicId conceptPublicId = PublicIds.of(id);
+		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNidForComponentOfPattern(
+				Entity.nid(conceptPublicId),
+				TinkarTermV2.IDENTIFIER_PATTERN.nid(),
+				identifierSemanticNid -> {
+					Latest<Field<PublicId>> latestSource = calculatorService
+							.getStampCalculator()
+							.getFieldForSemanticWithMeaning(identifierSemanticNid, TinkarTermV2.IDENTIFIER_SOURCE);
+					Latest<Field<String>> latestValue = calculatorService
+							.getStampCalculator()
+							.getFieldForSemanticWithMeaning(identifierSemanticNid, TinkarTermV2.IDENTIFIER_VALUE);
+					if (latestSource.isPresent() && latestValue.isPresent()) {
+						identifierMap.put(latestSource.get().value().asUuidList().stream().toList(), latestValue.get().value());
+					}
+				}
+		);
+		return identifierMap;
+	}
+
 	public List<UUID> findUSDialect(UUID id) {
+		return findAcceptability(id, TinkarTermV2.US_DIALECT_PATTERN);
+	}
+
+	public List<UUID> findUSDialect(List<UUID> id) {
 		return findAcceptability(id, TinkarTermV2.US_DIALECT_PATTERN);
 	}
 
@@ -164,7 +254,28 @@ public class IkeRepository {
 		return findAcceptability(id, TinkarTermV2.GB_DIALECT_PATTERN);
 	}
 
+	public List<UUID> findGBDialect(List<UUID> id) {
+		return findAcceptability(id, TinkarTermV2.GB_DIALECT_PATTERN);
+	}
+
 	private List<UUID> findAcceptability(UUID id, EntityProxy.Pattern dialect) {
+		List<UUID> acceptabilityId = new ArrayList<>();
+		PublicId semanticPublicId = PublicIds.of(id);
+		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNidForComponentOfPattern(
+				Entity.nid(semanticPublicId),
+				dialect.nid(),
+				nid -> {
+					Latest<Field<PublicId>> acceptability = calculatorService.getStampCalculator()
+							.getFieldForSemanticWithMeaning(nid, TinkarTermV2.GREAT_BRITAIN_ENGLISH_DIALECT);
+					if (acceptability.isPresent()) {
+						acceptabilityId.addAll(acceptability.get().value().asUuidList().stream().toList());
+					}
+				}
+		);
+		return acceptabilityId;
+	}
+
+	private List<UUID> findAcceptability(List<UUID> id, EntityProxy.Pattern dialect) {
 		List<UUID> acceptabilityId = new ArrayList<>();
 		PublicId semanticPublicId = PublicIds.of(id);
 		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNidForComponentOfPattern(

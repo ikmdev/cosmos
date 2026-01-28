@@ -2,6 +2,8 @@ package dev.ikm.server.cosmos.discovery;
 
 import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.tinkar.common.id.PublicId;
+import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.coordinate.stamp.calculator.LatestVersionSearchResult;
 import dev.ikm.tinkar.entity.EntityVersion;
@@ -23,7 +25,7 @@ public class SearchService {
 		this.ikeRepository = ikeRepository;
 	}
 
-	public List<SearchResult> search(String query) {
+	public List<SearchResult> searchTinkarData(String query) {
 		List<LatestVersionSearchResult> results = new ArrayList<>();
 		try {
 			results.addAll(calculatorService.getStampCalculator().search(query, 1000).castToList());

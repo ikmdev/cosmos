@@ -23,15 +23,12 @@ public class DiscoveryController {
 	Logger LOG = LoggerFactory.getLogger(DiscoveryController.class);
 
 	private final DiscoveryService discoveryService;
-	private final SearchService searchService;
 	private final CalculatorService calculatorService;
 
 	@Autowired
 	public DiscoveryController(DiscoveryService discoveryService,
-							   SearchService searchService,
 							   CalculatorService calculatorService) {
 		this.discoveryService = discoveryService;
-		this.searchService = searchService;
 		this.calculatorService = calculatorService;
 	}
 
@@ -70,8 +67,7 @@ public class DiscoveryController {
 		if (activeScopeId != null) {
 			calculatorService.setScope(activeScopeId);
 		}
-		List<SearchResult> results = searchService.search(discoverySearchForm.query());
-		return quickViz();
+		return discoveryService.buildVisualization(discoverySearchForm);
 	}
 
 	@GetMapping("/discovery/expand")
