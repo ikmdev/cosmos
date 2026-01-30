@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,23 +33,30 @@ public class DiscoveryService {
 
 		searchService.tinkarDataSearch(explorerSearchForm.query(), explorerSearchForm.maxResults(), SearchService.SortType.SEMANTIC_SCORE)
 				.forEach(searchResult -> {
-					 Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
-					 if (latest.isPresent()) {
-						 SemanticEntityVersion semanticEntityVersion = latest.get();
+					Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
+					if (latest.isPresent()) {
+						SemanticEntityVersion semanticEntityVersion = latest.get();
 
-						 int nodeId = semanticEntityVersion.entity().publicIdHash();
-						 String label = semanticEntityVersion.entity().idString();
-						 int group = 10;
-						 int size = 1;
-						 nodes.add(new Node(
-										 nodeId,
-										 NodeType.SEMANTIC,
-										 label,
-										 group,
-										 size,
-										 buildNodeValues(semanticEntityVersion))
-						 );
-					 }
+						Node chronologyNode = new Node(semanticEntityVersion.entity().publicIdHash(),
+								NodeType.SEMANTIC_CHRONOLOGY.getDisplayName(),
+								semanticEntityVersion.entity().idString(),
+								10,
+								1,
+								List.of());
+
+						Node versionNode = new Node(Objects.hash(chronologyNode.id(), semanticEntityVersion.stamp().publicIdHash()),
+								NodeType.SEMANTIC_VERSION.getDisplayName(),
+								"",
+								11,
+								1,
+								buildNodeValues(semanticEntityVersion));
+
+						nodes.add(chronologyNode);
+						nodes.add(versionNode);
+
+						Link chronologyToVersion = new Link("", chronologyNode.id(), versionNode.id());
+						links.add(chronologyToVersion);
+					}
 				});
 
 		return new ExplorerData(nodes, links);
@@ -77,27 +85,21 @@ public class DiscoveryService {
 						values.add("Component: " + object);
 					}
 					case DITREE -> values.add("DITree: " + object);
-					default -> throw new RuntimeException("Unsupported data type:" + semanticEntityVersion.fieldDataType(i));
-				};
+					default ->
+							throw new RuntimeException("Unsupported data type:" + semanticEntityVersion.fieldDataType(i));
+				}
+				;
 			}
 		}
-
-		semanticEntityVersion.fieldValues()
-				.forEach(o -> {
-
-				});
 		return values;
 	}
 
-	public ExplorerData exploreNeighbors(UUID nodeId, ExplorerSearchForm explorerSearchForm) {
+	public ExplorerData explore(int nodeId, ExplorerSearchForm explorerSearchForm) {
 		List<Node> nodes = new ArrayList<>();
 		List<Link> links = new ArrayList<>();
 
 		return new ExplorerData(nodes, links);
 	}
-
-
-
 
 
 }

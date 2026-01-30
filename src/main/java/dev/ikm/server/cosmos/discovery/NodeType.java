@@ -1,10 +1,14 @@
 package dev.ikm.server.cosmos.discovery;
 
 public enum NodeType {
-	CONCEPT("Concept"),
-	SEMANTIC("Semantic"),
-	PATTERN("Pattern"),
-	STAMP("STAMP"),
+	CONCEPT_CHRONOLOGY("Concept Chronology"),
+	CONCEPT_VERSION("Concept Version"),
+	SEMANTIC_CHRONOLOGY("Semantic Chronology"),
+	SEMANTIC_VERSION("Semantic Version"),
+	PATTERN_CHRONOLOGY("Pattern Chronology"),
+	PATTERN_VERSION("Pattern Version"),
+	STAMP_CHRONOLOGY("STAMP Chronology"),
+	STAMP_VERSION("STAMP Version"),
 	FIELD("Field");
 
 	private final String displayName;

@@ -4,7 +4,7 @@ import java.util.List;
 
 public record Node(
 		int id,
-		NodeType type,
+		String type,
 		String label,
 		int group,
 		int size,

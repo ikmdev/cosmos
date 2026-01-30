@@ -168,6 +168,9 @@
                     ctx.restore();
                 });
 
+            // Increase link distance
+            Graph.d3Force('link').distance(50);
+
             // 2. Handle Search (Direct access to Graph variable!)
             searchForm.addEventListener('htmx:afterRequest', (evt) => {
                 if (evt.detail.successful && evt.detail.xhr.response) {
