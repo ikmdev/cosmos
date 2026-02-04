@@ -48,6 +48,16 @@
             const clearBtn = document.getElementById(graphId + "-clear-btn");
             const recenterBtn = document.getElementById(graphId + "-recenter-btn");
 
+            const getGroupColor = (node) => {
+                if (node.color) return node.color;
+                const group = parseInt(node.group, 10) || 0;
+                const base = Math.floor(group / 10);
+                const variant = group % 10;
+                const hue = (base * 137.5) % 360;
+                const lightness = Math.min(90, 50 + (variant * 10));
+                return node.color = `hsl(${hue}, 70%, ${lightness}%)`;
+            };
+
             // 1. Initialize Graph Instance
             const Graph = new ForceGraph(elem)
                 .width(elem.clientWidth)
@@ -56,7 +66,7 @@
                 .nodeVal('size')
                 .nodeRelSize(8)
                 .nodeLabel('label')
-                .nodeAutoColorBy('group')
+                .nodeColor(getGroupColor)
                 .linkSource('source')
                 .linkTarget('target')
                 .onNodeClick((node) => {
@@ -92,13 +102,13 @@
                     const r = 8; // Fixed radius or use (node.size * scalar)
                     ctx.beginPath();
                     ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = node.color;
+                    ctx.fillStyle = getGroupColor(node);
                     ctx.fill();
 
                     // 2. Draw Label (NodeType) above circle
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    ctx.fillStyle = node.color;
+                    ctx.fillStyle = getGroupColor(node);
                     ctx.fillText(label, node.x, node.y - r - 2);
 
                     // 3. Draw Values below circle
@@ -169,7 +179,7 @@
                 });
 
             // Increase link distance
-            Graph.d3Force('link').distance(50);
+            Graph.d3Force('link').distance(125);
 
             // 2. Handle Search (Direct access to Graph variable!)
             searchForm.addEventListener('htmx:afterRequest', (evt) => {

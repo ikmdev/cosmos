@@ -3,7 +3,7 @@ package dev.ikm.server.cosmos.discovery;
 import java.util.List;
 
 public record Node(
-		int id,
+		String id,
 		String type,
 		String label,
 		int group,

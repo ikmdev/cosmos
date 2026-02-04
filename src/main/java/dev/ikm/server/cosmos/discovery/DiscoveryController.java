@@ -73,7 +73,7 @@ public class DiscoveryController {
 	@ResponseBody
 	public ExplorerData explore(@ModelAttribute("activeScopeId") UUID activeScopeId,
 								@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
-								@RequestParam("nodeId") int nodeId,
+								@RequestParam("nodeId") String nodeId,
 								Model model) {
 		if (activeScopeId != null) {
 			calculatorService.setScope(activeScopeId);
