@@ -286,7 +286,16 @@ public class DiscoveryService {
 	}
 
 	private void exploreFromPatternVersion(String nodeId, List<Node> nodes, List<Link> links) {
-
+		EntityVersion entityVersion = triangulateVersion(nodeId);
+		if (entityVersion instanceof PatternEntityVersion patternEntityVersion) {
+			patternEntityVersion.fieldDefinitions()
+					.forEach(fieldDefinition -> {
+						Node fieldDefinitionNode = nodeBuilder.buildPatternVersionField(fieldDefinition);
+						nodes.add(fieldDefinitionNode);
+						Link versionToFieldDefinition = new Link("", nodeId, fieldDefinitionNode.id());
+						links.add(versionToFieldDefinition);
+					});
+		}
 	}
 
 	private void exploreFromStampChronology(String nodeId, List<Node> nodes, List<Link> links) {
@@ -307,8 +316,56 @@ public class DiscoveryService {
 		}
 	}
 
-	private void exploreFromStampVersion(String nodeId, List<Node> nodes, List<Link> links) {
+	//TODO: make sure there is a way to go from Version to chronologies for each data type
 
+	private void exploreFromStampVersion(String nodeId, List<Node> nodes, List<Link> links) {
+		EntityVersion entityVersion = triangulateVersion(nodeId);
+		if (entityVersion instanceof StampEntityVersion stampEntityVersion) {
+
+			//State/Status Chronology
+			Optional<Entity<EntityVersion>> optionalStatus = Entity.get(stampEntityVersion.stateNid());
+			if (optionalStatus.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalStatus.get();
+				ConceptEntity<? extends ConceptEntityVersion> conceptEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+				Node stateChronology = nodeBuilder.buildConceptChronology(conceptEntity);
+				nodes.add(stateChronology);
+				Link chronologyToState = new Link("", nodeId, stateChronology.id());
+				links.add(chronologyToState);
+			}
+
+			//Author Chronology
+			Optional<Entity<EntityVersion>> optionalAuthor = Entity.get(stampEntityVersion.authorNid());
+			if (optionalAuthor.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalAuthor.get();
+				ConceptEntity<? extends ConceptEntityVersion> authorEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+				Node authorChronology = nodeBuilder.buildConceptChronology(authorEntity);
+				nodes.add(authorChronology);
+				Link chronologyToAuthor = new Link("", nodeId, authorChronology.id());
+				links.add(chronologyToAuthor);
+			}
+
+			//Module Chronology
+			Optional<Entity<EntityVersion>> optionalModule = Entity.get(stampEntityVersion.moduleNid());
+			if (optionalModule.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalModule.get();
+				ConceptEntity<? extends ConceptEntityVersion> moduleEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+				Node moduleChronology = nodeBuilder.buildConceptChronology(moduleEntity);
+				nodes.add(moduleChronology);
+				Link chronologyToModule = new Link("", nodeId, moduleChronology.id());
+				links.add(chronologyToModule);
+			}
+
+			//Path Chronology
+			Optional<Entity<EntityVersion>> optionalPath = Entity.get(stampEntityVersion.pathNid());
+			if (optionalPath.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalPath.get();
+				ConceptEntity<? extends ConceptEntityVersion> pathEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+				Node pathChronology = nodeBuilder.buildConceptChronology(pathEntity);
+				nodes.add(pathChronology);
+				Link chronologyToPath = new Link("", nodeId, pathChronology.id());
+				links.add(chronologyToPath);
+			}
+		}
 	}
 
 	private EntityVersion triangulateVersion(String nodeId) {
