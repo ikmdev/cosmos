@@ -2,6 +2,7 @@ package dev.ikm.server.cosmos.discovery;
 
 import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.ConceptEntity;
@@ -10,9 +11,11 @@ import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.entity.EntityService;
 import dev.ikm.tinkar.entity.EntityVersion;
 import dev.ikm.tinkar.entity.PatternEntity;
+import dev.ikm.tinkar.entity.PatternEntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntity;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.StampEntity;
+import dev.ikm.tinkar.entity.StampEntityVersion;
 import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +50,8 @@ public class DiscoveryService {
 					Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
 					if (latest.isPresent()) {
 						SemanticEntityVersion semanticEntityVersion = latest.get();
-
-//						Node chronologyNode = nodeBuilder.buildSemanticChronology(semanticEntityVersion.chronology());
 						Node versionNode = nodeBuilder.buildSemanticVersion(semanticEntityVersion);
-//						nodes.add(chronologyNode);
 						nodes.add(versionNode);
-
-//						Link chronologyToVersion = new Link("", chronologyNode.id(), versionNode.id());
-//						links.add(chronologyToVersion);
 					}
 				});
 
@@ -99,13 +96,60 @@ public class DiscoveryService {
 	}
 
 	private void exploreFromConceptChronology(String nodeId, List<Node> nodes, List<Link> links) {
-		//build out associated Semantic Chronologies
+		int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(chronologyNid);
 
-		//build out associated Concept Chronology Versions
+		if (optionalEntity.isPresent()) {
+			Entity<? extends EntityVersion> entity = optionalEntity.get();
+			ConceptEntity<? extends ConceptEntityVersion> conceptEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+
+			//build out associated Semantic Chronologies
+			ikeRepository.findAssociatedSemanticIds(conceptEntity.publicId().asUuidList().toList()).stream()
+					.map(PublicIds::of)
+					.map(Entity::nid)
+					.map(Entity::get)
+					.filter(Optional::isPresent)
+					.map(optEntity -> {
+						Entity<? extends EntityVersion> entityChronology = optEntity.get();
+						SemanticEntity<? extends SemanticEntityVersion> semanticChronology = (SemanticEntity<? extends SemanticEntityVersion>) entityChronology;
+						return semanticChronology;
+					})
+					.forEach(semanticEntity -> {
+						Node semanticChronology = nodeBuilder.buildSemanticChronology(semanticEntity);
+						nodes.add(semanticChronology);
+						Link chronologyToSemantic = new Link("", nodeId, semanticChronology.id());
+						links.add(chronologyToSemantic);
+					});
+
+
+			//build out associated Concept Chronology Versions
+			Latest<ConceptEntityVersion> latestConceptEntityVersion = calculatorService.getStampCalculator().latest(conceptEntity.nid());
+			if (latestConceptEntityVersion.isPresent()) {
+				ConceptEntityVersion conceptEntityVersion = latestConceptEntityVersion.get();
+				Node versionNode = nodeBuilder.buildConceptVersion(conceptEntityVersion);
+				nodes.add(versionNode);
+				Link chronologyToVersion = new Link("", nodeId, versionNode.id());
+				links.add(chronologyToVersion);
+			}
+		}
 	}
 
 	private void exploreFromConceptVersion(String nodeId, List<Node> nodes, List<Link> links) {
-		//build out associated STAMP chronologies
+		EntityVersion entityVersion = triangulateVersion(nodeId);
+
+		if (entityVersion instanceof ConceptEntityVersion conceptEntityVersion) {
+			//build out associated STAMP chronologies
+			Optional<Entity<EntityVersion>> optionalEntity = Entity.get(conceptEntityVersion.stampNid());
+
+			if (optionalEntity.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalEntity.get();
+				StampEntity<? extends StampEntityVersion> stampEntity = (StampEntity<? extends StampEntityVersion>) entity;
+				Node stampChronology = nodeBuilder.buildStampChronology(stampEntity);
+				nodes.add(stampChronology);
+				Link chronologyToStamp = new Link("", nodeId, stampChronology.id());
+				links.add(chronologyToStamp);
+			}
+		}
 	}
 
 	private void exploreFromSemanticChronology(String nodeId, List<Node> nodes, List<Link> links) {
@@ -116,13 +160,48 @@ public class DiscoveryService {
 			Entity<? extends EntityVersion> entity = optionalEntity.get();
 			SemanticEntity<? extends SemanticEntityVersion> semanticEntity = (SemanticEntity<? extends SemanticEntityVersion>) entity;
 
+			//build out reference Concept, Semantic
+			int referenceNid = semanticEntity.referencedComponentNid();
+			Optional<Entity<EntityVersion>> optionalReferenceEntity = Entity.get(referenceNid);
+			if (optionalReferenceEntity.isPresent()) {
+				Entity<? extends EntityVersion> referenceEntity = optionalReferenceEntity.get();
+				if (referenceEntity instanceof ConceptEntity conceptEntity) {
+					Node refConceptChronology = nodeBuilder.buildConceptChronology(conceptEntity);
+					nodes.add(refConceptChronology);
+					Link chronologyToConcept = new Link("", nodeId, refConceptChronology.id());
+					links.add(chronologyToConcept);
+				} else if (referenceEntity instanceof SemanticEntity refSemanticEntity) {
+					Node refSemanticChronology = nodeBuilder.buildSemanticChronology(refSemanticEntity);
+					nodes.add(refSemanticChronology);
+					Link chronologyToSemantic = new Link("", nodeId, refSemanticChronology.id());
+					links.add(chronologyToSemantic);
+				}
+			}
+
+			//build out Pattern Chronology
+			int patternNid = semanticEntity.patternNid();
+			Optional<Entity<EntityVersion>> optionalPatternEntity = Entity.get(patternNid);
+			if (optionalPatternEntity.isPresent()) {
+				Entity<? extends EntityVersion> patternReferenceEntity = optionalPatternEntity.get();
+				if (patternReferenceEntity instanceof PatternEntity patternEntity) {
+					Node refPatternChronology = nodeBuilder.buildPatternChronology(patternEntity);
+					nodes.add(refPatternChronology);
+					Link semanticToPattern = new Link("", nodeId, refPatternChronology.id());
+					links.add(semanticToPattern);
+				}
+			}
+
+			//build out associated Semantic Versions
+			Latest<SemanticEntityVersion> latestSemanticEntityVersion = calculatorService.getStampCalculator().latest(semanticEntity.nid());
+			if (latestSemanticEntityVersion.isPresent()) {
+				SemanticEntityVersion semanticEntityVersion = latestSemanticEntityVersion.get();
+				Node versionNode = nodeBuilder.buildSemanticVersion(semanticEntityVersion);
+				nodes.add(versionNode);
+				Link chronologyToVersion = new Link("", nodeId, versionNode.id());
+				links.add(chronologyToVersion);
+			}
+
 		}
-
-
-		//build out reference Concept, Semantic
-
-
-		//build out associated Semantic Versions
 	}
 
 	private void exploreFromSemanticVersion(String nodeId, List<Node> nodes, List<Link> links) {
@@ -169,7 +248,41 @@ public class DiscoveryService {
 	}
 
 	private void exploreFromPatternChronology(String nodeId, List<Node> nodes, List<Link> links) {
+		int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(chronologyNid);
 
+		if (optionalEntity.isPresent()) {
+			Entity<? extends EntityVersion> entity = optionalEntity.get();
+			PatternEntity<? extends PatternEntityVersion> patternEntity = (PatternEntity<? extends PatternEntityVersion>) entity;
+
+			//build out associated Semantic Chronologies
+			ikeRepository.findAssociatedSemanticIds(patternEntity.publicId().asUuidList().toList()).stream()
+					.map(PublicIds::of)
+					.map(Entity::nid)
+					.map(Entity::get)
+					.filter(Optional::isPresent)
+					.map(optEntity -> {
+						Entity<? extends EntityVersion> entityChronology = optEntity.get();
+						SemanticEntity<? extends SemanticEntityVersion> semanticChronology = (SemanticEntity<? extends SemanticEntityVersion>) entityChronology;
+						return semanticChronology;
+					})
+					.forEach(semanticEntity -> {
+						Node semanticChronology = nodeBuilder.buildSemanticChronology(semanticEntity);
+						nodes.add(semanticChronology);
+						Link chronologyToSemantic = new Link("", nodeId, semanticChronology.id());
+						links.add(chronologyToSemantic);
+					});
+
+			//Build out Pattern Version
+			Latest<PatternEntityVersion> patternEntityVersionLatest = calculatorService.getStampCalculator().latest(patternEntity.nid());
+			if (patternEntityVersionLatest.isPresent()) {
+				PatternEntityVersion patternEntityVersion = patternEntityVersionLatest.get();
+				Node patternVersion = nodeBuilder.buildPatternVersion(patternEntityVersion);
+				nodes.add(patternVersion);
+				Link chronologyToVersion = new Link("", nodeId, patternVersion.id());
+				links.add(chronologyToVersion);
+			}
+		}
 	}
 
 	private void exploreFromPatternVersion(String nodeId, List<Node> nodes, List<Link> links) {
@@ -177,7 +290,21 @@ public class DiscoveryService {
 	}
 
 	private void exploreFromStampChronology(String nodeId, List<Node> nodes, List<Link> links) {
+		int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(chronologyNid);
 
+		if (optionalEntity.isPresent()) {
+			Entity<? extends EntityVersion> entity = optionalEntity.get();
+			StampEntity<? extends StampEntityVersion> stampEntity = (StampEntity<? extends StampEntityVersion>) entity;
+			Latest<StampEntityVersion> latestStampEntityVersion = calculatorService.getStampCalculator().latest(stampEntity.nid());
+			if (latestStampEntityVersion.isPresent()) {
+				StampEntityVersion stampEntityVersion = latestStampEntityVersion.get();
+				Node versionNode = nodeBuilder.buildStampVersion(stampEntityVersion);
+				nodes.add(versionNode);
+				Link chronologyToVersion = new Link("", nodeId, versionNode.id());
+				links.add(chronologyToVersion);
+			}
+		}
 	}
 
 	private void exploreFromStampVersion(String nodeId, List<Node> nodes, List<Link> links) {
@@ -197,9 +324,6 @@ public class DiscoveryService {
 				return entityVersion.get();
 			}
 		}
-
 		throw new RuntimeException("Unable to triangulate version");
 	}
-
-
 }

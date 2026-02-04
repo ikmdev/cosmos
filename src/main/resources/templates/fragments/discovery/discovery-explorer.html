@@ -6,27 +6,51 @@
     <div class="flex-shrink-0 mb-3">
         <form th:id="${graphId} + '-search-form'" th:object="${explorerSearchForm}" hx-get="/discovery/search"
               hx-swap="none" hx-trigger="submit">
-            <div class="input-group">
+            <!-- Options Accordion -->
+            <div class="accordion mb-2" th:id="${graphId} + '-accordion'">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" th:id="${graphId} + '-headingOne'">
+                        <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
+                                th:data-bs-target="'#' + ${graphId} + '-collapseOne'" aria-expanded="false"
+                                th:aria-controls="${graphId} + '-collapseOne'">
+                            Search Options
+                        </button>
+                    </h2>
+                    <div th:id="${graphId} + '-collapseOne'" class="accordion-collapse collapse"
+                         th:aria-labelledby="${graphId} + '-headingOne'" th:data-bs-parent="'#' + ${graphId} + '-accordion'">
+                        <div class="accordion-body py-2">
+                            <div class="d-flex gap-4 align-items-center flex-wrap">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="form-label mb-0 text-nowrap">Max Results:</label>
+                                    <select class="form-select" th:field="*{maxResults}" style="width: auto;" aria-label="Max Results">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="75">75</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                                <div class="form-check form-switch mb-0" title="Latest Version Only">
+                                    <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" th:id="${graphId} + '-latest-checkbox'">
+                                    <label class="form-check-label text-nowrap" th:for="${graphId} + '-latest-checkbox'">Latest Version Only</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="input-group w-100">
                 <span class="input-group-text bg-white border-end-0">
                   <i class="bi bi-search"></i>
                 </span>
-                <input type="text" class="form-control border-start-0 ps-0"
+                <input type="text" class="form-control border-start-0 border-end-0 ps-0"
                        th:field="*{query}"
                        placeholder="Search Tinkar Knowledge..." aria-label="Search">
-                <select class="form-select" th:field="*{maxResults}" style="max-width: 100px;" aria-label="Max Results">
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="75">75</option>
-                    <option value="100">100</option>
-                </select>
-                <div class="input-group-text bg-white">
-                    <input class="form-check-input mt-0 me-2" type="checkbox" th:field="*{latestVersionOnly}" id="latest-checkbox">
-                    <label class="form-check-label" for="latest-checkbox">Latest Version Only</label>
-                </div>
-                <button class="btn btn-outline-secondary" type="button" th:id="${graphId} + '-clear-btn'" title="Clear Graph">
-                    <i class="bi bi-trash"></i>
+                <button class="btn btn-outline-secondary border-start-0" type="button" th:id="${graphId} + '-clear-btn'" title="Clear Graph">
+                    <i class="bi bi-x-lg"></i>
                 </button>
                 <button class="btn btn-outline-secondary" type="button" th:id="${graphId} + '-recenter-btn'" title="Recenter Graph">
                     <i class="bi bi-arrows-fullscreen"></i>
