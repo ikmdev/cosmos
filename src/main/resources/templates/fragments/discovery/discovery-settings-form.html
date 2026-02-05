@@ -1,7 +1,42 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<body>
-<div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
-</div>
-</body>
+    <body>
+        <div th:fragment="settings-form">
+            <div class="accordion" id="discovery-settings-accordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="settings-heading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#settings-collapse" aria-expanded="false"
+                                aria-controls="settings-collapse">
+                            Search Settings
+                        </button>
+                    </h2>
+                    <div id="settings-collapse" class="accordion-collapse collapse"
+                         aria-labelledby="settings-heading" data-bs-parent="#discovery-settings-accordion">
+                        <div class="accordion-body">
+                            <form th:object="${explorerSearchForm}">
+                                <div class="d-flex gap-4 align-items-center flex-wrap">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label class="form-label mb-0 text-nowrap">Max Results:</label>
+                                        <select class="form-select" th:field="*{maxResults}" style="width: auto;" aria-label="Max Results">
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="75">75</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check form-switch mb-0" title="Latest Version Only">
+                                        <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" id="latest-checkbox">
+                                        <label class="form-check-label text-nowrap" for="latest-checkbox">Latest Version Only</label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

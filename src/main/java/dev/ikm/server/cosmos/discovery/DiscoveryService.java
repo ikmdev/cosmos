@@ -3,12 +3,10 @@ package dev.ikm.server.cosmos.discovery;
 import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.id.PublicIds;
-import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.ConceptEntity;
 import dev.ikm.tinkar.entity.ConceptEntityVersion;
 import dev.ikm.tinkar.entity.Entity;
-import dev.ikm.tinkar.entity.EntityService;
 import dev.ikm.tinkar.entity.EntityVersion;
 import dev.ikm.tinkar.entity.PatternEntity;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
@@ -149,6 +147,18 @@ public class DiscoveryService {
 				Link chronologyToStamp = new Link("", nodeId, stampChronology.id());
 				links.add(chronologyToStamp);
 			}
+		}
+
+		//build parent concept chronology
+		int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+		Optional<Entity<EntityVersion>> optionalChronology = Entity.get(chronologyNid);
+		if (optionalChronology.isPresent()) {
+			Entity<? extends EntityVersion> entity = optionalChronology.get();
+			ConceptEntity<? extends ConceptEntityVersion> conceptEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+			Node parentConceptChronology = nodeBuilder.buildConceptChronology(conceptEntity);
+			nodes.add(parentConceptChronology);
+			Link chronologyToParentConcept = new Link("", nodeId, parentConceptChronology.id());
+			links.add(chronologyToParentConcept);
 		}
 	}
 
@@ -296,6 +306,19 @@ public class DiscoveryService {
 						links.add(versionToFieldDefinition);
 					});
 		}
+
+		//Connect back to Pattern Chronology
+		int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(chronologyNid);
+
+		if (optionalEntity.isPresent()) {
+			Entity<? extends EntityVersion> entity = optionalEntity.get();
+			PatternEntity<? extends PatternEntityVersion> patternEntity = (PatternEntity<? extends PatternEntityVersion>) entity;
+			Node patternChronology = nodeBuilder.buildPatternChronology(patternEntity);
+			nodes.add(patternChronology);
+			Link chronologyToPattern = new Link("", nodeId, patternChronology.id());
+			links.add(chronologyToPattern);
+		}
 	}
 
 	private void exploreFromStampChronology(String nodeId, List<Node> nodes, List<Link> links) {
@@ -313,10 +336,10 @@ public class DiscoveryService {
 				Link chronologyToVersion = new Link("", nodeId, versionNode.id());
 				links.add(chronologyToVersion);
 			}
+				
 		}
-	}
 
-	//TODO: make sure there is a way to go from Version to chronologies for each data type
+	}
 
 	private void exploreFromStampVersion(String nodeId, List<Node> nodes, List<Link> links) {
 		EntityVersion entityVersion = triangulateVersion(nodeId);
@@ -364,6 +387,18 @@ public class DiscoveryService {
 				nodes.add(pathChronology);
 				Link chronologyToPath = new Link("", nodeId, pathChronology.id());
 				links.add(chronologyToPath);
+			}
+
+			//Link back to Stamp Chronology
+			int chronologyNid = nodeBuilder.parseChronologyNid(nodeId);
+			Optional<Entity<EntityVersion>> optionalChronology = Entity.get(chronologyNid);
+			if (optionalChronology.isPresent()) {
+				Entity<? extends EntityVersion> entity = optionalChronology.get();
+				StampEntity<? extends StampEntityVersion> stampEntity = (StampEntity<? extends StampEntityVersion>) entity;
+				Node stampChronology = nodeBuilder.buildStampChronology(stampEntity);
+				nodes.add(stampChronology);
+				Link chronologyToStamp = new Link("", nodeId, stampChronology.id());
+				links.add(chronologyToStamp);
 			}
 		}
 	}
