@@ -2,6 +2,24 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
+    <style>
+        .graph-fullscreen {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999;
+            background-color: white;
+            padding: 1rem;
+        }
+    </style>
+    <!-- Exit Fullscreen Button -->
+    <button class="btn btn-outline-secondary position-absolute top-0 end-0 m-3 shadow"
+            type="button" th:id="${graphId} + '-exit-fullscreen-btn'"
+            style="display: none; z-index: 10000;" title="Exit Fullscreen">
+        <i class="bi bi-arrows-angle-contract"></i>
+    </button>
     <!-- Graph Section -->
     <div th:id="${graphId} + '-graph-visualization'" class="flex-grow-1"
          style="position: relative; overflow: hidden; min-height: 400px;"></div>
@@ -14,6 +32,8 @@
             const searchForm = document.getElementById(graphId + "-search-form");
             const clearBtn = document.getElementById(graphId + "-clear-btn");
             const recenterBtn = document.getElementById(graphId + "-recenter-btn");
+            const maximizeBtn = document.getElementById(graphId + "-maximize-btn");
+            const exitFullscreenBtn = document.getElementById(graphId + "-exit-fullscreen-btn");
 
             const getGroupColor = (node) => {
                 if (node.color) return node.color;
@@ -179,6 +199,27 @@
             // Handle Recenter
             recenterBtn.addEventListener('click', () => {
                 Graph.zoomToFit(400);
+            });
+
+            // Handle Maximize/Minimize
+            const toggleFullscreen = (enable) => {
+                const wrapper = document.getElementById(graphId + "-explorer-wrapper");
+                if (enable) {
+                    wrapper.classList.add('graph-fullscreen');
+                    exitFullscreenBtn.style.display = 'block';
+                } else {
+                    wrapper.classList.remove('graph-fullscreen');
+                    exitFullscreenBtn.style.display = 'none';
+                }
+                // Trigger resize observer implicitly by changing container size
+            };
+
+            if (maximizeBtn) maximizeBtn.addEventListener('click', () => toggleFullscreen(true));
+            if (exitFullscreenBtn) exitFullscreenBtn.addEventListener('click', () => toggleFullscreen(false));
+
+            // Escape key to exit fullscreen
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') toggleFullscreen(false);
             });
 
             // 3. Handle Resize
