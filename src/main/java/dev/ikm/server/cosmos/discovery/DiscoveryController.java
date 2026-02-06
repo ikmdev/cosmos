@@ -35,7 +35,7 @@ public class DiscoveryController {
 		model.addAttribute("titleDisplayName", "Discovery");
 		model.addAttribute("footerText", "Navigate your knowledge universe");
 		model.addAttribute("graphId", "discovery-graph");
-		model.addAttribute("explorerSearchForm", new ExplorerSearchForm("", false, 25));
+		model.addAttribute("explorerSearchForm", new ExplorerSearchForm("", true, 1));
 	}
 
 	@GetMapping("/discovery")

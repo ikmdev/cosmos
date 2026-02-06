@@ -2,63 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:id="${graphId} + '-explorer-wrapper'" th:fragment="explorer" class="d-flex flex-column h-100">
-    <!-- Search Section -->
-    <div class="flex-shrink-0 mb-3">
-        <form th:id="${graphId} + '-search-form'" th:object="${explorerSearchForm}" hx-get="/discovery/search"
-              hx-swap="none" hx-trigger="submit">
-            <!-- Options Accordion -->
-            <div class="accordion mb-2" th:id="${graphId} + '-accordion'">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" th:id="${graphId} + '-headingOne'">
-                        <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
-                                th:data-bs-target="'#' + ${graphId} + '-collapseOne'" aria-expanded="false"
-                                th:aria-controls="${graphId} + '-collapseOne'">
-                            Search Options
-                        </button>
-                    </h2>
-                    <div th:id="${graphId} + '-collapseOne'" class="accordion-collapse collapse"
-                         th:aria-labelledby="${graphId} + '-headingOne'" th:data-bs-parent="'#' + ${graphId} + '-accordion'">
-                        <div class="accordion-body py-2">
-                            <div class="d-flex gap-4 align-items-center flex-wrap">
-                                <div class="d-flex align-items-center gap-2">
-                                    <label class="form-label mb-0 text-nowrap">Max Results:</label>
-                                    <select class="form-select" th:field="*{maxResults}" style="width: auto;" aria-label="Max Results">
-                                        <option value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="75">75</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                </div>
-                                <div class="form-check form-switch mb-0" title="Latest Version Only">
-                                    <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" th:id="${graphId} + '-latest-checkbox'">
-                                    <label class="form-check-label text-nowrap" th:for="${graphId} + '-latest-checkbox'">Latest Version Only</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="input-group w-100">
-                <span class="input-group-text bg-white border-end-0">
-                  <i class="bi bi-search"></i>
-                </span>
-                <input type="text" class="form-control border-start-0 border-end-0 ps-0"
-                       th:field="*{query}"
-                       placeholder="Search Tinkar Knowledge..." aria-label="Search">
-                <button class="btn btn-outline-secondary border-start-0" type="button" th:id="${graphId} + '-clear-btn'" title="Clear Graph">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <button class="btn btn-outline-secondary" type="button" th:id="${graphId} + '-recenter-btn'" title="Recenter Graph">
-                    <i class="bi bi-arrows-fullscreen"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-
     <!-- Graph Section -->
     <div th:id="${graphId} + '-graph-visualization'" class="flex-grow-1"
          style="position: relative; overflow: hidden; min-height: 400px;"></div>
@@ -82,6 +25,32 @@
                 return node.color = `hsl(${hue}, 70%, ${lightness}%)`;
             };
 
+            // Helper: Merge new data into the existing graph
+            const expandNode = (node) => {
+                const nodeId = node.id;
+                fetch(`/discovery/explore?nodeId=${encodeURIComponent(nodeId)}`)
+                    .then(res => res.json())
+                    .then(newData => {
+                        const {nodes, links} = Graph.graphData();
+                        const existingNodeIds = new Set(nodes.map(n => n.id));
+                        const uniqueNewNodes = newData.nodes.filter(n => !existingNodeIds.has(n.id));
+
+                        Graph.graphData({
+                            nodes: [...nodes, ...uniqueNewNodes],
+                            links: [...links, ...newData.links]
+                        });
+                    })
+                    .catch(err => console.error("Expansion failed", err));
+            };
+
+            // Helper: Remove a node and its connections
+            const pruneNode = (node) => {
+                const {nodes, links} = Graph.graphData();
+                const newNodes = nodes.filter(n => n.id !== node.id);
+                const newLinks = links.filter(l => l.source.id !== node.id && l.target.id !== node.id);
+                Graph.graphData({nodes: newNodes, links: newLinks});
+            };
+
             // 1. Initialize Graph Instance
             const Graph = new ForceGraph(elem)
                 .width(elem.clientWidth)
@@ -93,33 +62,12 @@
                 .nodeColor(getGroupColor)
                 .linkSource('source')
                 .linkTarget('target')
-                .onNodeClick((node) => {
-                    // Expand (Grow)
-                    const nodeId = node.id;
-                    fetch(`/discovery/explore?nodeId=${encodeURIComponent(nodeId)}`)
-                        .then(res => res.json())
-                        .then(newData => {
-                            const {nodes, links} = Graph.graphData();
-                            const existingNodeIds = new Set(nodes.map(n => n.id));
-                            const uniqueNewNodes = newData.nodes.filter(n => !existingNodeIds.has(n.id));
-
-                            Graph.graphData({
-                                nodes: [...nodes, ...uniqueNewNodes],
-                                links: [...links, ...newData.links]
-                            });
-                        })
-                        .catch(err => console.error("Expansion failed", err));
-                })
-                .onNodeRightClick((node) => {
-                    // Remove (Prune)
-                    const {nodes, links} = Graph.graphData();
-                    const newNodes = nodes.filter(n => n.id !== node.id);
-                    const newLinks = links.filter(l => l.source.id !== node.id && l.target.id !== node.id);
-                    Graph.graphData({nodes: newNodes, links: newLinks});
-                }).nodeCanvasObject((node, ctx, globalScale) => {
+                .onNodeClick(expandNode)
+                .onNodeRightClick(pruneNode)
+                .nodeCanvasObject((node, ctx, globalScale) => {
                     const label = node.type;
                     const values = node.values || [];
-                    const fontSize = 12/globalScale;
+                    const fontSize = 12 / globalScale;
                     ctx.font = `${fontSize}px Sans-Serif`;
 
                     // 1. Draw Circle
@@ -129,18 +77,23 @@
                     ctx.fillStyle = getGroupColor(node);
                     ctx.fill();
 
-                    // 2. Draw Label (NodeType) above circle
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillStyle = getGroupColor(node);
-                    ctx.fillText(label, node.x, node.y - r - 2);
+                    // 2. Level of Detail: Only show text when zoomed in
+                    if (globalScale >= 0.8) {
+                        // Draw Label (NodeType) above circle
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = getGroupColor(node);
+                        ctx.fillText(label, node.x, node.y - r - 2);
+                    }
 
-                    // 3. Draw Values below circle
-                    ctx.textBaseline = 'top';
-                    ctx.fillStyle = 'black';
-                    values.forEach((val, i) => {
-                        ctx.fillText(val, node.x, node.y + r + 2 + (i * fontSize));
-                    });
+                    // 3. Level of Detail: Only show values when zoomed in further
+                    if (globalScale >= 1.2) {
+                        ctx.textBaseline = 'top';
+                        ctx.fillStyle = 'black';
+                        values.forEach((val, i) => {
+                            ctx.fillText(val, node.x, node.y + r + 2 + (i * fontSize));
+                        });
+                    }
 
                     node.__r = r; // Store radius for pointer area
                 })
@@ -171,7 +124,7 @@
                         [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
                     })));
 
-                    const relLink = { x: end.x - start.x, y: end.y - start.y };
+                    const relLink = {x: end.x - start.x, y: end.y - start.y};
 
                     const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
 
@@ -193,7 +146,7 @@
                     ctx.rotate(textAngle);
 
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.fillRect(- bckgDimensions[0] / 2, - bckgDimensions[1] / 2, ...bckgDimensions);
+                    ctx.fillRect(-bckgDimensions[0] / 2, -bckgDimensions[1] / 2, ...bckgDimensions);
 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -202,8 +155,9 @@
                     ctx.restore();
                 });
 
-            // Increase link distance
-            Graph.d3Force('link').distance(125);
+            // Physics Configuration to reduce clutter
+            Graph.d3Force('charge').strength(-400); // Stronger repulsion to push nodes apart
+            Graph.d3Force('link').distance(150);    // Longer links for breathing room
 
             // 2. Handle Search (Direct access to Graph variable!)
             searchForm.addEventListener('htmx:afterRequest', (evt) => {

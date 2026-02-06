@@ -14,11 +14,15 @@
                     <div id="settings-collapse" class="accordion-collapse collapse"
                          aria-labelledby="settings-heading" data-bs-parent="#discovery-settings-accordion">
                         <div class="accordion-body">
-                            <form th:object="${explorerSearchForm}">
+                            <form id="discovery-settings-form" th:object="${explorerSearchForm}">
                                 <div class="d-flex gap-4 align-items-center flex-wrap">
                                     <div class="d-flex align-items-center gap-2">
                                         <label class="form-label mb-0 text-nowrap">Max Results:</label>
                                         <select class="form-select" th:field="*{maxResults}" style="width: auto;" aria-label="Max Results">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
                                             <option value="5">5</option>
                                             <option value="10">10</option>
                                             <option value="25">25</option>
