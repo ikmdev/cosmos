@@ -43,7 +43,8 @@ public class DiscoveryService {
 		List<Node> nodes = new ArrayList<>();
 		List<Link> links = new ArrayList<>();
 
-		searchService.tinkarDataSearch(explorerSearchForm.query(), explorerSearchForm.maxResults(), SearchService.SortType.SEMANTIC_SCORE)
+		int maxResults = explorerSearchForm.maxResults() != null ? explorerSearchForm.maxResults() : 1;
+		searchService.tinkarDataSearch(explorerSearchForm.query(), maxResults, SearchService.SortType.SEMANTIC_SCORE)
 				.forEach(searchResult -> {
 					Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
 					if (latest.isPresent()) {

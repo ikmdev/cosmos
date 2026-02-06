@@ -18,7 +18,7 @@
                                 <div class="d-flex gap-4 align-items-center flex-wrap">
                                     <div class="d-flex align-items-center gap-2">
                                         <label class="form-label mb-0 text-nowrap">Max Results:</label>
-                                        <select class="form-select" th:field="*{maxResults}" style="width: auto;" aria-label="Max Results">
+                                        <select class="form-select" th:field="*{maxResults}" id="max-results-select" style="width: auto;" aria-label="Max Results">
                                             <option value="1">1</option>
                                             <option value="2">2</option>
                                             <option value="3">3</option>
@@ -35,12 +35,37 @@
                                         <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" id="latest-checkbox">
                                         <label class="form-check-label text-nowrap" for="latest-checkbox">Latest Version Only</label>
                                     </div>
+                                    <div class="form-check form-switch mb-0" title="Multi-select Search">
+                                        <input class="form-check-input" type="checkbox" role="switch" th:field="*{multiSelect}" id="multi-select-checkbox">
+                                        <label class="form-check-label text-nowrap" for="multi-select-checkbox">Multi-select Search</label>
+                                    </div>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+            <script>
+                (function() {
+                    const multiSelect = document.getElementById('multi-select-checkbox');
+                    const maxResults = document.getElementById('max-results-select');
+
+                    function updateState() {
+                        if (!multiSelect.checked) {
+                            maxResults.value = "1";
+                            maxResults.disabled = true;
+                        } else {
+                            maxResults.disabled = false;
+                        }
+                    }
+
+                    if (multiSelect && maxResults) {
+                        multiSelect.addEventListener('change', updateState);
+                        // Run once on load to set initial state
+                        updateState();
+                    }
+                })();
+            </script>
         </div>
     </body>
 </html>
