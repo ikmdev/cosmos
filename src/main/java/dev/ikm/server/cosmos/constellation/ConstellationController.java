@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.constellations;
+package dev.ikm.server.cosmos.constellation;
 
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
@@ -9,28 +9,28 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 @Controller
-public class ConstellationsController {
+public class ConstellationController {
 
-	Logger LOG = LoggerFactory.getLogger(ConstellationsController.class);
+	Logger LOG = LoggerFactory.getLogger(ConstellationController.class);
 
 	private void addSharedModelAttributes(Model model) {
-		model.addAttribute("activePage", "constellations");
-		model.addAttribute("titleDisplayName", "Constellations");
+		model.addAttribute("activePage", "constellation");
+		model.addAttribute("titleDisplayName", "Constellation");
 		model.addAttribute("footerText", "Mapping the stars of knowledge");
 	}
 
-	@GetMapping("/constellations")
+	@GetMapping("/constellation")
 	public String getKnowledge(Model model) {
 		addSharedModelAttributes(model);
-		return "constellations";
+		return "constellation";
 	}
 
 	@HxRequest
-	@GetMapping("/constellations")
+	@GetMapping("/constellation")
 	public FragmentsRendering getKnowledgeWithFragments(Model model) {
 		addSharedModelAttributes(model);
 		return FragmentsRendering
-				.with("constellations :: main-content")
+				.with("constellation :: main-content")
 				.fragment("fragments/layout/title :: title-content")
 				.fragment("fragments/layout/navigation :: navigation-content")
 				.fragment("fragments/layout/footer :: footer-content")

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<head>
+    <title>Constellation Table Row</title>
+</head>
+<body>
+<header></header>
+<main>
+    <table>
+        <!-- Adapter: Bridges the controller's 'newScope' model to the generic 'scope-row' fragment -->
+        <th:block th:fragment="new-scope-row">
+            <tr th:replace="~{:: scope-row(scope=${newScope})}"></tr>
+        </th:block>
+
+        <!-- Reusable Row Fragment -->
+        <!--/*@thymesVar id="id" type="dev.ikm.server.cosmos.scope.Scope"*/-->
+        <tr th:fragment="scope-row(scope)" th:id="${'scope-' + scope.id()}">
+            <td th:text="${scope.name()}"></td>
+            <td th:text="${scope.stampCoordinate().name()}"></td>
+            <td th:text="${scope.languageCoordinate().name()}"></td>
+            <td th:text="${scope.navigationCoordinate().name()}"></td>
+            <td class="text-center">
+                <button class="btn btn-danger btn-sm"
+                        th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
+                        th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML"><i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </table>
+</main>
+</body>
+</html>
