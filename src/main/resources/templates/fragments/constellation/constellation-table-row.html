@@ -7,22 +7,20 @@
 <header></header>
 <main>
     <table>
-        <!-- Adapter: Bridges the controller's 'newScope' model to the generic 'scope-row' fragment -->
-        <th:block th:fragment="new-scope-row">
-            <tr th:replace="~{:: scope-row(scope=${newScope})}"></tr>
+        <th:block th:fragment="new-constellation-row">
+            <tr th:replace="~{:: constellation-row(constellation=${newConstellation})}"></tr>
         </th:block>
 
-        <!-- Reusable Row Fragment -->
-        <!--/*@thymesVar id="id" type="dev.ikm.server.cosmos.scope.Scope"*/-->
-        <tr th:fragment="scope-row(scope)" th:id="${'scope-' + scope.id()}">
-            <td th:text="${scope.name()}"></td>
-            <td th:text="${scope.stampCoordinate().name()}"></td>
-            <td th:text="${scope.languageCoordinate().name()}"></td>
-            <td th:text="${scope.navigationCoordinate().name()}"></td>
+        <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id()}">
+            <td th:text="${constellation.name()}"></td>
+            <td th:text="${constellation.created()}"></td>
+            <td th:text="${constellation.processed()}"></td>
+            <td th:text="${constellation.duration()}"></td>
             <td class="text-center">
+                <button class="btn btn-primary btn-sm me-2"><i class="bi bi-arrow-clockwise"></i>
+                </button>
                 <button class="btn btn-danger btn-sm"
-                        th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
-                        th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
+                        th:attr="hx-delete=@{/constellation/{id}(id=${constellation.id()})}"
                         hx-target="closest tr"
                         hx-swap="outerHTML"><i class="bi bi-trash"></i>
                 </button>

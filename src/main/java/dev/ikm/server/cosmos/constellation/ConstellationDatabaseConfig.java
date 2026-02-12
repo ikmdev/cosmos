@@ -1,9 +1,5 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.api.coordinate.Language;
-import dev.ikm.server.cosmos.api.coordinate.Navigation;
-import dev.ikm.server.cosmos.api.coordinate.Stamp;
-import dev.ikm.server.cosmos.scope.ScopeDatabaseConfig;
 import dev.ikm.server.cosmos.scope.ScopeEntity;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -18,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
@@ -72,7 +67,7 @@ public class ConstellationDatabaseConfig {
 	}
 
 	@Bean
-	public ConcurrentMap<UUID, ScopeEntity> getConstellationDB() {
+	public ConcurrentMap<UUID, ConstellationEntity> getConstellationDB() {
 		return database
 				.hashMap(name, Serializer.UUID, Serializer.JAVA)
 				.createOrOpen();

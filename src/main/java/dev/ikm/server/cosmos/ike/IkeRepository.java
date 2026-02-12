@@ -20,6 +20,7 @@ import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import dev.ikm.tinkar.terms.State;
 import dev.ikm.tinkar.terms.TinkarTermV2;
+import org.eclipse.collections.api.block.procedure.primitive.IntProcedure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.IntConsumer;
 
 @Repository
 public class IkeRepository {
@@ -291,4 +293,23 @@ public class IkeRepository {
 		);
 		return acceptabilityId;
 	}
+
+
+	public void forEachConcept(IntProcedure nidProcedure) {
+		ikeDatabaseConfig.getPrimitiveDataService().forEachConceptNid(nidProcedure);
+	}
+
+	public void forEachSemantic(IntProcedure nidProcedure) {
+		ikeDatabaseConfig.getPrimitiveDataService().forEachSemanticNid(nidProcedure);
+	}
+
+	public void forEachPattern(IntProcedure nidProcedure) {
+		ikeDatabaseConfig.getPrimitiveDataService().forEachPatternNid(nidProcedure);
+	}
+
+	public void forEachSTAMP(IntProcedure nidProcedure) {
+		ikeDatabaseConfig.getPrimitiveDataService().forEachStampNid(nidProcedure);
+	}
+
+
 }

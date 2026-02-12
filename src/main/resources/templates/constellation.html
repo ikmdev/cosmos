@@ -23,10 +23,34 @@
                         </h2>
                         <div id="createConstellationCollapse" class="accordion-collapse collapse"
                              data-bs-parent="#createConstellationAccordion">
-<!--                            <div class="accordion-body">-->
-<!--                                <th:block th:replace="~{fragments/constellation/constellation-form :: constellation-form}"></th:block>-->
-<!--                            </div>-->
+                            <div class="accordion-body">
+                                <th:block th:replace="~{fragments/constellation/constellation-form :: constellation-form}"></th:block>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3 mb-3" th:if="${not #lists.isEmpty(constellations)}">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped table-hover">
+                            <thead class="text-center">
+                            <tr>
+                                <th>Name</th>
+                                <th>Created</th>
+                                <th>Processed</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="constellation-table-body">
+                            <th:block th:each="individualConstellation : ${constellations}">
+                                <tr th:replace="~{fragments/constellation/constellation-table-row :: constellation-row(constellation=${individualConstellation})}"></tr>
+                            </th:block>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
