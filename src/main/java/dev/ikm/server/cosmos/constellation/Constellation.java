@@ -7,5 +7,6 @@ public record Constellation(
 		String name,
 		String created,
 		long processed,
-		String duration) {
+		String duration,
+		boolean isCompleted) {
 }

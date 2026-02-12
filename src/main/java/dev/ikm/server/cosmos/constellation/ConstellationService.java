@@ -34,7 +34,7 @@ public class ConstellationService {
 
 	public Constellation saveNewConstellation(ConstellationForm constellationForm) {
 		UUID id = UUID.randomUUID();
-		Instant creation = Instant.now();
+		Instant created = Instant.now();
 		//TODO: need to make these more "fetchable", that way it's not a long delay on the UI side
 		//	There's a log on startup that the provider must give acccess too
 		long concepts = 100;
@@ -45,16 +45,11 @@ public class ConstellationService {
 		ConstellationEntity constellationEntity = new ConstellationEntity(
 				id,
 				constellationForm.name(),
-				concepts,
-				semantics,
-				patterns,
-				total,
 				0,
-				creation,
-				null,
-				null,
-				false
-		);
+				0,
+				0,
+				created,
+				null);
 		constellationRepository.createConstellation(constellationEntity);
 
 		return new Constellation(
@@ -62,7 +57,8 @@ public class ConstellationService {
 				constellationForm.name(),
 				formatter.format(Instant.now()),
 				0,
-				"00:00:00");
+				"00:00:00",
+				false);
 	}
 
 	public List<Constellation> retrieveAllConstellations() {
@@ -71,9 +67,10 @@ public class ConstellationService {
 						new Constellation(
 								entity.id(),
 								entity.name(),
-								formatter.format(entity.creation()),
+								formatter.format(entity.created()),
 								entity.total(),
-								"00:00:00"))
+								"00:00:00",
+								false))
 				.toList();
 	}
 

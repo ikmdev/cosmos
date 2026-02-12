@@ -20,12 +20,23 @@
             <td th:text="${scope.languageCoordinate().name()}"></td>
             <td th:text="${scope.navigationCoordinate().name()}"></td>
             <td class="text-center">
-                <button class="btn btn-danger btn-sm"
-                        th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
-                        th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
-                        hx-target="closest tr"
-                        hx-swap="outerHTML"><i class="bi bi-trash"></i>
-                </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            aria-label="Actions">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button class="dropdown-item text-danger"
+                                    th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
+                                    th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
+                                    hx-target="closest tr"
+                                    hx-swap="outerHTML">
+                                <i class="bi bi-trash me-2"></i>Delete
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </td>
         </tr>
     </table>
