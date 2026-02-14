@@ -1,5 +1,6 @@
 package dev.ikm.server.cosmos.observatory;
 
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import jakarta.servlet.http.Cookie;
@@ -26,52 +27,55 @@ public class ObservatoryController {
 
 	private final CoordinateService coordinateService;
 	private final ObservatoryService observatoryService;
+	private final CalculatorService calculatorService;
 
 
 	@Autowired
-	public ObservatoryController(CoordinateService coordinateService, ObservatoryService observatoryService) {
+	public ObservatoryController(CoordinateService coordinateService, ObservatoryService observatoryService, CalculatorService calculatorService) {
 		this.coordinateService = coordinateService;
 		this.observatoryService = observatoryService;
+		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
 		model.addAttribute("activePage", "observatory");
 		model.addAttribute("titleDisplayName", "Observatory");
 		model.addAttribute("footerText", "Configuring your cosmic viewpoint");
-	}
-
-	@GetMapping("/observatory")
-	public String getObservatory(Model model) {
-		addSharedModelAttributes(model);
-
-		//Add to the model the enumerations for Stamp, Language, and Navigation coordinates
-		ObservatoryForm observatoryForm = new ObservatoryForm(
+		model.addAttribute("observatoryForm", new ObservatoryForm(
 				"",
 				coordinateService.stampCoordinates(),
 				coordinateService.languageCoordinates(),
 				coordinateService.navigationCoordinates(),
+				observatoryService.retrieveModules(),
 				null,
 				null,
-				null);
-		model.addAttribute("observatoryForm", observatoryForm);
+				null,
+				null));
+
+	}
+
+	@GetMapping("/observatory")
+	public String getObservatory(
+			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
+			Model model) {
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
+		}
+
+		addSharedModelAttributes(model);
+
 		return "observatory";
 	}
 
 	@HxRequest
 	@GetMapping("/observatory")
-	public FragmentsRendering getObservatoryWithFragments(Model model) {
+	public FragmentsRendering getObservatoryWithFragments(
+			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
+			Model model) {
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
+		}
 		addSharedModelAttributes(model);
-
-		//Add to the model the enumerations for Stamp, Language, and Navigation coordinates
-		ObservatoryForm observatoryForm = new ObservatoryForm(
-				"",
-				coordinateService.stampCoordinates(),
-				coordinateService.languageCoordinates(),
-				coordinateService.navigationCoordinates(),
-				null,
-				null,
-				null);
-		model.addAttribute("observatoryForm", observatoryForm);
 		return FragmentsRendering
 				.with("observatory :: main-content")
 				.fragment("fragments/layout/title :: title-content")
@@ -82,7 +86,14 @@ public class ObservatoryController {
 
 	@HxRequest
 	@PostMapping("/observatory")
-	public FragmentsRendering postObservatory(@ModelAttribute("observatoryForm") ObservatoryForm observatoryForm, Model model) {
+	public FragmentsRendering postObservatory(
+			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
+			@ModelAttribute("observatoryForm") ObservatoryForm observatoryForm,
+			Model model) {
+
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
+		}
 		//Create a new Observatory
 		Observatory newObservatory = observatoryService.saveNewObservatory(
 				observatoryForm.name(),

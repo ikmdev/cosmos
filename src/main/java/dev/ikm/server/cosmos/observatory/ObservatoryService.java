@@ -1,11 +1,14 @@
 
 package dev.ikm.server.cosmos.observatory;
 
+import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
 import dev.ikm.server.cosmos.api.coordinate.Coordinate;
 import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
 import dev.ikm.server.cosmos.api.coordinate.Language;
 import dev.ikm.server.cosmos.api.coordinate.Navigation;
 import dev.ikm.server.cosmos.api.coordinate.Stamp;
+import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.tinkar.common.id.PublicId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +22,15 @@ public class ObservatoryService {
 
 	private final ObservatoryRepository observatoryRepository;
 	private final CoordinateService coordinateService;
+	private final CalculatorService calculatorService;
+	private final IkeRepository ikeRepository;
 
 	@Autowired
-	public ObservatoryService(ObservatoryRepository observatoryRepository, CoordinateService coordinateService) {
+	public ObservatoryService(ObservatoryRepository observatoryRepository, CoordinateService coordinateService, CalculatorService calculatorService, IkeRepository ikeRepository) {
 		this.observatoryRepository = observatoryRepository;
 		this.coordinateService = coordinateService;
+		this.calculatorService = calculatorService;
+		this.ikeRepository = ikeRepository;
 	}
 
 	public Observatory saveNewObservatory(String name,
@@ -78,5 +85,17 @@ public class ObservatoryService {
 				coordinateService.languageCoordinate(observatory.languageCoordinate().id()).get(),
 				coordinateService.navigationCoordinate(observatory.navigationCoordinate().id()).get()
 		));
+	}
+
+	public List<ModuleConcept> retrieveModules() {
+		List<PublicId> publicIds = ikeRepository.findAllModules();
+		return publicIds.stream()
+				.map(publicId -> {
+					return new ModuleConcept(
+							ikeRepository.getIds(publicId),
+							calculatorService.calculateText(publicId)
+					);
+				})
+				.toList();
 	}
 }

@@ -28,6 +28,7 @@
                     th:text="${stampCoordinate.name()}"></option>
         </select>
     </div>
+
     <div class="mb-3">
         <label for="languageSelect">Language</label>
         <select th:field="*{selectedLanguageCoordinateId}" class="form-select"
@@ -46,6 +47,16 @@
                     th:each="navigationCoordinate : ${observatoryForm.navigationCoordinates()}"
                     th:value="${#strings.listJoin(navigationCoordinate.id(), ',')}"
                     th:text="${navigationCoordinate.name()}"></option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="moduleSelect">Modules</label>
+        <select th:field="*{selectedModules}" class="form-select" id="moduleSelect" multiple
+                aria-label="Multiple select for Modules">
+            <option
+                    th:each="module : ${observatoryForm.modules()}"
+                    th:value="${#strings.listJoin(module.id(), ',')}"
+                    th:text="${module.name()}"></option>
         </select>
     </div>
     <button type="submit" class="btn btn-primary">Create</button>

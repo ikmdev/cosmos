@@ -16,6 +16,7 @@ import dev.ikm.tinkar.entity.SemanticEntity;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.StampEntity;
 import dev.ikm.tinkar.entity.StampEntityVersion;
+import dev.ikm.tinkar.terms.ConceptFacade;
 import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import dev.ikm.tinkar.terms.State;
@@ -28,9 +29,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
@@ -292,6 +295,22 @@ public class IkeRepository {
 				}
 		);
 		return acceptabilityId;
+	}
+
+	public List<PublicId> findAllModules() {
+		Set<Integer> moduleNids = new HashSet<>();
+		ikeDatabaseConfig.getPrimitiveDataService().forEachStampNid(stampNid -> {
+			Latest<StampEntityVersion> latest = calculatorService.getStampCalculator().latest(stampNid);
+			if (latest.isPresent()) {
+				moduleNids.add(latest.get().module().nid());
+			}
+		});
+		return moduleNids.stream()
+				.map(moduleNid -> {
+					Entity entity = Entity.getFast(moduleNid);
+					return entity.publicId();
+				})
+				.toList();
 	}
 
 

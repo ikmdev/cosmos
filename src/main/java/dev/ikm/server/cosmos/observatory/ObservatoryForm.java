@@ -10,8 +10,10 @@ public record ObservatoryForm(
 		List<Coordinate> stampCoordinates,
 		List<Coordinate> languageCoordinates,
 		List<Coordinate> navigationCoordinates,
+		List<ModuleConcept> modules,
 		List<UUID> selectedStampCoordinateId,
 		List<UUID> selectedLanguageCoordinateId,
-		List<UUID> selectedNavigationCoordinateId
+		List<UUID> selectedNavigationCoordinateId,
+		List<List<UUID>> selectedModules
 ) {
 }
