@@ -1,11 +1,11 @@
-package dev.ikm.server.cosmos.scope;
+package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.api.coordinate.Coordinate;
 
 import java.util.List;
 import java.util.UUID;
 
-public record ScopeForm(
+public record ObservatoryForm(
 		String name,
 		List<Coordinate> stampCoordinates,
 		List<Coordinate> languageCoordinates,

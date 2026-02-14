@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.scope;
+package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.api.coordinate.Language;
 import dev.ikm.server.cosmos.api.coordinate.Navigation;
@@ -21,16 +21,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
 @Configuration
-@ConfigurationProperties(prefix = "cosmos.scope.database")
-public class ScopeDatabaseConfig {
+@ConfigurationProperties(prefix = "cosmos.observatory.database")
+public class ObservatoryDatabaseConfig {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ScopeDatabaseConfig.class);
-	public static final UUID DEFAULT_SCOPE_ID = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
+	private static final Logger LOG = LoggerFactory.getLogger(ObservatoryDatabaseConfig.class);
+	public static final UUID DEFAULT_OBSERVATORY_ID = UUID.fromString("312b2c57-6882-452c-bec4-966ed1af04d8");
 
 	private DB database;
 	private File directory;
 	private String name;
-	private ConcurrentMap<UUID, ScopeEntity> scopeDB;
+	private ConcurrentMap<UUID, ObservatoryEntity> observatoryDB;
 
 	public File getDirectory() {
 		return directory;
@@ -58,20 +58,20 @@ public class ScopeDatabaseConfig {
 					.make();
 
 			//Create Default Scope
-			ConcurrentMap<UUID, ScopeEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
-			if (!dbMap.containsKey(DEFAULT_SCOPE_ID)) {
-				dbMap.put(DEFAULT_SCOPE_ID, new ScopeEntity(
-						DEFAULT_SCOPE_ID,
+			ConcurrentMap<UUID, ObservatoryEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
+			if (!dbMap.containsKey(DEFAULT_OBSERVATORY_ID)) {
+				dbMap.put(DEFAULT_OBSERVATORY_ID, new ObservatoryEntity(
+						DEFAULT_OBSERVATORY_ID,
 						Instant.now(),
-						"Default Scope",
+						"Default Observatory",
 						Stamp.DEV_LATEST,
 						Language.US_ENG_REG,
 						Navigation.INFERRED));
 			}
 
-			LOG.info("Scope database initialized");
+			LOG.info("Observatory database initialized");
 		} else {
-			throw new RuntimeException("Scope database directory does not exist");
+			throw new RuntimeException("Observatory database directory does not exist");
 		}
 	}
 
@@ -83,7 +83,7 @@ public class ScopeDatabaseConfig {
 	}
 
 	@Bean
-	public ConcurrentMap<UUID, ScopeEntity> getScopeDB() {
+	public ConcurrentMap<UUID, ObservatoryEntity> getObservatoryDB() {
 		return database
 				.hashMap(name, Serializer.UUID, Serializer.JAVA)
 				.createOrOpen();

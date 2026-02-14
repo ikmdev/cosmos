@@ -25,12 +25,12 @@
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'scope' ? 'active' : ''}"
-                               href="/context"
-                               hx-get="/scope"
+                               th:classappend="${activePage == 'observatory' ? 'active' : ''}"
+                               href="/observatory"
+                               hx-get="/observatory"
                                hx-target="#main-content"
                                hx-swap="outerHTML"
-                               hx-push-url="true">Scope</a>
+                               hx-push-url="true">Observatory</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
@@ -90,21 +90,21 @@
                     <ul class="navbar-nav ms-auto">
                         <div data-bs-theme="dark">
                             <li class="nav-item dropstart">
-                                <div th:fragment="scopeSelector" class="dropdown" id="scopeSelector" hx-swap-oob="true">
+                                <div th:fragment="observatorySelector" class="dropdown" id="observatorySelector" hx-swap-oob="true">
                                     <button class="btn btn-secondary dropdown-toggle" type="button"
                                             data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span th:if="${activeScopeId == null}">Select Scope</span>
-                                        <span th:each="scope : ${scopes}"
-                                              th:if="${activeScopeId != null and scope.id() == activeScopeId}"
-                                              th:text="${scope.name()}" th:remove="tag"></span>
+                                        <span th:if="${activeObservatoryId == null}">Select Observatory</span>
+                                        <span th:each="observatory : ${observatories}"
+                                              th:if="${activeObservatoryId != null and observatory.id() == activeObservatoryId}"
+                                              th:text="${observatory.name()}" th:remove="tag"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="#"
-                                               th:each="scope : ${scopes}"
-                                               th:text="${scope.name()}"
-                                               th:hx-post="@{/scope/selected(scopeId=${scope.id()})}"
-                                               hx-target="#scopeSelector"
-                                               hx-swap="outerHTML">Scope Name</a></li>
+                                               th:each="observatory : ${observatories}"
+                                               th:text="${observatory.name()}"
+                                               th:hx-post="@{/observatory/selected(observatoryId=${observatory.id()})}"
+                                               hx-target="#observatorySelector"
+                                               hx-swap="outerHTML">Observatory Name</a></li>
                                     </ul>
                                 </div>
                             </li>

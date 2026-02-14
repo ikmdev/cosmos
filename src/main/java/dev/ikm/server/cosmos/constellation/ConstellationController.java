@@ -66,7 +66,10 @@ public class ConstellationController {
 		if (activeScopeId != null) {
 			calculatorService.setScope(activeScopeId);
 		}
-		Constellation newConstellation = constellationService.saveNewConstellation(constellationForm);
+		// This method should save the constellation with an initial status like "QUEUED"
+		Constellation newConstellation = constellationService.formConstellation(constellationForm);
+
+		// The new row will immediately reflect the "QUEUED" status
 		model.addAttribute("newConstellation", newConstellation);
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: new-constellation-row")
@@ -90,7 +93,7 @@ public class ConstellationController {
 				.with("fragments/constellation/constellation-table-row :: constellation-row")
 				.build();
 	}
-	
+
 	@HxRequest
 	@PostMapping("/constellation/{id}/chart")
 	public FragmentsRendering processConstellation(@PathVariable("id") UUID id, Model model) {

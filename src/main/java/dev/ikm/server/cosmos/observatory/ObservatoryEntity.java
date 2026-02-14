@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.scope;
+package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.api.coordinate.Language;
 import dev.ikm.server.cosmos.api.coordinate.Navigation;
@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
-public record ScopeEntity(
+public record ObservatoryEntity(
 		UUID id,
 		Instant modified,
 		String name,

@@ -39,5 +39,4 @@ public record ConstellationEntity(
 	public long total() {
 		return concepts + semantics + patterns;
 	}
-
 }

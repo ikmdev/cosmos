@@ -1,10 +1,6 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
-import dev.ikm.server.cosmos.ike.IkeRepository;
-import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,24 +15,16 @@ public class ConstellationService {
 
 	private final ConstellationRepository constellationRepository;
 	private final ChartingService chartingService;
-	private final CalculatorService calculatorService;
-	private final IkeRepository ikeRepository;
-	private final Neo4jClient neo4jClient;
-
-
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 			.withZone(ZoneId.systemDefault());
 
 	@Autowired
-	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService, CalculatorService calculatorService, IkeRepository ikeRepository, Neo4jClient neo4jClient) {
+	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService) {
 		this.constellationRepository = constellationRepository;
 		this.chartingService = chartingService;
-		this.calculatorService = calculatorService;
-		this.ikeRepository = ikeRepository;
-		this.neo4jClient = neo4jClient;
 	}
 
-	public Constellation saveNewConstellation(ConstellationForm constellationForm) {
+	public Constellation formConstellation(ConstellationForm constellationForm) {
 		UUID id = UUID.randomUUID();
 		Instant created = Instant.now();
 
@@ -93,18 +81,12 @@ public class ConstellationService {
 	}
 
 	public Constellation startCharting(UUID id) {
-		// 1. Immediately update the phase to CHARTING so the UI reflects the change.
-		constellationRepository.updatePhase(id, Phase.CHARTING);
-
-		// 2. Publish the task to the asynchronous ChartingService.
-		// This call returns immediately.
-		chartingService.beginChartingProcess(id);
-
-		// 3. Return the current status. The web request completes instantly,
-		// while the task runs in the background.
+		// Synchronously update the phase to give the user immediate feedback.
+		constellationRepository.updatePhase(id, Phase.QUEUED);
+		chartingService.submitChartingJob(id);
 		return getConstellationStatus(id);
 	}
- 
+
 	private String formatDuration(Duration duration) {
 		if (duration == null) {
 			return "00:00:00";

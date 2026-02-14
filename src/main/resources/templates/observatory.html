@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layout}">
 <head>
-    <title>Scope</title>
+    <title>Observatory</title>
 </head>
 <body>
 <header>
@@ -13,18 +13,18 @@
     <div id="main-content" th:fragment="main-content" layout:fragment="main-content">
         <div class="row mt-3 mb-3">
             <div class="col-md-12">
-                <div class="accordion" id="createScopeAccordion">
+                <div class="accordion" id="createObservatoryAccordion">
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#createScopeCollapse">
-                                Create a new Scope
+                                    data-bs-target="#createObservatoryCollapse">
+                                Create a new Observatory
                             </button>
                         </h2>
-                        <div id="createScopeCollapse" class="accordion-collapse collapse"
-                             data-bs-parent="#createScopeAccordion">
+                        <div id="createObservatoryCollapse" class="accordion-collapse collapse"
+                             data-bs-parent="#createObservatoryAccordion">
                             <div class="accordion-body">
-                                <th:block th:replace="~{fragments/scope/scope-form :: scope-form}"></th:block>
+                                <th:block th:replace="~{fragments/observatory/observatory-form :: observatory-form}"></th:block>
                             </div>
                         </div>
                     </div>
@@ -45,9 +45,9 @@
                                 <th>Actions</th>
                             </tr>
                             </thead>
-                            <tbody id="scopes-table-body">
-                            <th:block th:each="individualScope : ${scopes}">
-                                <tr th:replace="~{fragments/scope/scope-table-row :: scope-row(scope=${individualScope})}"></tr>
+                            <tbody id="observatories-table-body">
+                            <th:block th:each="individualObservatory : ${observatories}">
+                                <tr th:replace="~{fragments/observatory/observatory-table-row :: observatory-row(observatory=${individualObservatory})}"></tr>
                             </th:block>
                             </tbody>
                         </table>

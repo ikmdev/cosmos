@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<form th:fragment="scope-form"
+<form th:fragment="observatory-form"
       x-data
       @htmx:after-request="if($event.detail.successful) $el.reset()"
       action="#"
-      th:action="@{/scope}"
-      th:object="${scopeForm}"
+      th:action="@{/observatory}"
+      th:object="${observatoryForm}"
       method="post"
-      hx-post="/scope"
-      hx-target="#scopes-table-body"
+      hx-post="/observatory"
+      hx-target="#observatories-table-body"
       hx-swap="afterbegin"
       hx-trigger="submit">
     <div class="mb-3">
@@ -23,7 +23,7 @@
                 id="stampSelect"
                 aria-label="Floating label select example">
             <option
-                    th:each="stampCoordinate : ${scopeForm.stampCoordinates()}"
+                    th:each="stampCoordinate : ${observatoryForm.stampCoordinates()}"
                     th:value="${#strings.listJoin(stampCoordinate.id(), ',')}"
                     th:text="${stampCoordinate.name()}"></option>
         </select>
@@ -33,7 +33,7 @@
         <select th:field="*{selectedLanguageCoordinateId}" class="form-select"
                 id="languageSelect">
             <option
-                    th:each="languageCoordinate : ${scopeForm.languageCoordinates()}"
+                    th:each="languageCoordinate : ${observatoryForm.languageCoordinates()}"
                     th:value="${#strings.listJoin(languageCoordinate.id(), ',')}"
                     th:text="${languageCoordinate.name()}"></option>
         </select>
@@ -43,7 +43,7 @@
         <select th:field="*{selectedNavigationCoordinateId}" class="form-select"
                 id="navigationSelect">
             <option
-                    th:each="navigationCoordinate : ${scopeForm.navigationCoordinates()}"
+                    th:each="navigationCoordinate : ${observatoryForm.navigationCoordinates()}"
                     th:value="${#strings.listJoin(navigationCoordinate.id(), ',')}"
                     th:text="${navigationCoordinate.name()}"></option>
         </select>

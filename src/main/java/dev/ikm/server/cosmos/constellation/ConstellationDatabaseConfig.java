@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.scope.ScopeEntity;
+import dev.ikm.server.cosmos.observatory.ObservatoryEntity;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.mapdb.DB;
@@ -26,7 +26,7 @@ public class ConstellationDatabaseConfig {
 	private DB database;
 	private File directory;
 	private String name;
-	private ConcurrentMap<UUID, ScopeEntity> scopeDB;
+	private ConcurrentMap<UUID, ObservatoryEntity> scopeDB;
 
 	public File getDirectory() {
 		return directory;

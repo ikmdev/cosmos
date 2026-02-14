@@ -11,6 +11,7 @@ public enum Phase {
 	 * Corresponds to the creation of the Neo4j database.
 	 */
 	FORMING("Forming"),
+	QUEUED("Queued"),
 	/**
 	 * The active processing phase where the constellation is being built and populated,
 	 * like charting the stars in the sky.

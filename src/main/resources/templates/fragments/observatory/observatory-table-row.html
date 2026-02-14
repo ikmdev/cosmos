@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <head>
-    <title>Scope Table Row</title>
+    <title>Observatory Table Row</title>
 </head>
 <body>
 <header></header>
 <main>
     <table>
-        <!-- Adapter: Bridges the controller's 'newScope' model to the generic 'scope-row' fragment -->
-        <th:block th:fragment="new-scope-row">
-            <tr th:replace="~{:: scope-row(scope=${newScope})}"></tr>
+        <th:block th:fragment="new-observatory-row">
+            <tr th:replace="~{:: observatory-row(observatory=${newObservatory})}"></tr>
         </th:block>
 
-        <!-- Reusable Row Fragment -->
-        <!--/*@thymesVar id="id" type="dev.ikm.server.cosmos.scope.Scope"*/-->
-        <tr th:fragment="scope-row(scope)" th:id="${'scope-' + scope.id()}">
-            <td th:text="${scope.name()}"></td>
-            <td th:text="${scope.stampCoordinate().name()}"></td>
-            <td th:text="${scope.languageCoordinate().name()}"></td>
-            <td th:text="${scope.navigationCoordinate().name()}"></td>
+        <tr th:fragment="observatory-row(observatory)" th:id="${'observatory-' + observatory.id()}">
+            <td th:text="${observatory.name()}"></td>
+            <td th:text="${observatory.stampCoordinate().name()}"></td>
+            <td th:text="${observatory.languageCoordinate().name()}"></td>
+            <td th:text="${observatory.navigationCoordinate().name()}"></td>
             <td class="text-center">
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -28,8 +25,8 @@
                     <ul class="dropdown-menu">
                         <li>
                             <button class="dropdown-item text-danger"
-                                    th:disabled="${scope.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
-                                    th:attr="hx-delete=@{/scope/{id}(id=${scope.id()})}"
+                                    th:disabled="${observatory.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
+                                    th:attr="hx-delete=@{/observatory/{id}(id=${observatory.id()})}"
                                     hx-target="closest tr"
                                     hx-swap="outerHTML">
                                 <i class="bi bi-trash me-2"></i>Delete

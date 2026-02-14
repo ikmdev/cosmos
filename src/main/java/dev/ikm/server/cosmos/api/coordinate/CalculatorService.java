@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.api.coordinate;
 
 import dev.ikm.server.cosmos.ike.IkeRepository;
-import dev.ikm.server.cosmos.scope.Scope;
-import dev.ikm.server.cosmos.scope.ScopeService;
+import dev.ikm.server.cosmos.observatory.Observatory;
+import dev.ikm.server.cosmos.observatory.ObservatoryService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
@@ -28,21 +28,21 @@ import java.util.UUID;
 @RequestScope
 public class CalculatorService {
 
-	private final ScopeService scopeService;
+	private final ObservatoryService observatoryService;
 	private final IkeRepository ikeRepository;
 
 	private StampCoordinateRecord stampCoordinateRecord;
 	private LanguageCoordinateRecord languageCoordinateRecord;
 	private NavigationCoordinateRecord navigationCoordinateRecord;
 
-	public CalculatorService(ScopeService scopeService, IkeRepository ikeRepository) {
-		this.scopeService = scopeService;
+	public CalculatorService(ObservatoryService observatoryService, IkeRepository ikeRepository) {
+		this.observatoryService = observatoryService;
 		this.ikeRepository = ikeRepository;
 	}
 
 	public void setScope(UUID scopeId) {
-		Scope scope = scopeService.retrieveScope(scopeId);
-		setScope(scope.stampCoordinate().id().getFirst(), scope.languageCoordinate().id().getFirst(), scope.navigationCoordinate().id().getFirst());
+		Observatory observatory = observatoryService.retrieveObservatory(scopeId);
+		setScope(observatory.stampCoordinate().id().getFirst(), observatory.languageCoordinate().id().getFirst(), observatory.navigationCoordinate().id().getFirst());
 	}
 
 	public void setScope(UUID stampId, UUID languageId, UUID navigationId) {

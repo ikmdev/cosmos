@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.global;
 
-import dev.ikm.server.cosmos.scope.Scope;
-import dev.ikm.server.cosmos.scope.ScopeDatabaseConfig;
-import dev.ikm.server.cosmos.scope.ScopeService;
+import dev.ikm.server.cosmos.observatory.Observatory;
+import dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig;
+import dev.ikm.server.cosmos.observatory.ObservatoryService;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,25 +13,25 @@ import java.util.UUID;
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
-	private final ScopeService scopeService;
+	private final ObservatoryService observatoryService;
 
-	public GlobalControllerAdvice(ScopeService scopeService) {
-		this.scopeService = scopeService;
+	public GlobalControllerAdvice(ObservatoryService observatoryService) {
+		this.observatoryService = observatoryService;
 	}
 
-	@ModelAttribute("scopes")
-	public List<Scope> addScopesToModel() {
-		return scopeService.retrieveAllScopes();
+	@ModelAttribute("observatories")
+	public List<Observatory> addObservatoriesToModel() {
+		return observatoryService.retrieveAllObservatories();
 	}
 
-	@ModelAttribute("activeScopeId")
-	public UUID addScopeSelectionToModel(
-			@CookieValue(name = "cosmos-scope-id", required = false) String scopeSelectionId) {
-		if (scopeSelectionId == null) {
-			return ScopeDatabaseConfig.DEFAULT_SCOPE_ID;
+	@ModelAttribute("activeObservatoryId")
+	public UUID addObservatorySelectionToModel(
+			@CookieValue(name = "cosmos-observatory-id", required = false) String observatorySelectionId) {
+		if (observatorySelectionId == null) {
+			return ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
 		}
 		try {
-			return UUID.fromString(scopeSelectionId);
+			return UUID.fromString(observatorySelectionId);
 		} catch (IllegalArgumentException e) {
 			return null;
 		}
