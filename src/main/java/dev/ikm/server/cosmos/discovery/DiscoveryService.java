@@ -306,6 +306,12 @@ public class DiscoveryService {
 						Link versionToFieldDefinition = new Link("", nodeId, fieldDefinitionNode.id());
 						links.add(versionToFieldDefinition);
 					});
+
+			//STAMP Chronology
+			Node stampChronology = nodeBuilder.buildStampChronology(patternEntityVersion.stamp());
+			nodes.add(stampChronology);
+			Link chronologyToStamp = new Link("", nodeId, stampChronology.id());
+			links.add(chronologyToStamp);
 		}
 
 		//Connect back to Pattern Chronology

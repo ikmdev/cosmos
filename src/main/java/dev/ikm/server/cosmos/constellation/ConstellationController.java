@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 import java.util.UUID;
@@ -74,8 +75,32 @@ public class ConstellationController {
 
 	@HxRequest
 	@DeleteMapping("/constellation/{id}")
+	@ResponseBody
 	public String deleteConstellation(@PathVariable("id") UUID id, Model model) {
 		constellationService.removeConstellation(id);
 		return "";
+	}
+
+	@HxRequest
+	@GetMapping("/constellations/status/{id}")
+	public FragmentsRendering getConstellationStatus(@PathVariable("id") UUID id, Model model) {
+		Constellation constellation = constellationService.getConstellationStatus(id);
+		model.addAttribute("constellation", constellation);
+		return FragmentsRendering
+				.with("fragments/constellation/constellation-table-row :: constellation-row")
+				.build();
+	}
+	
+	@HxRequest
+	@PostMapping("/constellation/{id}/chart")
+	public FragmentsRendering processConstellation(@PathVariable("id") UUID id, Model model) {
+		// Call the service to start the charting process and get the updated state
+		Constellation updatedConstellation = constellationService.startCharting(id);
+		model.addAttribute("constellation", updatedConstellation);
+
+		// Return the updated table row fragment, which HTMX will swap into the DOM
+		return FragmentsRendering
+				.with("fragments/constellation/constellation-table-row :: constellation-row")
+				.build();
 	}
 }

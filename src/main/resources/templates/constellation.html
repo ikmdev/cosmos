@@ -31,14 +31,14 @@
                 </div>
             </div>
         </div>
-        <div id="constellations-table" class="row mt-3 mb-3" th:classappend="${#lists.isEmpty(constellations)} ? 'd-none' : ''"
-             hx-on:htmx:after-swap="this.classList.remove('d-none')">
+        <div id="constellations-table" class="row mt-3 mb-3">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
                         <table class="table table-striped table-hover">
                             <thead class="text-center">
                             <tr>
+                                <th>Phase</th>
                                 <th>Name</th>
                                 <th>Created</th>
                                 <th>Processed</th>

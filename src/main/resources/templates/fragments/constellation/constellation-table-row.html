@@ -12,6 +12,7 @@
         </th:block>
 
         <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id()}">
+            <td th:text="${constellation.phase()}"></td>
             <td th:text="${constellation.name()}"></td>
             <td th:text="${constellation.created()}"></td>
             <td th:text="${constellation.processed()}"></td>
@@ -29,15 +30,15 @@
                         <th:block th:if="${!constellation.isCompleted()}">
                             <li>
                                 <button class="dropdown-item"
-                                        th:attr="hx-post=@{/constellation/{id}/process(id=${constellation.id()})}"
+                                        th:attr="hx-post=@{/constellation/{id}/chart(id=${constellation.id()})}"
                                         hx-target="closest tr"
                                         hx-swap="outerHTML">
-                                    <i class="bi bi-play-fill me-2"></i>Process
+                                    <i class="bi bi-diagram-3 me-2"></i>Chart
                                 </button>
                             </li>
                             <li>
                                 <button class="dropdown-item"
-                                        th:attr="hx-get=@{/constellation/{id}(id=${constellation.id()})}"
+                                        th:attr="hx-get=@{/constellations/status/{id}(id=${constellation.id()})}"
                                         hx-target="closest tr"
                                         hx-swap="outerHTML">
                                     <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status

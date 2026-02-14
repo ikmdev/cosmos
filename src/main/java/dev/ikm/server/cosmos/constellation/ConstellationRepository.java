@@ -3,6 +3,7 @@ package dev.ikm.server.cosmos.constellation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,5 +35,30 @@ public class ConstellationRepository {
 
 	public void deleteConstellation(UUID id) {
 		constellationDatabaseConfig.getConstellationDB().remove(id);
+	}
+
+	public void updatePhase(UUID id, Phase phase) {
+		ConstellationEntity constellationEntity = readConstellation(id);
+		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(phase));
+	}
+
+	public void updateConceptCount(UUID id, long count) {
+		ConstellationEntity constellationEntity = readConstellation(id);
+		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(count, 0, 0));
+	}
+
+	public void updateSemanticsCount(UUID id, long count) {
+		ConstellationEntity constellationEntity = readConstellation(id);
+		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(0, count, 0));
+	}
+
+	public void updatePatternCount(UUID id, long count) {
+		ConstellationEntity constellationEntity = readConstellation(id);
+		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(0, 0, count));
+	}
+
+	public void updateCompleted(UUID id, Instant instant) {
+		ConstellationEntity constellationEntity = readConstellation(id);
+		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(instant));
 	}
 }

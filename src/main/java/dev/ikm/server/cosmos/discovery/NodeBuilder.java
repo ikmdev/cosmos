@@ -199,7 +199,7 @@ public class NodeBuilder {
 		int pathNid = stampEntityVersion.pathNid();
 		Entity.get(pathNid).ifPresent(entity -> values.add("Path: " + calculatorService.getLanguageCalculator().getDescriptionTextOrNid(entity)));
 
-		String id = generateVersionId(stampEntityVersion.chronology().nid(), stampEntityVersion.stampNid()); //TODO: may need to handle nid of a nid??
+		String id = generateVersionId(stampEntityVersion.chronology().nid(), stampEntityVersion.stampNid());
 		return makeNode(id, "", NodeType.STAMP_VERSION, values);
 	}
 }
