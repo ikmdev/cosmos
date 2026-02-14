@@ -1,7 +1,6 @@
 package dev.ikm.server.cosmos.constellation;
 
 import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
-import io.activej.common.collection.Try;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,15 @@ public class ChartingService {
 		LOG.info("Starting to chart constellation: {}", constellationId);
 
 		try {
-			Thread.sleep(10_000);
+
+			for (int i = 0; i < 10; i++) {
+				Thread.sleep(1_000);
+				constellationRepository.updateConceptCount(constellationId, i+2);
+				constellationRepository.updateSemanticCount(constellationId, i *10);
+				constellationRepository.updatePatternCount(constellationId, i +1);
+			}
+
+
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

@@ -47,7 +47,7 @@ public class ConstellationRepository {
 		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(count, 0, 0));
 	}
 
-	public void updateSemanticsCount(UUID id, long count) {
+	public void updateSemanticCount(UUID id, long count) {
 		ConstellationEntity constellationEntity = readConstellation(id);
 		constellationDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(0, count, 0));
 	}

@@ -26,7 +26,6 @@ public class ConstellationDatabaseConfig {
 	private DB database;
 	private File directory;
 	private String name;
-	private ConcurrentMap<UUID, ObservatoryEntity> scopeDB;
 
 	public File getDirectory() {
 		return directory;

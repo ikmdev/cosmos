@@ -60,23 +60,23 @@ public class DiscoveryController {
 	@GetMapping("/discovery/search")
 	@ResponseBody
 	public ExplorerData search(
-			@ModelAttribute("activeScopeId") UUID activeScopeId,
+			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
 			Model model) {
-		if (activeScopeId != null) {
-			calculatorService.setScope(activeScopeId);
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
 		}
 		return discoveryService.buildExplorationVisualization(explorerSearchForm);
 	}
 
 	@GetMapping("/discovery/explore")
 	@ResponseBody
-	public ExplorerData explore(@ModelAttribute("activeScopeId") UUID activeScopeId,
+	public ExplorerData explore(@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 								@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
 								@RequestParam("nodeId") String nodeId,
 								Model model) {
-		if (activeScopeId != null) {
-			calculatorService.setScope(activeScopeId);
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
 		}
 		return discoveryService.explore(nodeId, explorerSearchForm);
 	}

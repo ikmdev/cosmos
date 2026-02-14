@@ -36,7 +36,7 @@ public class StampController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setScope(stampId, langId, navId);
+		calculatorService.setObservatory(stampId, langId, navId);
 		return stampService.retrieveStampWithLatestVersion(uuid);
 	}
 

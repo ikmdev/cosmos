@@ -1,71 +1,53 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <body>
-        <div th:fragment="settings-form">
-            <div class="accordion" id="discovery-settings-accordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="settings-heading">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#settings-collapse" aria-expanded="false"
-                                aria-controls="settings-collapse">
-                            Search Settings
-                        </button>
-                    </h2>
-                    <div id="settings-collapse" class="accordion-collapse collapse"
-                         aria-labelledby="settings-heading" data-bs-parent="#discovery-settings-accordion">
-                        <div class="accordion-body">
-                            <form id="discovery-settings-form" th:object="${explorerSearchForm}">
-                                <div class="d-flex gap-4 align-items-center flex-wrap">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <label class="form-label mb-0 text-nowrap">Max Results:</label>
-                                        <select class="form-select" th:field="*{maxResults}" id="max-results-select" style="width: auto;" aria-label="Max Results">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="10">10</option>
-                                            <option value="25">25</option>
-                                            <option value="50">50</option>
-                                            <option value="75">75</option>
-                                            <option value="100">100</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-check form-switch mb-0" title="Latest Version Only">
-                                        <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" id="latest-checkbox">
-                                        <label class="form-check-label text-nowrap" for="latest-checkbox">Latest Version Only</label>
-                                    </div>
-                                    <div class="form-check form-switch mb-0" title="Multi-select Search">
-                                        <input class="form-check-input" type="checkbox" role="switch" th:field="*{multiSelect}" id="multi-select-checkbox">
-                                        <label class="form-check-label text-nowrap" for="multi-select-checkbox">Multi-select Search</label>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+    <form th:fragment="settings-form" id="discovery-settings-form" th:object="${explorerSearchForm}">
+        <div class="d-flex gap-4 align-items-center flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 text-nowrap">Max Results:</label>
+                <select class="form-select" th:field="*{maxResults}" id="max-results-select" style="width: auto;" aria-label="Max Results">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100">100</option>
+                </select>
             </div>
-            <script>
-                (function() {
-                    const multiSelect = document.getElementById('multi-select-checkbox');
-                    const maxResults = document.getElementById('max-results-select');
-
-                    function updateState() {
-                        if (!multiSelect.checked) {
-                            maxResults.value = "1";
-                            maxResults.disabled = true;
-                        } else {
-                            maxResults.disabled = false;
-                        }
-                    }
-
-                    if (multiSelect && maxResults) {
-                        multiSelect.addEventListener('change', updateState);
-                        // Run once on load to set initial state
-                        updateState();
-                    }
-                })();
-            </script>
+            <div class="form-check form-switch mb-0" title="Latest Version Only">
+                <input class="form-check-input" type="checkbox" role="switch" th:field="*{latestVersionOnly}" id="latest-checkbox">
+                <label class="form-check-label text-nowrap" for="latest-checkbox">Latest Version Only</label>
+            </div>
+            <div class="form-check form-switch mb-0" title="Multi-select Search">
+                <input class="form-check-input" type="checkbox" role="switch" th:field="*{multiSelect}" id="multi-select-checkbox">
+                <label class="form-check-label text-nowrap" for="multi-select-checkbox">Multi-select Search</label>
+            </div>
         </div>
+        <script>
+            (function() {
+                const multiSelect = document.getElementById('multi-select-checkbox');
+                const maxResults = document.getElementById('max-results-select');
+
+                function updateState() {
+                    if (!multiSelect.checked) {
+                        maxResults.value = "1";
+                        maxResults.disabled = true;
+                    } else {
+                        maxResults.disabled = false;
+                    }
+                }
+
+                if (multiSelect && maxResults) {
+                    multiSelect.addEventListener('change', updateState);
+                    // Run once on load to set initial state
+                    updateState();
+                }
+            })();
+        </script>
+    </form>
     </body>
 </html>

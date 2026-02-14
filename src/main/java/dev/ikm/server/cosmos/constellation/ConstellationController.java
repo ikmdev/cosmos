@@ -60,11 +60,11 @@ public class ConstellationController {
 	@HxRequest
 	@PostMapping("/constellation")
 	public FragmentsRendering postConstellation(
-			@ModelAttribute("activeScopeId") UUID activeScopeId,
+			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			@ModelAttribute("constellationForm") ConstellationForm constellationForm,
 			Model model) {
-		if (activeScopeId != null) {
-			calculatorService.setScope(activeScopeId);
+		if (activeObservatoryId != null) {
+			calculatorService.setObservatory(activeObservatoryId);
 		}
 		// This method should save the constellation with an initial status like "QUEUED"
 		Constellation newConstellation = constellationService.formConstellation(constellationForm);

@@ -30,7 +30,7 @@ public class PlausibilityController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setScope(stampId, langId, navId);
+		calculatorService.setObservatory(stampId, langId, navId);
 		return plausibilityService.calculateLabResultPlausibility(dob, testCode, resultValue);
 	}
 
@@ -43,7 +43,7 @@ public class PlausibilityController {
 			@RequestParam("stamp") UUID stampId,
 			@RequestParam("lang") UUID langId,
 			@RequestParam("nav") UUID navId) {
-		calculatorService.setScope(stampId, langId, navId);
+		calculatorService.setObservatory(stampId, langId, navId);
 		return plausibilityService.calculateLabDevicePlausibility(testCode, refRangeLow, refRangeHigh, unit);
 	}
 }

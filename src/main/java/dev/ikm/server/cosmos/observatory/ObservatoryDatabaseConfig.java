@@ -57,7 +57,7 @@ public class ObservatoryDatabaseConfig {
 					.fileMmapEnable()
 					.make();
 
-			//Create Default Scope
+			//Create Default Observatory
 			ConcurrentMap<UUID, ObservatoryEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
 			if (!dbMap.containsKey(DEFAULT_OBSERVATORY_ID)) {
 				dbMap.put(DEFAULT_OBSERVATORY_ID, new ObservatoryEntity(

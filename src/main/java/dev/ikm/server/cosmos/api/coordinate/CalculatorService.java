@@ -40,12 +40,12 @@ public class CalculatorService {
 		this.ikeRepository = ikeRepository;
 	}
 
-	public void setScope(UUID scopeId) {
-		Observatory observatory = observatoryService.retrieveObservatory(scopeId);
-		setScope(observatory.stampCoordinate().id().getFirst(), observatory.languageCoordinate().id().getFirst(), observatory.navigationCoordinate().id().getFirst());
+	public void setObservatory(UUID observatoryId) {
+		Observatory observatory = observatoryService.retrieveObservatory(observatoryId);
+		setObservatory(observatory.stampCoordinate().id().getFirst(), observatory.languageCoordinate().id().getFirst(), observatory.navigationCoordinate().id().getFirst());
 	}
 
-	public void setScope(UUID stampId, UUID languageId, UUID navigationId) {
+	public void setObservatory(UUID stampId, UUID languageId, UUID navigationId) {
 		this.stampCoordinateRecord = Stamp.toRecord(stampId);
 		this.languageCoordinateRecord = Language.toRecord(languageId);
 		this.navigationCoordinateRecord = Navigation.toRecord(navigationId);
