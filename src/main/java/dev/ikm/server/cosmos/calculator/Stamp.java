@@ -1,8 +1,14 @@
-package dev.ikm.server.cosmos.api.coordinate;
+package dev.ikm.server.cosmos.calculator;
 
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.ike.Id;
+import dev.ikm.tinkar.common.id.PublicId;
+import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.Coordinates;
 import dev.ikm.tinkar.coordinate.stamp.StampCoordinateRecord;
+import dev.ikm.tinkar.entity.Entity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +20,7 @@ public enum Stamp {
 	MASTER_LATEST("Latest on the Master Path", List.of(UUID.fromString("5bbcab20-dc56-4dcc-bdbc-5957ddf559e8")), Coordinates.Stamp.MasterLatest()),
 	MASTER_LATEST_ACTIVE_ONLY("Latest Active on the Master Path", List.of(UUID.fromString("4fc5f3f3-704a-44a2-88b6-7ce1b84c7422")), Coordinates.Stamp.MasterLatestActiveOnly()),;
 
+	private final Facade facade;
 	private final String name;
 	private final List<UUID> uuids;
 	private final StampCoordinateRecord record;
@@ -22,6 +29,9 @@ public enum Stamp {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
+		PublicId publicId = PublicIds.of(uuids);
+		int nid = Entity.nid(publicId);
+		this.facade = new Facade(new Id(nid, this.uuids), this.name);
 	}
 
 	public String getName() {
@@ -43,5 +53,29 @@ public enum Stamp {
 			}
 		}
 		return DEV_LATEST.getRecord();
+	}
+
+	public static Stamp fromId(Id id) {
+		for (Stamp stamp : values()) {
+			if (stamp.getConcept().id().equals(id)) {
+				return stamp;
+			}
+		}
+		throw new RuntimeException("Stamp not found");
+	}
+
+	public Facade getConcept() {
+		return this.facade;
+	}
+
+	public static List<Facade> stampConcepts() {
+		return Arrays.stream(values())
+				.map(Stamp::getConcept)
+				.toList();
+	}
+
+	public int getNid() {
+		PublicId publicId = PublicIds.of(uuids);
+		return Entity.nid(publicId);
 	}
 }

@@ -1,8 +1,14 @@
-package dev.ikm.server.cosmos.api.coordinate;
+package dev.ikm.server.cosmos.calculator;
 
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.ike.Id;
+import dev.ikm.tinkar.common.id.PublicId;
+import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.Coordinates;
 import dev.ikm.tinkar.coordinate.language.LanguageCoordinateRecord;
+import dev.ikm.tinkar.entity.Entity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +23,7 @@ public enum Language {
 	ESP_REG("Spanish Language Regular Name", List.of(UUID.fromString("7333bbe8-0857-48cd-8479-0cdbf4f8f831")), Coordinates.Language.SpanishPreferredName()),
 	ESP_FQN("Spanish Language Fully Qualified Name", List.of(UUID.fromString("c79e417c-d061-46fd-addd-de2cec751299")), Coordinates.Language.SpanishFullyQualifiedName()),;
 
+	private final Facade facade;
 	private final String name;
 	private final List<UUID> uuids;
 	private final LanguageCoordinateRecord record;
@@ -25,6 +32,9 @@ public enum Language {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
+		PublicId publicId = PublicIds.of(uuids);
+		int nid = Entity.nid(publicId);
+		this.facade = new Facade(new Id(nid, this.uuids), this.name);
 	}
 
 	public String getName() {
@@ -45,5 +55,29 @@ public enum Language {
 			}
 		}
 		return US_ENG_REG.getRecord();
+	}
+
+	public static Language fromId(Id id) {
+		for (Language language : values()) {
+			if (language.getConcept().id().equals(id)) {
+				return language;
+			}
+		}
+		throw new RuntimeException("Language not found");
+	}
+
+	public Facade getConcept() {
+		return this.facade;
+	}
+
+	public static List<Facade> languageConcepts() {
+		return Arrays.stream(values())
+				.map(Language::getConcept)
+				.toList();
+	}
+
+	public int getNid() {
+		PublicId publicId = PublicIds.of(uuids);
+		return Entity.nid(publicId);
 	}
 }

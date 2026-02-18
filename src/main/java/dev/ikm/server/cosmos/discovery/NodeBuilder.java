@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.discovery;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.tinkar.component.ChronologyService;
 import dev.ikm.tinkar.entity.ConceptEntity;
 import dev.ikm.tinkar.entity.ConceptEntityVersion;

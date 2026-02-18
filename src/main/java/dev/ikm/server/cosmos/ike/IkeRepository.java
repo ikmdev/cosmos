@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.ike;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
@@ -16,7 +16,6 @@ import dev.ikm.tinkar.entity.SemanticEntity;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.StampEntity;
 import dev.ikm.tinkar.entity.StampEntityVersion;
-import dev.ikm.tinkar.terms.ConceptFacade;
 import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import dev.ikm.tinkar.terms.State;
@@ -35,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.IntConsumer;
 
 @Repository
 public class IkeRepository {
@@ -329,6 +327,5 @@ public class IkeRepository {
 	public void forEachSTAMP(IntProcedure nidProcedure) {
 		ikeDatabaseConfig.getPrimitiveDataService().forEachStampNid(nidProcedure);
 	}
-
 
 }

@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

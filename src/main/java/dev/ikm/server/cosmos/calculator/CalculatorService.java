@@ -1,8 +1,12 @@
-package dev.ikm.server.cosmos.api.coordinate;
+package dev.ikm.server.cosmos.calculator;
 
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
-import dev.ikm.server.cosmos.observatory.Observatory;
-import dev.ikm.server.cosmos.observatory.ObservatoryService;
+import dev.ikm.server.cosmos.observatory.ObservatoryEntity;
+import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
+import dev.ikm.tinkar.common.id.IntIdSet;
+import dev.ikm.tinkar.common.id.IntIds;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
@@ -16,6 +20,7 @@ import dev.ikm.tinkar.coordinate.stamp.StampCoordinateRecord;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculatorWithCache;
 import dev.ikm.tinkar.entity.Entity;
+import dev.ikm.tinkar.terms.ConceptFacade;
 import dev.ikm.tinkar.terms.EntityFacade;
 import org.eclipse.collections.impl.factory.Lists;
 import org.springframework.stereotype.Service;
@@ -28,27 +33,48 @@ import java.util.UUID;
 @RequestScope
 public class CalculatorService {
 
-	private final ObservatoryService observatoryService;
+	private final ObservatoryRepository observatoryRepository;
 	private final IkeRepository ikeRepository;
 
 	private StampCoordinateRecord stampCoordinateRecord;
 	private LanguageCoordinateRecord languageCoordinateRecord;
 	private NavigationCoordinateRecord navigationCoordinateRecord;
 
-	public CalculatorService(ObservatoryService observatoryService, IkeRepository ikeRepository) {
-		this.observatoryService = observatoryService;
+	public CalculatorService(ObservatoryRepository observatoryRepository, IkeRepository ikeRepository) {
+		this.observatoryRepository = observatoryRepository;
 		this.ikeRepository = ikeRepository;
 	}
 
 	public void setObservatory(UUID observatoryId) {
-		Observatory observatory = observatoryService.retrieveObservatory(observatoryId);
-		setObservatory(observatory.stampCoordinate().id().getFirst(), observatory.languageCoordinate().id().getFirst(), observatory.navigationCoordinate().id().getFirst());
+		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(observatoryId);
+		setObservatory(observatoryEntity.stamp(), observatoryEntity.language(), observatoryEntity.navigation(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
 
-	public void setObservatory(UUID stampId, UUID languageId, UUID navigationId) {
-		this.stampCoordinateRecord = Stamp.toRecord(stampId);
-		this.languageCoordinateRecord = Language.toRecord(languageId);
-		this.navigationCoordinateRecord = Navigation.toRecord(navigationId);
+	public void setObservatory(Stamp stamp, Language language, Navigation navigation, List<List<UUID>> includedModules, List<List<UUID>> excludedModules) {
+		List<ConceptFacade> include = makeConceptFacadeList(includedModules);
+		IntIdSet exclude = makeIntIdSet(excludedModules);
+		this.stampCoordinateRecord = stamp.getRecord()
+				.withModules(include)
+				.withExcludedModuleNids(exclude);
+
+		this.languageCoordinateRecord = language.getRecord();
+		this.navigationCoordinateRecord = navigation.getRecord();
+	}
+
+	private List<ConceptFacade> makeConceptFacadeList(List<List<UUID>> publicIds) {
+		return publicIds.stream()
+				.map(PublicIds::of)
+				.map(Entity::nid)
+				.map(ConceptFacade::make)
+				.toList();
+	}
+
+	private IntIdSet makeIntIdSet(List<List<UUID>> publicIds) {
+		int[] nids = publicIds.stream()
+				.map(PublicIds::of)
+				.mapToInt(Entity::nid)
+				.toArray();
+		return IntIds.set.of(nids);
 	}
 
 	public StampCalculator getStampCalculator() {
@@ -69,6 +95,10 @@ public class CalculatorService {
 				.orElse("");
 	}
 
+	public String calculateFQN(UUID id) {
+		return calculateFQN(PublicIds.of(id));
+	}
+
 	public String calculateText(PublicId publicId) {
 		EntityFacade facade = ikeRepository.getEntityFacade(publicId);
 		return getLanguageCalculator()
@@ -80,9 +110,6 @@ public class CalculatorService {
 		return calculateText(PublicIds.of(id));
 	}
 
-	public String calculateFQN(UUID id) {
-		return calculateFQN(PublicIds.of(id));
-	}
 
 	public String calculateSYN(PublicId publicId) {
 		return getLanguageCalculator()
@@ -104,68 +131,68 @@ public class CalculatorService {
 		return calculateDEF(PublicIds.of(id));
 	}
 
-	public List<List<UUID>> calculateChildren(PublicId publicId) {
+	public List<Facade> calculateChildren(PublicId publicId) {
 		return getNavigationCalculator()
 				.childrenOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> pId.asUuidList().stream().toList())
+				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
 				.toList();
 	}
 
-	public List<List<UUID>> calculateChildren(UUID id) {
+	public List<Facade> calculateChildren(UUID id) {
 		return calculateChildren(PublicIds.of(id));
 	}
 
-	public List<List<UUID>> calculateParents(PublicId publicId) {
+	public List<Facade> calculateParents(PublicId publicId) {
 		return getNavigationCalculator()
 				.parentsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> pId.asUuidList().stream().toList())
+				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
 				.toList();
 	}
 
-	public List<List<UUID>> calculateParents(UUID id) {
+	public List<Facade> calculateParents(UUID id) {
 		return calculateParents(PublicIds.of(id));
 	}
 
-	public List<List<UUID>> calculateDescendants(PublicId publicId) {
+	public List<Facade> calculateDescendants(PublicId publicId) {
 		return getNavigationCalculator()
 				.descendentsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> pId.asUuidList().stream().toList())
+				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
 				.toList();
 	}
 
-	public List<List<UUID>> calculateDescendants(UUID id) {
+	public List<Facade> calculateDescendants(UUID id) {
 		return calculateDescendants(PublicIds.of(id));
 	}
 
-	public List<List<UUID>> calculateAncestors(PublicId publicId) {
+	public List<Facade> calculateAncestors(PublicId publicId) {
 		return getNavigationCalculator()
 				.ancestorsOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> pId.asUuidList().stream().toList())
+				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
 				.toList();
 	}
 
-	public List<List<UUID>> calculateAncestors(UUID id) {
+	public List<Facade> calculateAncestors(UUID id) {
 		return calculateAncestors(PublicIds.of(id));
 	}
 
-	public List<List<UUID>> calculateKinds(PublicId publicId) {
+	public List<Facade> calculateKinds(PublicId publicId) {
 		return getNavigationCalculator()
 				.kindOf(Entity.nid(publicId))
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> pId.asUuidList().stream().toList())
+				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
 				.toList();
 	}
 
-	public List<List<UUID>> calculateKinds(UUID id) {
+	public List<Facade> calculateKinds(UUID id) {
 		return calculateKinds(PublicIds.of(id));
 	}
 

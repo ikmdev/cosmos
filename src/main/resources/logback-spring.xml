@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Include Spring Boot's default Logback configuration for console output -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!--
+        Set the logging level for your application's packages.
+        Levels are: TRACE, DEBUG, INFO, WARN, ERROR, OFF.
+        This ensures all messages from your code at DEBUG level or higher will be displayed.
+    -->
+    <logger name="dev.ikm.server.cosmos" level="DEBUG" />
+
+</configuration>

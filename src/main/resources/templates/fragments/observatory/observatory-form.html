@@ -18,46 +18,58 @@
                placeholder="Default Name" autocomplete="off">
     </div>
     <div class="mb-3">
-        <label for="stampSelect">Status Time Author Module Path (STAMP)</label>
-        <select th:field="*{selectedStampCoordinateId}" class="form-select"
+        <label for="stampSelect">STAMP</label>
+        <select th:field="*{selectedStampCoordinate}" class="form-select"
                 id="stampSelect"
                 aria-label="Floating label select example">
             <option
                     th:each="stampCoordinate : ${observatoryForm.stampCoordinates()}"
-                    th:value="${#strings.listJoin(stampCoordinate.id(), ',')}"
+                    th:value="${stampCoordinate.id().nid()}"
                     th:text="${stampCoordinate.name()}"></option>
         </select>
     </div>
 
     <div class="mb-3">
         <label for="languageSelect">Language</label>
-        <select th:field="*{selectedLanguageCoordinateId}" class="form-select"
+        <select th:field="*{selectedLanguageCoordinate}" class="form-select"
                 id="languageSelect">
             <option
                     th:each="languageCoordinate : ${observatoryForm.languageCoordinates()}"
-                    th:value="${#strings.listJoin(languageCoordinate.id(), ',')}"
+                    th:value="${languageCoordinate.id().nid()}"
                     th:text="${languageCoordinate.name()}"></option>
         </select>
     </div>
     <div class="mb-3">
         <label for="navigationSelect">Navigation</label>
-        <select th:field="*{selectedNavigationCoordinateId}" class="form-select"
+        <select th:field="*{selectedNavigationCoordinate}" class="form-select"
                 id="navigationSelect">
             <option
                     th:each="navigationCoordinate : ${observatoryForm.navigationCoordinates()}"
-                    th:value="${#strings.listJoin(navigationCoordinate.id(), ',')}"
+                    th:value="${navigationCoordinate.id().nid()}"
                     th:text="${navigationCoordinate.name()}"></option>
         </select>
     </div>
-    <div class="mb-3">
-        <label for="moduleSelect">Modules</label>
-        <select th:field="*{selectedModules}" class="form-select" id="moduleSelect" multiple
-                aria-label="Multiple select for Modules">
-            <option
-                    th:each="module : ${observatoryForm.modules()}"
-                    th:value="${#strings.listJoin(module.id(), ',')}"
-                    th:text="${module.name()}"></option>
-        </select>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="includedModuleSelect">Included Modules</label>
+            <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect" multiple
+                    aria-label="Multiple select for Included Modules">
+                <option
+                        th:each="module : ${observatoryForm.modules()}"
+                        th:value="${module.id().nid()}"
+                        th:text="${module.name()}"></option>
+            </select>
+        </div>
+        <div class="col">
+            <label for="excludedModuleSelect">Excluded Modules</label>
+            <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect" multiple
+                    aria-label="Multiple select for Excluded Modules">
+                <option
+                        th:each="module : ${observatoryForm.modules()}"
+                        th:value="${module.id().nid()}"
+                        th:text="${module.name()}"></option>
+            </select>
+        </div>
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
 </form>

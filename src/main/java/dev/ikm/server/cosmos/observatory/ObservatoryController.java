@@ -1,7 +1,6 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
-import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -25,14 +25,12 @@ public class ObservatoryController {
 
 	Logger LOG = LoggerFactory.getLogger(ObservatoryController.class);
 
-	private final CoordinateService coordinateService;
 	private final ObservatoryService observatoryService;
 	private final CalculatorService calculatorService;
 
 
 	@Autowired
-	public ObservatoryController(CoordinateService coordinateService, ObservatoryService observatoryService, CalculatorService calculatorService) {
-		this.coordinateService = coordinateService;
+	public ObservatoryController(ObservatoryService observatoryService, CalculatorService calculatorService) {
 		this.observatoryService = observatoryService;
 		this.calculatorService = calculatorService;
 	}
@@ -43,25 +41,21 @@ public class ObservatoryController {
 		model.addAttribute("footerText", "Configuring your cosmic viewpoint");
 		model.addAttribute("observatoryForm", new ObservatoryForm(
 				"",
-				coordinateService.stampCoordinates(),
-				coordinateService.languageCoordinates(),
-				coordinateService.navigationCoordinates(),
+				observatoryService.retrieveStamps(),
+				observatoryService.retrieveLanguages(),
+				observatoryService.retrieveNavigations(),
 				observatoryService.retrieveModules(),
 				null,
 				null,
 				null,
-				null));
+				List.of(),
+				List.of()));
 
 	}
 
 	@GetMapping("/observatory")
 	public String getObservatory(
-			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			Model model) {
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
-
 		addSharedModelAttributes(model);
 
 		return "observatory";
@@ -70,11 +64,7 @@ public class ObservatoryController {
 	@HxRequest
 	@GetMapping("/observatory")
 	public FragmentsRendering getObservatoryWithFragments(
-			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			Model model) {
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
 		addSharedModelAttributes(model);
 		return FragmentsRendering
 				.with("observatory :: main-content")
@@ -87,19 +77,10 @@ public class ObservatoryController {
 	@HxRequest
 	@PostMapping("/observatory")
 	public FragmentsRendering postObservatory(
-			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			@ModelAttribute("observatoryForm") ObservatoryForm observatoryForm,
 			Model model) {
-
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
 		//Create a new Observatory
-		Observatory newObservatory = observatoryService.saveNewObservatory(
-				observatoryForm.name(),
-				observatoryForm.selectedStampCoordinateId(),
-				observatoryForm.selectedLanguageCoordinateId(),
-				observatoryForm.selectedNavigationCoordinateId());
+		Observatory newObservatory = observatoryService.saveNewObservatory(observatoryForm);
 		model.addAttribute("newObservatory", newObservatory);
 		model.addAttribute("observatories", observatoryService.retrieveAllObservatories());
 		return FragmentsRendering

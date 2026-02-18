@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.api.coordinate.Language;
-import dev.ikm.server.cosmos.api.coordinate.Navigation;
-import dev.ikm.server.cosmos.api.coordinate.Stamp;
+import dev.ikm.server.cosmos.calculator.Language;
+import dev.ikm.server.cosmos.calculator.Navigation;
+import dev.ikm.server.cosmos.calculator.Stamp;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.mapdb.DB;
@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
@@ -66,7 +67,9 @@ public class ObservatoryDatabaseConfig {
 						"Default Observatory",
 						Stamp.DEV_LATEST,
 						Language.US_ENG_REG,
-						Navigation.INFERRED));
+						Navigation.INFERRED,
+						List.of(),
+						List.of()));
 			}
 
 			LOG.info("Observatory database initialized");

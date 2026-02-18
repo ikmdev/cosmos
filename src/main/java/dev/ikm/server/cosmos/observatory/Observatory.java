@@ -1,13 +1,16 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.api.coordinate.Coordinate;
+import dev.ikm.server.cosmos.ike.Facade;
 
+import java.util.List;
 import java.util.UUID;
 
 public record Observatory(
 		UUID id,
 		String name,
-		Coordinate stampCoordinate,
-		Coordinate languageCoordinate,
-		Coordinate navigationCoordinate) {
+		Facade stamp,
+		Facade language,
+		Facade navigation,
+		List<Facade> includedModules,
+		List<Facade> excludedModules) {
 }

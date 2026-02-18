@@ -1,19 +1,18 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.api.coordinate.Coordinate;
+import dev.ikm.server.cosmos.ike.Facade;
 
 import java.util.List;
-import java.util.UUID;
 
 public record ObservatoryForm(
 		String name,
-		List<Coordinate> stampCoordinates,
-		List<Coordinate> languageCoordinates,
-		List<Coordinate> navigationCoordinates,
-		List<ModuleConcept> modules,
-		List<UUID> selectedStampCoordinateId,
-		List<UUID> selectedLanguageCoordinateId,
-		List<UUID> selectedNavigationCoordinateId,
-		List<List<UUID>> selectedModules
-) {
+		List<Facade> stampCoordinates,
+		List<Facade> languageCoordinates,
+		List<Facade> navigationCoordinates,
+		List<Facade> modules,
+		Facade selectedStampCoordinate,
+		Facade selectedLanguageCoordinate,
+		Facade selectedNavigationCoordinate,
+		List<Facade> selectedIncludedModules,
+		List<Facade> selectedExcludedModules) {
 }

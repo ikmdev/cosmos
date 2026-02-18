@@ -1,18 +1,21 @@
 
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
-import dev.ikm.server.cosmos.api.coordinate.Coordinate;
-import dev.ikm.server.cosmos.api.coordinate.CoordinateService;
-import dev.ikm.server.cosmos.api.coordinate.Language;
-import dev.ikm.server.cosmos.api.coordinate.Navigation;
-import dev.ikm.server.cosmos.api.coordinate.Stamp;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.calculator.Language;
+import dev.ikm.server.cosmos.calculator.Navigation;
+import dev.ikm.server.cosmos.calculator.Stamp;
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.id.PublicId;
+import dev.ikm.tinkar.common.id.PublicIds;
+import dev.ikm.tinkar.entity.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -21,54 +24,71 @@ import java.util.UUID;
 public class ObservatoryService {
 
 	private final ObservatoryRepository observatoryRepository;
-	private final CoordinateService coordinateService;
 	private final CalculatorService calculatorService;
 	private final IkeRepository ikeRepository;
 
 	@Autowired
-	public ObservatoryService(ObservatoryRepository observatoryRepository, CoordinateService coordinateService, CalculatorService calculatorService, IkeRepository ikeRepository) {
+	public ObservatoryService(ObservatoryRepository observatoryRepository, CalculatorService calculatorService, IkeRepository ikeRepository) {
 		this.observatoryRepository = observatoryRepository;
-		this.coordinateService = coordinateService;
 		this.calculatorService = calculatorService;
 		this.ikeRepository = ikeRepository;
 	}
 
-	public Observatory saveNewObservatory(String name,
-							  List<UUID> stampId,
-							  List<UUID> languageId,
-							  List<UUID> navigationId) {
+	private Observatory buildObservatory(ObservatoryEntity observatoryEntity) {
+		return new Observatory(
+				observatoryEntity.id(),
+				observatoryEntity.name(),
+				observatoryEntity.stamp().getConcept(),
+				observatoryEntity.language().getConcept(),
+				observatoryEntity.navigation().getConcept(),
+				observatoryEntity.includedModules().stream()
+						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), calculatorService.calculateText(PublicIds.of(uuids))))
+						.toList(),
+				observatoryEntity.excludedModules().stream()
+						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), calculatorService.calculateText(PublicIds.of(uuids))))
+						.toList());
+	}
+
+	private ObservatoryEntity buildObservatoryEntity(Observatory observatory) {
+		Stamp stamp = Stamp.fromId(observatory.stamp().id());
+		Language language = Language.fromId(observatory.language().id());
+		Navigation navigation = Navigation.fromId(observatory.navigation().id());
+		List<List<UUID>> includedModules = observatory.includedModules().stream()
+				.map(component -> PublicIds.of(component.id().uuids()))
+				.map(publicId -> publicId.asUuidList().castToList())
+				.toList();
+		List<List<UUID>> excludedModules = observatory.excludedModules().stream()
+				.map(component -> PublicIds.of(component.id().uuids()))
+				.map(publicId -> publicId.asUuidList().castToList())
+				.toList();
+		return new ObservatoryEntity(observatory.id(), Instant.now(), observatory.name(), stamp, language, navigation, includedModules, excludedModules);
+	}
+
+	public Observatory saveNewObservatory(ObservatoryForm observatoryForm) {
 		UUID id = UUID.randomUUID();
-		Stamp stamp = coordinateService.stampCoordinate(stampId).get();
-		Language language = coordinateService.languageCoordinate(languageId).get();
-		Navigation navigation = coordinateService.navigationCoordinate(navigationId).get();
-
-		observatoryRepository.createObservatory(new ObservatoryEntity(id, Instant.now(), name, stamp, language, navigation));
-
-		Coordinate stampCoordinate = coordinateService.stampCoordinate(stamp);
-		Coordinate languageCoordinate = coordinateService.languageCoordinate(language);
-		Coordinate navigationCoordinate = coordinateService.navigationCoordinate(navigation);
-
-		return new Observatory(id, name, stampCoordinate, languageCoordinate, navigationCoordinate);
+		//TODO - Handle the edge case where the coordinate ids aren't correct
+		Observatory observatory = new Observatory(
+				id,
+				observatoryForm.name(),
+				observatoryForm.selectedStampCoordinate(),
+				observatoryForm.selectedLanguageCoordinate(),
+				observatoryForm.selectedNavigationCoordinate(),
+				observatoryForm.selectedIncludedModules(),
+				observatoryForm.selectedExcludedModules());
+		ObservatoryEntity entity = buildObservatoryEntity(observatory);
+		observatoryRepository.createObservatory(entity);
+		return observatory;
 	}
 
 	public Observatory retrieveObservatory(UUID id) {
 		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(id);
-		Coordinate stampCoordinate = coordinateService.stampCoordinate(observatoryEntity.stamp());
-		Coordinate languageCoordinate = coordinateService.languageCoordinate(observatoryEntity.language());
-		Coordinate navigationCoordinate = coordinateService.navigationCoordinate(observatoryEntity.navigation());
-		return new Observatory(observatoryEntity.id(), observatoryEntity.name(), stampCoordinate, languageCoordinate, navigationCoordinate);
+		return buildObservatory(observatoryEntity);
 	}
 
 	public List<Observatory> retrieveAllObservatories() {
 		return observatoryRepository.readAll().stream()
 				.sorted(Comparator.comparing(ObservatoryEntity::modified).reversed())
-				.map(observatoryEntity ->
-						new Observatory(observatoryEntity.id(),
-								observatoryEntity.name(),
-								coordinateService.stampCoordinate(observatoryEntity.stamp()),
-								coordinateService.languageCoordinate(observatoryEntity.language()),
-								coordinateService.navigationCoordinate(observatoryEntity.navigation()))
-				)
+				.map(this::buildObservatory)
 				.toList();
 	}
 
@@ -77,25 +97,26 @@ public class ObservatoryService {
 	}
 
 	public void updateObservatory(Observatory observatory) {
-		observatoryRepository.updateObservatory(observatory.id(), new ObservatoryEntity(
-				observatory.id(),
-				Instant.now(),
-				observatory.name(),
-				coordinateService.stampCoordinate(observatory.stampCoordinate().id()).get(),
-				coordinateService.languageCoordinate(observatory.languageCoordinate().id()).get(),
-				coordinateService.navigationCoordinate(observatory.navigationCoordinate().id()).get()
-		));
+		ObservatoryEntity entity = buildObservatoryEntity(observatory);
+		observatoryRepository.updateObservatory(observatory.id(), entity);
 	}
 
-	public List<ModuleConcept> retrieveModules() {
+	public List<Facade> retrieveModules() {
 		List<PublicId> publicIds = ikeRepository.findAllModules();
 		return publicIds.stream()
-				.map(publicId -> {
-					return new ModuleConcept(
-							ikeRepository.getIds(publicId),
-							calculatorService.calculateText(publicId)
-					);
-				})
+				.map(publicId -> new Facade(new Id(Entity.nid(publicId), Arrays.asList(publicId.asUuidArray())), calculatorService.calculateText(publicId)))
 				.toList();
+	}
+
+	public List<Facade> retrieveStamps() {
+		return Stamp.stampConcepts();
+	}
+
+	public List<Facade> retrieveLanguages() {
+		return Language.languageConcepts();
+	}
+
+	public List<Facade> retrieveNavigations() {
+		return Navigation.navigationConcepts();
 	}
 }

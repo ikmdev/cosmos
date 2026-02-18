@@ -1,6 +1,6 @@
 package dev.ikm.server.cosmos.discovery;
 
-import dev.ikm.server.cosmos.api.coordinate.CalculatorService;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

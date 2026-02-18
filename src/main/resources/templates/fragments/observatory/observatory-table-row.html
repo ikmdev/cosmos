@@ -13,9 +13,9 @@
 
         <tr th:fragment="observatory-row(observatory)" th:id="${'observatory-' + observatory.id()}">
             <td th:text="${observatory.name()}"></td>
-            <td th:text="${observatory.stampCoordinate().name()}"></td>
-            <td th:text="${observatory.languageCoordinate().name()}"></td>
-            <td th:text="${observatory.navigationCoordinate().name()}"></td>
+            <td th:text="${observatory.stamp().name()}"></td>
+            <td th:text="${observatory.language().name()}"></td>
+            <td th:text="${observatory.navigation().name()}"></td>
             <td class="text-center">
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -25,7 +25,7 @@
                     <ul class="dropdown-menu">
                         <li>
                             <button class="dropdown-item text-danger"
-                                    th:disabled="${observatory.id().toString() == '312b2c57-6882-452c-bec4-966ed1af04d8'}"
+                                    th:disabled="${observatory.id().equals(defaultObservatory)}"
                                     th:attr="hx-delete=@{/observatory/{id}(id=${observatory.id()})}"
                                     hx-target="closest tr"
                                     hx-swap="outerHTML">
