@@ -10,9 +10,13 @@ public record ObservatoryForm(
 		List<Facade> languageCoordinates,
 		List<Facade> navigationCoordinates,
 		List<Facade> modules,
-		Facade selectedStampCoordinate,
-		Facade selectedLanguageCoordinate,
-		Facade selectedNavigationCoordinate,
-		List<Facade> selectedIncludedModules,
-		List<Facade> selectedExcludedModules) {
+		@StringToFacade Facade selectedStampCoordinate,
+		@StringToFacade Facade selectedLanguageCoordinate,
+		@StringToFacade Facade selectedNavigationCoordinate,
+		@StringToFacade List<Facade> selectedIncludedModules,
+		@StringToFacade List<Facade> selectedExcludedModules,
+		TreeData hierarchy,
+		@StringToFacade List<Facade> individualScopes,
+		@StringToFacade List<Facade> descendantScopes,
+		@StringToFacade List<Facade> kindOfScopes) {
 }

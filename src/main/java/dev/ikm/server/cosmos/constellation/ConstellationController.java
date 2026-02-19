@@ -23,12 +23,10 @@ public class ConstellationController {
 	private final Logger LOG = LoggerFactory.getLogger(ConstellationController.class);
 
 	private final ConstellationService constellationService;
-	private final CalculatorService calculatorService;
 
 	@Autowired
-	public ConstellationController(ConstellationService constellationService, CalculatorService calculatorService) {
+	public ConstellationController(ConstellationService constellationService) {
 		this.constellationService = constellationService;
-		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
@@ -60,12 +58,8 @@ public class ConstellationController {
 	@HxRequest
 	@PostMapping("/constellation")
 	public FragmentsRendering postConstellation(
-			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			@ModelAttribute("constellationForm") ConstellationForm constellationForm,
 			Model model) {
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
 		// This method should save the constellation with an initial status like "QUEUED"
 		Constellation newConstellation = constellationService.formConstellation(constellationForm);
 

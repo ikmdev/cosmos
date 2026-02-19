@@ -15,13 +15,15 @@ import org.springframework.web.util.WebUtils;
 import java.util.UUID;
 
 @Component
-public class ObservatoryContextInterceptor implements HandlerInterceptor {
+public class CalculatorServiceInterceptor implements HandlerInterceptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ObservatoryContextInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CalculatorServiceInterceptor.class);
+    public static final String ACTIVE_OBSERVATORY_ID_ATTR = "activeObservatoryId";
+
     private final CalculatorService calculatorService;
 
     @Autowired
-    public ObservatoryContextInterceptor(CalculatorService calculatorService) {
+    public CalculatorServiceInterceptor(CalculatorService calculatorService) {
         this.calculatorService = calculatorService;
     }
 
@@ -43,6 +45,8 @@ public class ObservatoryContextInterceptor implements HandlerInterceptor {
 
         // This is guaranteed to run before controller data binding, setting up the request-scoped bean.
         calculatorService.setObservatory(activeObservatoryId);
+        // Make the active observatory ID available to other components, like the GlobalControllerAdvice.
+        request.setAttribute(ACTIVE_OBSERVATORY_ID_ATTR, activeObservatoryId);
         return true; // Continue processing the request
     }
 }

@@ -1,11 +1,13 @@
 package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.Facade;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,13 +28,11 @@ public class ObservatoryController {
 	Logger LOG = LoggerFactory.getLogger(ObservatoryController.class);
 
 	private final ObservatoryService observatoryService;
-	private final CalculatorService calculatorService;
 
 
 	@Autowired
-	public ObservatoryController(ObservatoryService observatoryService, CalculatorService calculatorService) {
+	public ObservatoryController(ObservatoryService observatoryService) {
 		this.observatoryService = observatoryService;
-		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
@@ -48,6 +48,10 @@ public class ObservatoryController {
 				null,
 				null,
 				null,
+				List.of(),
+				List.of(),
+				observatoryService.retrieveHierarchy(), // Assumes service returns the root TreeData node
+				List.of(),
 				List.of(),
 				List.of()));
 
@@ -112,4 +116,13 @@ public class ObservatoryController {
 				.with("fragments/layout/navigation :: observatorySelector")
 				.build();
 	}
+
+	@HxRequest
+	@GetMapping("/observatory/scope/children/{id}")
+	public String getScopeChildren(@PathVariable("id") int id, Model model) {
+		List<TreeData> children = observatoryService.retrieveChildren(String.valueOf(id));
+		model.addAttribute("children", children);
+		return "fragments/observatory/observatory-form :: children-fragment";
+	}
+
 }

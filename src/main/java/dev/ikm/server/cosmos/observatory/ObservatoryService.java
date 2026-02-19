@@ -119,4 +119,27 @@ public class ObservatoryService {
 	public List<Facade> retrieveNavigations() {
 		return Navigation.navigationConcepts();
 	}
+
+	public TreeData retrieveHierarchy() {
+		// Return only the root node, with an empty list of children, but mark it as expandable.
+		// The client will use HTMX to fetch children when the user expands this node.
+
+		return new TreeData(new Facade(new Id(1, List.of(UUID.randomUUID())), "Root"), List.of(), true, true);
+	}
+
+	public List<TreeData> retrieveChildren(String parentId) {
+		// In a real application, this would query a database.
+		// Here, we simulate it based on the parentId to demonstrate lazy loading.
+
+		return switch (parentId) {
+			case "1" -> List.of(new TreeData(new Facade(new Id(2, List.of(UUID.randomUUID())), "Child"), List.of(), true, true));
+			case "2" -> List.of(new TreeData(new Facade(new Id(3, List.of(UUID.randomUUID())), "grandChild"), List.of(), true, true));
+			case "3" -> List.of(new TreeData(new Facade(new Id(4, List.of(UUID.randomUUID())), "greatGrandChild"), List.of(), false, true)); // greatGrandChild is a leaf
+			default -> List.of();
+		};
+	}
+
+	public List<Facade> retrieveDescendants(Facade facade) {
+		return List.of();
+	}
 }

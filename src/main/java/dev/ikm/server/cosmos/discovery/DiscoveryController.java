@@ -21,13 +21,10 @@ public class DiscoveryController {
 	Logger LOG = LoggerFactory.getLogger(DiscoveryController.class);
 
 	private final DiscoveryService discoveryService;
-	private final CalculatorService calculatorService;
 
 	@Autowired
-	public DiscoveryController(DiscoveryService discoveryService,
-							   CalculatorService calculatorService) {
+	public DiscoveryController(DiscoveryService discoveryService) {
 		this.discoveryService = discoveryService;
-		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
@@ -60,24 +57,16 @@ public class DiscoveryController {
 	@GetMapping("/discovery/search")
 	@ResponseBody
 	public ExplorerData search(
-			@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
 			@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
 			Model model) {
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
 		return discoveryService.buildExplorationVisualization(explorerSearchForm);
 	}
 
 	@GetMapping("/discovery/explore")
 	@ResponseBody
-	public ExplorerData explore(@ModelAttribute("activeObservatoryId") UUID activeObservatoryId,
-								@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
+	public ExplorerData explore(@ModelAttribute("explorerSearchForm") ExplorerSearchForm explorerSearchForm,
 								@RequestParam("nodeId") String nodeId,
 								Model model) {
-		if (activeObservatoryId != null) {
-			calculatorService.setObservatory(activeObservatoryId);
-		}
 		return discoveryService.explore(nodeId, explorerSearchForm);
 	}
 }

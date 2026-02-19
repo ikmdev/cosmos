@@ -16,6 +16,16 @@
             <td th:text="${observatory.stamp().name()}"></td>
             <td th:text="${observatory.language().name()}"></td>
             <td th:text="${observatory.navigation().name()}"></td>
+            <td>
+                <th:block th:each="module : ${observatory.includedModules()}">
+                    <span class="badge bg-primary-subtle text-primary-emphasis me-1 mb-1" th:text="${module.name()}"></span>
+                </th:block>
+            </td>
+            <td>
+                <th:block th:each="module : ${observatory.excludedModules()}">
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis me-1 mb-1" th:text="${module.name()}"></span>
+                </th:block>
+            </td>
             <td class="text-center">
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
