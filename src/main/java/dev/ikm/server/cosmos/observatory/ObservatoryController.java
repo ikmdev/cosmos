@@ -1,13 +1,10 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.calculator.CalculatorService;
-import dev.ikm.server.cosmos.ike.Facade;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,18 +47,17 @@ public class ObservatoryController {
 				null,
 				List.of(),
 				List.of(),
-				observatoryService.retrieveHierarchy(), // Assumes service returns the root TreeData node
+				List.of(observatoryService.retrieveHierarchy()), // Assumes service returns the root TreeData node
 				List.of(),
 				List.of(),
 				List.of()));
-
+		model.addAttribute("scopeSearchForm", new ScopeSearchForm(""));
 	}
 
 	@GetMapping("/observatory")
 	public String getObservatory(
 			Model model) {
 		addSharedModelAttributes(model);
-
 		return "observatory";
 	}
 
@@ -118,11 +114,16 @@ public class ObservatoryController {
 	}
 
 	@HxRequest
-	@GetMapping("/observatory/scope/children/{id}")
-	public String getScopeChildren(@PathVariable("id") int id, Model model) {
-		List<TreeData> children = observatoryService.retrieveChildren(String.valueOf(id));
+	@GetMapping("/observatory/scope/children")
+	public FragmentsRendering getScopeChildren(@RequestParam("id") String parentId,
+								   @RequestParam("depth") int depth,
+								   Model model) {
+		List<TreeNode> children = observatoryService.retrieveChildren(String.valueOf(parentId));
+		model.addAttribute("depth", depth);
 		model.addAttribute("children", children);
-		return "fragments/observatory/observatory-form :: children-fragment";
+		return FragmentsRendering
+				.with("fragments/observatory/observatory-form :: children-fragment")
+				.build();
 	}
 
 }

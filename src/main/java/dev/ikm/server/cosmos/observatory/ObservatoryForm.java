@@ -15,7 +15,7 @@ public record ObservatoryForm(
 		@StringToFacade Facade selectedNavigationCoordinate,
 		@StringToFacade List<Facade> selectedIncludedModules,
 		@StringToFacade List<Facade> selectedExcludedModules,
-		TreeData hierarchy,
+		List<TreeNode> hierarchy,
 		@StringToFacade List<Facade> individualScopes,
 		@StringToFacade List<Facade> descendantScopes,
 		@StringToFacade List<Facade> kindOfScopes) {

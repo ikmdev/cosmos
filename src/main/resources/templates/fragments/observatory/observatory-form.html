@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <form th:fragment="observatory-form"
-      x-data
+      x-data @keydown.enter.prevent
       @htmx:after-request="if($event.detail.successful) $el.reset()"
       action="#"
       th:action="@{/observatory}"
@@ -72,73 +72,27 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Hierarchy Scope</label>
-        <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
-            <ul style="list-style-type: none; padding-left: 0;">
-                <li th:if="${observatoryForm.hierarchy() != null}">
-                    <div th:replace="~{::tree(node=${observatoryForm.hierarchy})}"></div>
-                </li>
-            </ul>
-        </div>
+        <div id="scope-tree-view"></div>
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
+
+    <script th:inline="javascript">
+    {
+        const treeViewDiv = document.getElementById('scope-tree-view');
+        const hierarchyData = /*[[${observatoryForm.hierarchy}]]*/ null;
+        console.log(hierarchyData);
+        console.log(treeViewDiv);
+
+        // --- Quercus Tree Initialization ---
+        const tree1 = new Treeview({
+            containerId: 'scope-tree-view',   // ID of the HTML element to render the tree into
+            data: hierarchyData,             // Your hierarchical data
+            searchEnabled: true,          // Enable the search bar (default: true)
+            initiallyExpanded: false,     // Start with nodes collapsed (default: false)
+            multiSelectEnabled: true     // Enable multi-selection by clicking nodes
+        });
+    }
+    </script>
 </form>
-
-<th:block th:fragment="treeNodeContent(node)">
-    <!-- For selectable nodes, the name is a dropdown button -->
-    <div th:if="${node.selectable()}" class="dropdown d-inline-block">
-        <button class="btn btn-link dropdown-toggle text-start text-decoration-none p-0" type="button"
-                th:id="${'dropdownMenuButton-' + node.facade().id().nid()}"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                @click="if ($el.closest('details')?.open) { $event.stopPropagation(); }">
-            <span th:text="${node.facade().name()}">Node Name</span>
-        </button>
-        <ul class="dropdown-menu p-2" th:aria-labelledby="${'dropdownMenuButton-' + node.facade().id().nid()}"
-            data-bs-auto-close="outside">
-            <li class="form-check ms-2">
-                <input class="form-check-input" type="checkbox" th:field="*{individualScopes}" th:value="${node.facade().id().nid()}" th:id="${'individual-' + node.facade().id().nid()}"/>
-                <label class="form-check-label" th:for="${'individual-' + node.facade().id().nid()}">Individual</label>
-            </li>
-            <li class="form-check ms-2">
-                <input class="form-check-input" type="checkbox" th:field="*{kindOfScopes}" th:value="${node.facade().id().nid()}" th:id="${'children-' + node.facade().id().nid()}"/>
-                <label class="form-check-label" th:for="${'children-' + node.facade().id().nid()}">Children</label>
-            </li>
-            <li class="form-check ms-2">
-                <input class="form-check-input" type="checkbox" th:field="*{descendantScopes}" th:value="${node.facade().id().nid()}" th:id="${'descendants-' + node.facade().id().nid()}"/>
-                <label class="form-check-label" th:for="${'descendants-' + node.facade().id().nid()}">Descendants</label>
-            </li>
-        </ul>
-    </div>
-    <!-- For non-selectable nodes, just display the name -->
-    <span th:unless="${node.selectable()}" th:text="${node.facade().name()}">Node Name</span>
-</th:block>
-
-<th:block th:fragment="children-fragment(children)">
-    <li th:each="child : ${children}">
-        <div th:replace="~{::tree(node=${child})}"></div>
-    </li>
-</th:block>
-
-<div th:fragment="tree(node)">
-    <!-- An expandable node (has children, loaded or not). It is not initially open. -->
-    <details th:if="${node.expandable()}"
-             hx-get="@{/observatory/scope/children/{id}(id=${node.facade().id().nid()})}"
-             hx-trigger="toggle once"
-             hx-target="this > ul"
-             hx-swap="innerHTML">
-        <summary>
-            <th:block th:replace="~{::treeNodeContent(node=${node})}"/>
-        </summary>
-        <!-- This UL will be populated by HTMX. It contains a loading indicator. -->
-        <ul style="list-style-type: none; padding-left: 20px;">
-            <li>Loading...</li>
-        </ul>
-    </details>
-
-    <!-- A leaf node (not expandable) -->
-    <div th:unless="${node.expandable()}" class="ms-3">
-        <th:block th:replace="~{::treeNodeContent(node=${node})}"/>
-    </div>
-</div>
 </body>
 </html>
