@@ -2,6 +2,7 @@ package dev.ikm.server.cosmos.calculator;
 
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
+import dev.ikm.server.cosmos.ike.Type;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.Coordinates;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public enum Language {
+public enum LanguageCoordinate {
 	ANY_LANG_REG("Any Language Regular Name", List.of(UUID.fromString("456ed121-e492-403e-8448-351a4645b7cd")), Coordinates.Language.AnyLanguageRegularName()),
 	ANY_LANG_FQN("Any Language Fully Qualified Name", List.of(UUID.fromString("f4b46e0b-9622-452f-89f2-64e4dab8ef37")), Coordinates.Language.AnyLanguageFullyQualifiedName()),
 	ANY_LANG_DEF("Any Language Definition", List.of(UUID.fromString("1b46224b-91c1-4bfe-8428-a1e895649216")), Coordinates.Language.AnyLanguageDefinition()),
@@ -28,13 +29,13 @@ public enum Language {
 	private final List<UUID> uuids;
 	private final LanguageCoordinateRecord record;
 
-	Language(String name, List<UUID> uuids, LanguageCoordinateRecord record) {
+	LanguageCoordinate(String name, List<UUID> uuids, LanguageCoordinateRecord record) {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
 		PublicId publicId = PublicIds.of(uuids);
 		int nid = Entity.nid(publicId);
-		this.facade = new Facade(new Id(nid, this.uuids), this.name);
+		this.facade = new Facade(new Id(nid, this.uuids), Type.COORDINATE, this.name);
 	}
 
 	public String getName() {
@@ -49,7 +50,7 @@ public enum Language {
 	}
 
 	public static LanguageCoordinateRecord toRecord(UUID uuid) {
-		for (Language coord : Language.values()) {
+		for (LanguageCoordinate coord : LanguageCoordinate.values()) {
 			if (coord.uuids.contains(uuid)) {
 				return coord.getRecord();
 			}
@@ -57,10 +58,10 @@ public enum Language {
 		return US_ENG_REG.getRecord();
 	}
 
-	public static Language fromId(Id id) {
-		for (Language language : values()) {
-			if (language.getConcept().id().equals(id)) {
-				return language;
+	public static LanguageCoordinate fromId(Id id) {
+		for (LanguageCoordinate languageCoordinate : values()) {
+			if (languageCoordinate.getConcept().id().equals(id)) {
+				return languageCoordinate;
 			}
 		}
 		throw new RuntimeException("Language not found");
@@ -72,7 +73,7 @@ public enum Language {
 
 	public static List<Facade> languageConcepts() {
 		return Arrays.stream(values())
-				.map(Language::getConcept)
+				.map(LanguageCoordinate::getConcept)
 				.toList();
 	}
 

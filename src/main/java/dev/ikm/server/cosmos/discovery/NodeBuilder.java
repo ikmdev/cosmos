@@ -101,9 +101,7 @@ public class NodeBuilder {
 
 	public Node buildSemanticChronology(SemanticEntity semanticEntity) {
 		List<String> values = new ArrayList<>();
-		values.add("Reference: " + calculatorService.getLanguageCalculator().getDescriptionTextOrNid(semanticEntity.referencedComponentNid()));
 		values.add("Pattern: " + calculatorService.getLanguageCalculator().getDescriptionTextOrNid(semanticEntity.patternNid()));
-
 		return makeNode(generateChronologyId(semanticEntity.nid()), semanticEntity.idString(), NodeType.SEMANTIC_CHRONOLOGY, values);
 	}
 

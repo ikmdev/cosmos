@@ -13,9 +13,9 @@
 
         <tr th:fragment="observatory-row(observatory)" th:id="${'observatory-' + observatory.id()}">
             <td th:text="${observatory.name()}"></td>
-            <td th:text="${observatory.stamp().name()}"></td>
-            <td th:text="${observatory.language().name()}"></td>
-            <td th:text="${observatory.navigation().name()}"></td>
+            <td th:text="${observatory.stampCoordinate().name()}"></td>
+            <td th:text="${observatory.languageCoordinate().name()}"></td>
+            <td th:text="${observatory.navigationCoordinate().name()}"></td>
             <td>
                 <th:block th:each="module : ${observatory.includedModules()}">
                     <span class="badge bg-primary-subtle text-primary-emphasis me-1 mb-1" th:text="${module.name()}"></span>

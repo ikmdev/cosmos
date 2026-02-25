@@ -1,11 +1,12 @@
 package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
-import dev.ikm.server.cosmos.calculator.Language;
-import dev.ikm.server.cosmos.calculator.Navigation;
-import dev.ikm.server.cosmos.calculator.Stamp;
+import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
+import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
+import dev.ikm.server.cosmos.calculator.StampCoordinate;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
+import dev.ikm.server.cosmos.ike.Type;
 import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.entity.EntityVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,8 @@ import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A factory for creating formatters that convert between a String (representing a NID)
@@ -65,19 +63,19 @@ public class StringToFacadeFormatterFactory implements AnnotationFormatterFactor
             }
 
             // 1. Check for well-known facades (from enums) using the pre-loaded map.
-            for (Stamp stamp : Stamp.values()) {
-                if (stamp.getNid() == nid) {
-                    return stamp.getConcept();
+            for (StampCoordinate stampCoordinate : StampCoordinate.values()) {
+                if (stampCoordinate.getNid() == nid) {
+                    return stampCoordinate.getConcept();
                 }
             }
-            for (Language language : Language.values()) {
-                if (language.getNid() == nid) {
-                    return language.getConcept();
+            for (LanguageCoordinate languageCoordinate : LanguageCoordinate.values()) {
+                if (languageCoordinate.getNid() == nid) {
+                    return languageCoordinate.getConcept();
                 }
             }
-            for (Navigation navigation : Navigation.values()) {
-                if (navigation.getNid() == nid) {
-                    return navigation.getConcept();
+            for (NavigationCoordinate navigationCoordinate : NavigationCoordinate.values()) {
+                if (navigationCoordinate.getNid() == nid) {
+                    return navigationCoordinate.getConcept();
                 }
             }
             // 2. If not in enums, look for Facade nid in the entity database
@@ -87,6 +85,7 @@ public class StringToFacadeFormatterFactory implements AnnotationFormatterFactor
                 Entity<? extends EntityVersion> entity = entityOptional.get();
                 return new Facade(
                         new Id(entity.nid(), entity.publicId().asUuidList().castToList()),
+                        Type.ENTITY,
                         calculatorService.calculateText(entity.publicId()));
             }
             return null;

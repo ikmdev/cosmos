@@ -3,6 +3,7 @@ package dev.ikm.server.cosmos.calculator;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.server.cosmos.ike.Type;
 import dev.ikm.server.cosmos.observatory.ObservatoryEntity;
 import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
 import dev.ikm.tinkar.common.id.IntIdSet;
@@ -47,18 +48,18 @@ public class CalculatorService {
 
 	public void setObservatory(UUID observatoryId) {
 		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(observatoryId);
-		setObservatory(observatoryEntity.stamp(), observatoryEntity.language(), observatoryEntity.navigation(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
+		setObservatory(observatoryEntity.stampCoordinate(), observatoryEntity.languageCoordinate(), observatoryEntity.navigationCoordinate(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
 
-	public void setObservatory(Stamp stamp, Language language, Navigation navigation, List<List<UUID>> includedModules, List<List<UUID>> excludedModules) {
+	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, List<List<UUID>> includedModules, List<List<UUID>> excludedModules) {
 		List<ConceptFacade> include = makeConceptFacadeList(includedModules);
 		IntIdSet exclude = makeIntIdSet(excludedModules);
-		this.stampCoordinateRecord = stamp.getRecord()
+		this.stampCoordinateRecord = stampCoordinate.getRecord()
 				.withModules(include)
 				.withExcludedModuleNids(exclude);
 
-		this.languageCoordinateRecord = language.getRecord();
-		this.navigationCoordinateRecord = navigation.getRecord();
+		this.languageCoordinateRecord = languageCoordinate.getRecord();
+		this.navigationCoordinateRecord = navigationCoordinate.getRecord();
 	}
 
 	private List<ConceptFacade> makeConceptFacadeList(List<List<UUID>> publicIds) {
@@ -89,107 +90,182 @@ public class CalculatorService {
 		return NavigationCalculatorWithCache.getCalculator(stampCoordinateRecord, Lists.immutable.of(languageCoordinateRecord), navigationCoordinateRecord);
 	}
 
-	public String calculateFQN(PublicId publicId) {
+	public String calculateFQN(int nid) {
 		return getLanguageCalculator()
-				.getFullyQualifiedNameText(Entity.nid(publicId))
-				.orElse("");
+				.getFullyQualifiedNameText(nid)
+				.orElse("ERROR: FQN NOT FOUND!");
+	}
+
+	public String calculateFQN(Facade facade) {
+		return calculateFQN(facade.id().nid());
+	}
+
+	public String calculateFQN(PublicId publicId) {
+		return calculateFQN(Entity.nid(publicId));
 	}
 
 	public String calculateFQN(UUID id) {
 		return calculateFQN(PublicIds.of(id));
 	}
 
-	public String calculateText(PublicId publicId) {
-		EntityFacade facade = ikeRepository.getEntityFacade(publicId);
+	public String calculateText(int nid) {
+		EntityFacade facade = EntityFacade.make(nid);
 		return getLanguageCalculator()
 				.getDescriptionText(facade)
-				.orElse("");
+				.orElse("ERROR: TEXT NOT FOUND!");
+	}
+
+	public String calculateText(Facade facade) {
+		return calculateText(facade.id().nid());
+	}
+
+	public String calculateText(PublicId publicId) {
+		return calculateText(Entity.nid(publicId));
 	}
 
 	public String calculateText(UUID id) {
 		return calculateText(PublicIds.of(id));
 	}
 
+	public String calculateSYN(int nid) {
+		return getLanguageCalculator()
+				.getRegularDescriptionText(nid)
+				.orElse("ERROR: SYN NOT FOUND!");
+	}
+
+	public String calculateSYN(Facade facade) {
+		return calculateSYN(facade.id().nid());
+	}
 
 	public String calculateSYN(PublicId publicId) {
-		return getLanguageCalculator()
-				.getRegularDescriptionText(Entity.nid(publicId))
-				.orElse("");
+		return calculateSYN(Entity.nid(publicId));
 	}
 
 	public String calculateSYN(UUID id) {
 		return calculateSYN(PublicIds.of(id));
 	}
 
-	public String calculateDEF(PublicId publicId) {
+	public String calculateDEF(int nid) {
 		return getLanguageCalculator()
-				.getDefinitionDescriptionText(Entity.nid(publicId))
-				.orElse("");
+				.getDefinitionDescriptionText(nid)
+				.orElse("ERROR: DEF NOT FOUND!");
+	}
+
+	public String calculateDEF(Facade facade) {
+		return calculateDEF(facade.id().nid());
+	}
+
+	public String calculateDEF(PublicId publicId) {
+		return calculateDEF(Entity.nid(publicId));
 	}
 
 	public String calculateDEF(UUID id) {
 		return calculateDEF(PublicIds.of(id));
 	}
 
-	public List<Facade> calculateChildren(PublicId publicId) {
+	private Facade toFacade(PublicId pId) {
+		return new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), Type.CONCEPT, calculateText(pId));
+	}
+
+	public List<Facade> calculateChildren(int nid) {
 		return getNavigationCalculator()
-				.childrenOf(Entity.nid(publicId))
+				.childrenOf(nid)
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
+				.map(this::toFacade)
 				.toList();
+	}
+
+	public List<Facade> calculateChildren(Facade facade) {
+		return calculateChildren(facade.id().nid());
+	}
+
+	public List<Facade> calculateChildren(PublicId publicId) {
+		return calculateChildren(Entity.nid(publicId));
 	}
 
 	public List<Facade> calculateChildren(UUID id) {
 		return calculateChildren(PublicIds.of(id));
 	}
 
-	public List<Facade> calculateParents(PublicId publicId) {
+	public List<Facade> calculateParents(int nid) {
 		return getNavigationCalculator()
-				.parentsOf(Entity.nid(publicId))
+				.parentsOf(nid)
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
+				.map(this::toFacade)
 				.toList();
+	}
+
+	public List<Facade> calculateParents(Facade facade) {
+		return calculateParents(facade.id().nid());
+	}
+
+	public List<Facade> calculateParents(PublicId publicId) {
+		return calculateParents(Entity.nid(publicId));
 	}
 
 	public List<Facade> calculateParents(UUID id) {
 		return calculateParents(PublicIds.of(id));
 	}
 
-	public List<Facade> calculateDescendants(PublicId publicId) {
+	public List<Facade> calculateDescendants(int nid) {
 		return getNavigationCalculator()
-				.descendentsOf(Entity.nid(publicId))
+				.descendentsOf(nid)
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
+				.map(this::toFacade)
 				.toList();
+	}
+
+	public List<Facade> calculateDescendants(Facade facade) {
+		return calculateDescendants(facade.id().nid());
+	}
+
+	public List<Facade> calculateDescendants(PublicId publicId) {
+		return calculateDescendants(Entity.nid(publicId));
 	}
 
 	public List<Facade> calculateDescendants(UUID id) {
 		return calculateDescendants(PublicIds.of(id));
 	}
 
-	public List<Facade> calculateAncestors(PublicId publicId) {
+	public List<Facade> calculateAncestors(int nid) {
 		return getNavigationCalculator()
-				.ancestorsOf(Entity.nid(publicId))
+				.ancestorsOf(nid)
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
+				.map(this::toFacade)
 				.toList();
+	}
+
+	public List<Facade> calculateAncestors(Facade facade) {
+		return calculateAncestors(facade.id().nid());
+	}
+
+	public List<Facade> calculateAncestors(PublicId publicId) {
+		return calculateAncestors(Entity.nid(publicId));
 	}
 
 	public List<Facade> calculateAncestors(UUID id) {
 		return calculateAncestors(PublicIds.of(id));
 	}
 
-	public List<Facade> calculateKinds(PublicId publicId) {
+	public List<Facade> calculateKinds(int nid) {
 		return getNavigationCalculator()
-				.kindOf(Entity.nid(publicId))
+				.kindOf(nid)
 				.mapToList(PrimitiveData::publicId)
 				.stream()
-				.map(pId -> new Facade(new Id(Entity.nid(pId), pId.asUuidList().castToList()), calculateText(pId)))
+				.map(this::toFacade)
 				.toList();
+	}
+
+	public List<Facade> calculateKinds(Facade facade) {
+		return calculateKinds(facade.id().nid());
+	}
+
+	public List<Facade> calculateKinds(PublicId publicId) {
+		return calculateKinds(Entity.nid(publicId));
 	}
 
 	public List<Facade> calculateKinds(UUID id) {

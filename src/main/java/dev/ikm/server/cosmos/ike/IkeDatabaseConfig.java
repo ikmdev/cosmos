@@ -25,7 +25,7 @@ public class IkeDatabaseConfig {
 	private final Logger LOG = LoggerFactory.getLogger(IkeDatabaseConfig.class);
 
 	private File directory;
-	private Type type;
+	private DatastoreType datastoreType;
 
 	public File getDirectory() {
 		return directory;
@@ -35,12 +35,12 @@ public class IkeDatabaseConfig {
 		this.directory = directory;
 	}
 
-	public Type getType() {
-		return type;
+	public DatastoreType getDatastoreType() {
+		return datastoreType;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setDatastoreType(DatastoreType datastoreType) {
+		this.datastoreType = datastoreType;
 	}
 
 	@PostConstruct
@@ -52,16 +52,16 @@ public class IkeDatabaseConfig {
 		LOG.info("Clear database cache");
 
 		//Set up the correct database controller by name
-		switch (type) {
+		switch (datastoreType) {
 			case SA, MV -> {
 				if (directory.isDirectory() && directory.exists()) {
 					ServiceProperties.set(ServiceKeys.DATA_STORE_ROOT, directory);
-					PrimitiveData.selectControllerByName(type.getName());
+					PrimitiveData.selectControllerByName(datastoreType.getName());
 				}
 			}
 			case null, default -> {
-				LOG.warn("Unsupported database type: {}", type);
-				throw new RuntimeException("Unsupported database type: " + type);
+				LOG.warn("Unsupported database type: {}", datastoreType);
+				throw new RuntimeException("Unsupported database type: " + datastoreType);
 			}
 		}
 

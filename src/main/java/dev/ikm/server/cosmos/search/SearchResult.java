@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.discovery;
+package dev.ikm.server.cosmos.search;
 
 import java.util.List;
 import java.util.UUID;

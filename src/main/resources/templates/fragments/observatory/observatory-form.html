@@ -64,7 +64,8 @@
                         <label for="includedModuleSelect">Included Modules</label>
                         <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect"
                                 multiple
-                                aria-label="Multiple select for Included Modules">
+                                aria-label="Multiple select for Included Modules"
+                                style="min-height: 250px;">
                             <option
                                     th:each="module : ${observatoryForm.modules()}"
                                     th:value="${module.id().nid()}"
@@ -75,7 +76,8 @@
                         <label for="excludedModuleSelect">Excluded Modules</label>
                         <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect"
                                 multiple
-                                aria-label="Multiple select for Excluded Modules">
+                                aria-label="Multiple select for Excluded Modules"
+                                style="min-height: 250px;">
                             <option
                                     th:each="module : ${observatoryForm.modules()}"
                                     th:value="${module.id().nid()}"
@@ -91,11 +93,11 @@
             <div class="card-header">Scope</div>
             <div class="card-body">
                 <div class="row mb-3">
-                    <div id="scope-search" class="col-md-12">
-                        <div class="input-group mb-12">
-                            <button class="btn btn-outline-secondary" type="button" id="scope-search-button">
+                    <div id="scope-search" class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text" id="scope-search-button">
                                 <i class="bi bi-search"></i>
-                            </button>
+                            </span>
                             <input type="text" class="form-control" placeholder="Search scopes..." name="query"
                                    aria-label="Search scopes" id="scope-search-input"
                                    hx-get="/observatory/scope/search"
@@ -104,25 +106,20 @@
                                    hx-target="#scope-search-results"
                                    hx-swap="innerHTML"
                                    hx-indicator="#search-indicator">
-                            <button class="btn btn-outline-danger" type="button" id="scope-search-clear"
-                                    onclick="document.getElementById('scope-search-input').value = ''; document.getElementById('scope-search-results').innerHTML = '';">
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
-                        <div id="search-indicator" class="htmx-indicator text-center p-2">
-                            <div class="spinner-border spinner-border-sm" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                        <ul class="list-group" id="scope-search-results" style="max-height: 250px; overflow-y: auto;">
+                        <ul class="list-group" id="scope-search-results"
+                            style="max-height: 250px; overflow-y: auto;">
                             <!-- HTMX will populate search results here -->
                         </ul>
+                    </div>
+                    <div class="col-md-6">
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+    <button datastoreType="submit" class="btn btn-primary">Create</button>
 </form>
 </body>
 </html>

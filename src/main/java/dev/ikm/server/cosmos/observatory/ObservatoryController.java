@@ -136,7 +136,7 @@ public class ObservatoryController {
 			@PageableDefault(size = 10, page = 0) Pageable pageable,
 			Model model) {
 		// Assumes observatoryService.search is updated to return a Page
-		Page<ScopeSearchResult> searchResults = observatoryService.search(query, pageable);
+		Page<ScopeSearchResult> searchResults = observatoryService.searchForParentsOnly(query, pageable);
 		model.addAttribute("scopeSearchResultsPage", searchResults);
 		model.addAttribute("query", query);
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();

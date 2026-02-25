@@ -2,6 +2,7 @@ package dev.ikm.server.cosmos.calculator;
 
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
+import dev.ikm.server.cosmos.ike.Type;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.Coordinates;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public enum Stamp {
+public enum StampCoordinate {
 
 	DEV_LATEST("Latest on the Development Path", List.of(UUID.fromString("1767ad74-0b89-4601-b293-89dc0c51917a")), Coordinates.Stamp.DevelopmentLatest()),
 	DEV_LATEST_ACTIVE_ONLY("Latest Active on the Development Path", List.of(UUID.fromString("6a5091d1-d30a-4a31-bfc1-bcf09639574e")), Coordinates.Stamp.DevelopmentLatestActiveOnly()),
@@ -25,13 +26,13 @@ public enum Stamp {
 	private final List<UUID> uuids;
 	private final StampCoordinateRecord record;
 
-	Stamp(String name, List<UUID> uuids, StampCoordinateRecord record) {
+	StampCoordinate(String name, List<UUID> uuids, StampCoordinateRecord record) {
 		this.name = name;
 		this.uuids = uuids;
 		this.record = record;
 		PublicId publicId = PublicIds.of(uuids);
 		int nid = Entity.nid(publicId);
-		this.facade = new Facade(new Id(nid, this.uuids), this.name);
+		this.facade = new Facade(new Id(nid, this.uuids), Type.COORDINATE, this.name);
 	}
 
 	public String getName() {
@@ -47,7 +48,7 @@ public enum Stamp {
 	}
 
 	public static StampCoordinateRecord toRecord(UUID uuid) {
-		for (Stamp coord : Stamp.values()) {
+		for (StampCoordinate coord : StampCoordinate.values()) {
 			if (coord.uuids.contains(uuid)) {
 				return coord.getRecord();
 			}
@@ -55,10 +56,10 @@ public enum Stamp {
 		return DEV_LATEST.getRecord();
 	}
 
-	public static Stamp fromId(Id id) {
-		for (Stamp stamp : values()) {
-			if (stamp.getConcept().id().equals(id)) {
-				return stamp;
+	public static StampCoordinate fromId(Id id) {
+		for (StampCoordinate stampCoordinate : values()) {
+			if (stampCoordinate.getConcept().id().equals(id)) {
+				return stampCoordinate;
 			}
 		}
 		throw new RuntimeException("Stamp not found");
@@ -70,7 +71,7 @@ public enum Stamp {
 
 	public static List<Facade> stampConcepts() {
 		return Arrays.stream(values())
-				.map(Stamp::getConcept)
+				.map(StampCoordinate::getConcept)
 				.toList();
 	}
 

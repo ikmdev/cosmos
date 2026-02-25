@@ -1,7 +1,11 @@
 package dev.ikm.server.cosmos.discovery;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.server.cosmos.ike.Type;
+import dev.ikm.server.cosmos.search.SearchResult;
+import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.ConceptEntity;
@@ -17,6 +21,8 @@ import dev.ikm.tinkar.entity.StampEntityVersion;
 import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,28 +46,24 @@ public class DiscoveryService {
 		this.nodeBuilder = nodeBuilder;
 	}
 
-	private Function<SearchResult, Node> transformToNode() {
-		return searchResult -> {
-			Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
-			if (latest.isPresent()) {
-				SemanticEntityVersion semanticEntityVersion = latest.get();
-				return nodeBuilder.buildSemanticVersion(semanticEntityVersion);
-			} else {
-				throw new IllegalStateException("Semantic entity version not found for latest version of search result");
-			}
-		};
-	}
-
 	public ExplorerData buildExplorationVisualization(ExplorerSearchForm explorerSearchForm) {
 		List<Link> links = new ArrayList<>();
 
 		int maxResults = explorerSearchForm.maxResults() != null ? explorerSearchForm.maxResults() : 1;
-		List<Node> nodes = new ArrayList<>(
-				searchService.tinkarDataSearch(
-						explorerSearchForm.query(),
-						maxResults,
-						SearchService.SortType.SEMANTIC_SCORE,
-						transformToNode()));
+
+		Page<Facade> searchResults = searchService.searchConcepts(
+				explorerSearchForm.query(),
+				Pageable.ofSize(maxResults),
+				SearchService.SortType.SEMANTIC_SCORE);
+
+		List<Node> nodes = searchResults.getContent().stream()
+				.map(facade -> {
+					Entity<? extends EntityVersion> entity = Entity.getFast(facade.id().nid());
+					ConceptEntity<? extends ConceptEntityVersion> conceptEntity = (ConceptEntity<? extends ConceptEntityVersion>) entity;
+					return nodeBuilder.buildConceptChronology(conceptEntity);
+				})
+				.toList();
+
 		return new ExplorerData(nodes, links);
 	}
 
@@ -351,7 +353,7 @@ public class DiscoveryService {
 				Link chronologyToVersion = new Link("", nodeId, versionNode.id());
 				links.add(chronologyToVersion);
 			}
-				
+
 		}
 
 	}

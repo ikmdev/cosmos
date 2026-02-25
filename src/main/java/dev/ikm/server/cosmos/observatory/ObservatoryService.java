@@ -2,36 +2,33 @@
 package dev.ikm.server.cosmos.observatory;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
-import dev.ikm.server.cosmos.calculator.Language;
-import dev.ikm.server.cosmos.calculator.Navigation;
-import dev.ikm.server.cosmos.calculator.Stamp;
-import dev.ikm.server.cosmos.discovery.SearchResult;
-import dev.ikm.server.cosmos.discovery.SearchService;
+import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
+import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
+import dev.ikm.server.cosmos.calculator.StampCoordinate;
+import dev.ikm.server.cosmos.ike.Type;
+import dev.ikm.server.cosmos.search.SearchResult;
+import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
-import dev.ikm.tinkar.entity.ConceptEntity;
 import dev.ikm.tinkar.entity.Entity;
-import dev.ikm.tinkar.entity.EntityVersion;
-import dev.ikm.tinkar.entity.SemanticEntity;
-import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.terms.EntityFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ObservatoryService {
@@ -53,21 +50,21 @@ public class ObservatoryService {
 		return new Observatory(
 				observatoryEntity.id(),
 				observatoryEntity.name(),
-				observatoryEntity.stamp().getConcept(),
-				observatoryEntity.language().getConcept(),
-				observatoryEntity.navigation().getConcept(),
+				observatoryEntity.stampCoordinate().getConcept(),
+				observatoryEntity.languageCoordinate().getConcept(),
+				observatoryEntity.navigationCoordinate().getConcept(),
 				observatoryEntity.includedModules().stream()
-						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), calculatorService.calculateText(PublicIds.of(uuids))))
+						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), Type.CONCEPT, calculatorService.calculateText(PublicIds.of(uuids))))
 						.toList(),
 				observatoryEntity.excludedModules().stream()
-						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), calculatorService.calculateText(PublicIds.of(uuids))))
+						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), Type.CONCEPT, calculatorService.calculateText(PublicIds.of(uuids))))
 						.toList());
 	}
 
 	private ObservatoryEntity buildObservatoryEntity(Observatory observatory) {
-		Stamp stamp = Stamp.fromId(observatory.stamp().id());
-		Language language = Language.fromId(observatory.language().id());
-		Navigation navigation = Navigation.fromId(observatory.navigation().id());
+		StampCoordinate stampCoordinate = StampCoordinate.fromId(observatory.stampCoordinate().id());
+		LanguageCoordinate languageCoordinate = LanguageCoordinate.fromId(observatory.languageCoordinate().id());
+		NavigationCoordinate navigationCoordinate = NavigationCoordinate.fromId(observatory.navigationCoordinate().id());
 		List<List<UUID>> includedModules = observatory.includedModules().stream()
 				.map(component -> PublicIds.of(component.id().uuids()))
 				.map(publicId -> publicId.asUuidList().castToList())
@@ -76,7 +73,7 @@ public class ObservatoryService {
 				.map(component -> PublicIds.of(component.id().uuids()))
 				.map(publicId -> publicId.asUuidList().castToList())
 				.toList();
-		return new ObservatoryEntity(observatory.id(), Instant.now(), observatory.name(), stamp, language, navigation, includedModules, excludedModules);
+		return new ObservatoryEntity(observatory.id(), Instant.now(), observatory.name(), stampCoordinate, languageCoordinate, navigationCoordinate, includedModules, excludedModules);
 	}
 
 	public Observatory saveNewObservatory(ObservatoryForm observatoryForm) {
@@ -119,20 +116,20 @@ public class ObservatoryService {
 	public List<Facade> retrieveModules() {
 		List<PublicId> publicIds = ikeRepository.findAllModules();
 		return publicIds.stream()
-				.map(publicId -> new Facade(new Id(Entity.nid(publicId), Arrays.asList(publicId.asUuidArray())), calculatorService.calculateText(publicId)))
+				.map(publicId -> new Facade(new Id(Entity.nid(publicId), Arrays.asList(publicId.asUuidArray())), Type.CONCEPT, calculatorService.calculateText(publicId)))
 				.toList();
 	}
 
 	public List<Facade> retrieveStamps() {
-		return Stamp.stampConcepts();
+		return StampCoordinate.stampConcepts();
 	}
 
 	public List<Facade> retrieveLanguages() {
-		return Language.languageConcepts();
+		return LanguageCoordinate.languageConcepts();
 	}
 
 	public List<Facade> retrieveNavigations() {
-		return Navigation.navigationConcepts();
+		return NavigationCoordinate.navigationConcepts();
 	}
 
 	public TreeNode retrieveHierarchy() {
@@ -148,21 +145,11 @@ public class ObservatoryService {
 
 	}
 
-	private Function<SearchResult, ScopeSearchResult> transformToScopeSearchResult() {
-		return searchResult -> {
-			int conceptNid = ikeRepository.findLatestSemanticById(searchResult.id()).get().chronology().referencedComponent().nid();
-			Facade facade = new Facade(new Id(conceptNid, searchResult.id()), calculatorService.getLanguageCalculator().getDescriptionTextOrNid(EntityFacade.make(conceptNid)));
-			return new ScopeSearchResult(facade,
-					calculatorService.getNavigationCalculator().childrenOf(facade.id().nid()).size(),
-					calculatorService.getNavigationCalculator().descendentsOf(facade.id().nid()).size());
-		};
-	}
+	public Page<ScopeSearchResult> searchForParentsOnly(String query, Pageable pageable) {
 
-	public Page<ScopeSearchResult> search(String query, Pageable pageable) {
-		return searchService.tinkarDataSearch(
-				query,
+		return new PageImpl<>(
+				List.of(),
 				pageable,
-				SearchService.SortType.SEMANTIC_SCORE,
-				transformToScopeSearchResult());
+				1);
 	}
 }

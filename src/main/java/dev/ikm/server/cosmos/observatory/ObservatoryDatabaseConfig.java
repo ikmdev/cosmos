@@ -1,8 +1,8 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.calculator.Language;
-import dev.ikm.server.cosmos.calculator.Navigation;
-import dev.ikm.server.cosmos.calculator.Stamp;
+import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
+import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
+import dev.ikm.server.cosmos.calculator.StampCoordinate;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.mapdb.DB;
@@ -65,9 +65,9 @@ public class ObservatoryDatabaseConfig {
 						DEFAULT_OBSERVATORY_ID,
 						Instant.now(),
 						"Default Observatory",
-						Stamp.DEV_LATEST,
-						Language.US_ENG_REG,
-						Navigation.INFERRED,
+						StampCoordinate.DEV_LATEST,
+						LanguageCoordinate.US_ENG_REG,
+						NavigationCoordinate.INFERRED,
 						List.of(),
 						List.of()));
 			}
