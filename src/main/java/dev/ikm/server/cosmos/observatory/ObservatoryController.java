@@ -128,13 +128,24 @@ public class ObservatoryController {
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
 	}
 	@HxRequest
-	@GetMapping("/observatory/scope/children")
-	public FragmentsRendering getChildren(
+	@GetMapping("/observatory/scope/descend")
+	public FragmentsRendering getDescent(
 			@RequestParam("nid") @StringToFacade Facade scope,
 			Model model) {
 		model.addAttribute("scope", scope);
 		model.addAttribute("children", observatoryService.retrieveChildren(scope));
+		observatoryService.retrieveParent(scope).ifPresent(parent -> model.addAttribute("parent", parent));
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
 	}
 
+	@HxRequest
+	@GetMapping("/observatory/scope/ascend")
+	public FragmentsRendering getAscent(
+			@RequestParam("nid") @StringToFacade Facade scope,
+			Model model) {
+		model.addAttribute("scope", scope);
+		model.addAttribute("children", observatoryService.retrieveChildren(scope));
+		observatoryService.retrieveParent(scope).ifPresent(parent -> model.addAttribute("parent", parent));
+		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
+	}
 }

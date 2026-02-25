@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -137,5 +138,11 @@ public class ObservatoryService {
 
 	public List<Facade> retrieveChildren(Facade facade) {
 		return calculatorService.calculateChildren(facade);
+	}
+
+	public Optional<Facade> retrieveParent(Facade facade) {
+		// This assumes a method exists in CalculatorService to get parents.
+		// It returns the first parent found, which is suitable for a simple tree-like navigation.
+		return calculatorService.calculateParents(facade).stream().findFirst();
 	}
 }
