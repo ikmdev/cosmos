@@ -6,6 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,7 +55,6 @@ public class ObservatoryController {
 				List.of(),
 				List.of(),
 				List.of()));
-		model.addAttribute("scopeSearchForm", new ScopeSearchForm(""));
 	}
 
 	@GetMapping("/observatory")
@@ -124,6 +127,19 @@ public class ObservatoryController {
 		return FragmentsRendering
 				.with("fragments/observatory/observatory-form :: children-fragment")
 				.build();
+	}
+
+	@HxRequest
+	@GetMapping("/observatory/scope/search")
+	public FragmentsRendering getSearchResults(
+			@RequestParam(value = "query", required = false, defaultValue = "") String query,
+			@PageableDefault(size = 10, page = 0) Pageable pageable,
+			Model model) {
+		// Assumes observatoryService.search is updated to return a Page
+		Page<ScopeSearchResult> searchResults = observatoryService.search(query, pageable);
+		model.addAttribute("scopeSearchResultsPage", searchResults);
+		model.addAttribute("query", query);
+		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
 	}
 
 }

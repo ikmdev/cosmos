@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<head>
+    <title>Observatory Table Row</title>
+</head>
+<body>
+<header></header>
+<main>
+    <th:block th:fragment="search-results-list">
+        <!-- Renders the results for the current page -->
+        <li th:each="result : ${scopeSearchResultsPage.content}"
+            class="list-group-item d-flex justify-content-between align-items-center">
+
+            <span th:text="${result.facade.name}">Search Result Text</span>
+
+            <div>
+                <span class="badge bg-primary rounded-pill"
+                      title="Children Count"
+                      th:text="${result.childrenCount}"></span>
+                <span class="badge bg-secondary rounded-pill ms-1"
+                      title="Descendant Count"
+                      th:text="${result.descendantCount}"></span>
+                <!-- TODO: This checkbox needs to be wired up to add the scope to the form -->
+                <input class="form-check-input ms-2" type="checkbox" name="selectedScopes" th:value="${result.facade.id.nid}">
+            </div>
+        </li>
+
+        <!-- If there is a next page, render the 'Load More' button -->
+        <li th:if="${!scopeSearchResultsPage.last}" class="list-group-item p-0">
+            <button class="btn btn-outline-secondary w-100 border-0"
+                    th:hx-get="@{/observatory/scope/search(query=${query}, page=${scopeSearchResultsPage.number + 1})}"
+                    hx-swap="outerHTML"
+                    hx-target="closest li">Load More...</button>        </li>
+    </th:block>
+</main>
+</body>
+</html>

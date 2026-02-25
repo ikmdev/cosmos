@@ -18,81 +18,111 @@
                placeholder="Default Name" autocomplete="off">
     </div>
     <div class="mb-3">
-        <label for="stampSelect">STAMP</label>
-        <select th:field="*{selectedStampCoordinate}" class="form-select"
-                id="stampSelect">
-            <option
-                    th:each="stampCoordinate : ${observatoryForm.stampCoordinates()}"
-                    th:value="${stampCoordinate.id().nid()}"
-                    th:text="${stampCoordinate.name()}"></option>
-        </select>
-    </div>
+        <div class="card mb-3">
+            <div class="card-header">Coordinate</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <label for="stampSelect">STAMP</label>
+                    <select th:field="*{selectedStampCoordinate}" class="form-select"
+                            id="stampSelect">
+                        <option
+                                th:each="stampCoordinate : ${observatoryForm.stampCoordinates()}"
+                                th:value="${stampCoordinate.id().nid()}"
+                                th:text="${stampCoordinate.name()}"></option>
+                    </select>
+                </div>
+                <div class="row mb-3">
+                    <label for="languageSelect">Language</label>
+                    <select th:field="*{selectedLanguageCoordinate}" class="form-select"
+                            id="languageSelect">
+                        <option
+                                th:each="languageCoordinate : ${observatoryForm.languageCoordinates()}"
+                                th:value="${languageCoordinate.id().nid()}"
+                                th:text="${languageCoordinate.name()}"></option>
+                    </select>
+                </div>
 
-    <div class="mb-3">
-        <label for="languageSelect">Language</label>
-        <select th:field="*{selectedLanguageCoordinate}" class="form-select"
-                id="languageSelect">
-            <option
-                    th:each="languageCoordinate : ${observatoryForm.languageCoordinates()}"
-                    th:value="${languageCoordinate.id().nid()}"
-                    th:text="${languageCoordinate.name()}"></option>
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="navigationSelect">Navigation</label>
-        <select th:field="*{selectedNavigationCoordinate}" class="form-select"
-                id="navigationSelect">
-            <option
-                    th:each="navigationCoordinate : ${observatoryForm.navigationCoordinates()}"
-                    th:value="${navigationCoordinate.id().nid()}"
-                    th:text="${navigationCoordinate.name()}"></option>
-        </select>
-    </div>
-    <div class="row mb-3">
-        <div class="col">
-            <label for="includedModuleSelect">Included Modules</label>
-            <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect" multiple
-                    aria-label="Multiple select for Included Modules">
-                <option
-                        th:each="module : ${observatoryForm.modules()}"
-                        th:value="${module.id().nid()}"
-                        th:text="${module.name()}"></option>
-            </select>
-        </div>
-        <div class="col">
-            <label for="excludedModuleSelect">Excluded Modules</label>
-            <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect" multiple
-                    aria-label="Multiple select for Excluded Modules">
-                <option
-                        th:each="module : ${observatoryForm.modules()}"
-                        th:value="${module.id().nid()}"
-                        th:text="${module.name()}"></option>
-            </select>
+                <div class="row mb-3">
+                    <label for="navigationSelect">Navigation</label>
+                    <select th:field="*{selectedNavigationCoordinate}" class="form-select"
+                            id="navigationSelect">
+                        <option
+                                th:each="navigationCoordinate : ${observatoryForm.navigationCoordinates()}"
+                                th:value="${navigationCoordinate.id().nid()}"
+                                th:text="${navigationCoordinate.name()}"></option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
     <div class="mb-3">
-        <label class="form-label">Hierarchy Scope</label>
-        <div id="scope-tree-view"></div>
+        <div class="card mb-3">
+            <div class="card-header">Modularity</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="includedModuleSelect">Included Modules</label>
+                        <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect"
+                                multiple
+                                aria-label="Multiple select for Included Modules">
+                            <option
+                                    th:each="module : ${observatoryForm.modules()}"
+                                    th:value="${module.id().nid()}"
+                                    th:text="${module.name()}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="excludedModuleSelect">Excluded Modules</label>
+                        <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect"
+                                multiple
+                                aria-label="Multiple select for Excluded Modules">
+                            <option
+                                    th:each="module : ${observatoryForm.modules()}"
+                                    th:value="${module.id().nid()}"
+                                    th:text="${module.name()}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="card mb-3">
+            <div class="card-header">Scope</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div id="scope-search" class="col-md-12">
+                        <div class="input-group mb-12">
+                            <button class="btn btn-outline-secondary" type="button" id="scope-search-button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <input type="text" class="form-control" placeholder="Search scopes..." name="query"
+                                   aria-label="Search scopes" id="scope-search-input"
+                                   hx-get="/observatory/scope/search"
+                                   hx-vals='{"page": "0"}'
+                                   hx-trigger="keyup changed delay:300ms"
+                                   hx-target="#scope-search-results"
+                                   hx-swap="innerHTML"
+                                   hx-indicator="#search-indicator">
+                            <button class="btn btn-outline-danger" type="button" id="scope-search-clear"
+                                    onclick="document.getElementById('scope-search-input').value = ''; document.getElementById('scope-search-results').innerHTML = '';">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div id="search-indicator" class="htmx-indicator text-center p-2">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <ul class="list-group" id="scope-search-results" style="max-height: 250px; overflow-y: auto;">
+                            <!-- HTMX will populate search results here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
-
-    <script th:inline="javascript">
-    {
-        const treeViewDiv = document.getElementById('scope-tree-view');
-        const hierarchyData = /*[[${observatoryForm.hierarchy}]]*/ null;
-        console.log(hierarchyData);
-        console.log(treeViewDiv);
-
-        // --- Quercus Tree Initialization ---
-        const tree1 = new Treeview({
-            containerId: 'scope-tree-view',   // ID of the HTML element to render the tree into
-            data: hierarchyData,             // Your hierarchical data
-            searchEnabled: true,          // Enable the search bar (default: true)
-            initiallyExpanded: false,     // Start with nodes collapsed (default: false)
-            multiSelectEnabled: true     // Enable multi-selection by clicking nodes
-        });
-    }
-    </script>
 </form>
 </body>
 </html>

@@ -5,12 +5,18 @@ import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.util.text.NaturalOrder;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.coordinate.stamp.calculator.LatestVersionSearchResult;
-import dev.ikm.tinkar.entity.EntityVersion;
-import org.eclipse.collections.api.list.ImmutableList;
+import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Service
 public class SearchService {
@@ -29,45 +35,57 @@ public class SearchService {
 		this.ikeRepository = ikeRepository;
 	}
 
-	public List<SearchResult> tinkarDataSearch(String query, int maxResults, SortType sortType) {
-		ImmutableList<LatestVersionSearchResult> unsortedResults = search(query, maxResults);
-		return switch (sortType) {
-			case NATURAL_ORDER -> transformToSearchResults(sortResultByNaturalOrder(unsortedResults));
-			case SEMANTIC_SCORE -> transformToSearchResults(sortResultsBySemanticScore(unsortedResults));
+	//TODO-need to overhaul this to return a Facade aware record. SearchResult is using List<UUID> to represent publicIds
+	public <T> List<T> tinkarDataSearch(String query, int maxResults, SortType sortType, Function<SearchResult, T> transformer) {
+		return tinkarDataSearch(query, PageRequest.of(0, maxResults), sortType, transformer).getContent();
+	}
+
+	public <T> Page<T> tinkarDataSearch(String query, Pageable pageable, SortType sortType, Function<SearchResult, T> transformer) {
+		List<SearchResult> allSearchResults = switch (sortType) {
+			case NATURAL_ORDER -> search(query, naturalOrderComparator());
+			case SEMANTIC_SCORE -> search(query, semanticScoreComparator());
 		};
-	}
-
-	private List<SearchResult> transformToSearchResults(ImmutableList<LatestVersionSearchResult> results) {
-		return results.stream()
-				.map(LatestVersionSearchResult::latestVersion)
-				.filter(Latest::isPresent)
-				.map(Latest::get)
-				.map(EntityVersion::publicId)
-				.map(publicId -> new SearchResult(ikeRepository.getIds(publicId), calculatorService.calculateText(publicId)))
+		List<T> searchResults = allSearchResults.stream()
+				.skip(pageable.getOffset())
+				.limit(pageable.getPageSize())
+				.map(transformer)
 				.toList();
+		return new PageImpl<>(searchResults, pageable, allSearchResults.size());
 	}
 
-	private ImmutableList<LatestVersionSearchResult> search(String query, int maxResults) {
+	private List<SearchResult> search(String query, Comparator<LatestVersionSearchResult> comparator) {
 		try {
-			return calculatorService.getStampCalculator().search(query, maxResults);
+			return calculatorService.getStampCalculator().search(query, 10_000)
+					.stream()
+					.sorted(comparator)
+					.map(this::transformToSearchResults)
+					.toList();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private ImmutableList<LatestVersionSearchResult> sortResultsBySemanticScore(ImmutableList<LatestVersionSearchResult> results) {
-		return results
-				.toSortedList((o1, o2) -> Float.compare(o2.score(), o1.score()))
-				.toImmutable();
+	private Comparator<LatestVersionSearchResult> semanticScoreComparator() {
+		return (o1, o2) -> Float.compare(o2.score(), o1.score());
 	}
 
-	private ImmutableList<LatestVersionSearchResult> sortResultByNaturalOrder(ImmutableList<LatestVersionSearchResult> results) {
-		return results
-				.toSortedList((o1, o2) -> {
-					String string1 = (String) o1.latestVersion().get().fieldValues().get(o1.fieldIndex());
-					String string2 = (String) o2.latestVersion().get().fieldValues().get(o2.fieldIndex());
-					return NaturalOrder.compareStrings(string1, string2);
-				})
-				.toImmutable();
+	private Comparator<LatestVersionSearchResult> naturalOrderComparator() {
+		return (o1, o2) -> {
+			String string1 = (String) o1.latestVersion().get().fieldValues().get(o1.fieldIndex());
+			String string2 = (String) o2.latestVersion().get().fieldValues().get(o2.fieldIndex());
+			return NaturalOrder.compareStrings(string1, string2);
+		};
 	}
+
+	private SearchResult transformToSearchResults(LatestVersionSearchResult latestVersionSearchResult) {
+		Latest<SemanticEntityVersion> semanticEntityVersionLatest = latestVersionSearchResult.latestVersion();
+		if (semanticEntityVersionLatest.isPresent()) {
+			return new SearchResult(
+					ikeRepository.getIds(semanticEntityVersionLatest.get().publicId()),
+					calculatorService.calculateText(semanticEntityVersionLatest.get().publicId()));
+		} else {
+			throw new IllegalStateException("Semantic entity version not found for latest version of search result");
+		}
+	}
+
 }

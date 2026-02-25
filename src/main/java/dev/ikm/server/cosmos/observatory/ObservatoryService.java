@@ -5,20 +5,33 @@ import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.calculator.Language;
 import dev.ikm.server.cosmos.calculator.Navigation;
 import dev.ikm.server.cosmos.calculator.Stamp;
+import dev.ikm.server.cosmos.discovery.SearchResult;
+import dev.ikm.server.cosmos.discovery.SearchService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
+import dev.ikm.tinkar.entity.ConceptEntity;
 import dev.ikm.tinkar.entity.Entity;
+import dev.ikm.tinkar.entity.EntityVersion;
+import dev.ikm.tinkar.entity.SemanticEntity;
+import dev.ikm.tinkar.entity.SemanticEntityVersion;
+import dev.ikm.tinkar.terms.EntityFacade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 public class ObservatoryService {
@@ -26,12 +39,14 @@ public class ObservatoryService {
 	private final ObservatoryRepository observatoryRepository;
 	private final CalculatorService calculatorService;
 	private final IkeRepository ikeRepository;
+	private final SearchService searchService;
 
 	@Autowired
-	public ObservatoryService(ObservatoryRepository observatoryRepository, CalculatorService calculatorService, IkeRepository ikeRepository) {
+	public ObservatoryService(ObservatoryRepository observatoryRepository, CalculatorService calculatorService, IkeRepository ikeRepository, SearchService searchService) {
 		this.observatoryRepository = observatoryRepository;
 		this.calculatorService = calculatorService;
 		this.ikeRepository = ikeRepository;
+		this.searchService = searchService;
 	}
 
 	private Observatory buildObservatory(ObservatoryEntity observatoryEntity) {
@@ -123,7 +138,7 @@ public class ObservatoryService {
 	public TreeNode retrieveHierarchy() {
 		// Return only the root node, with an empty list of children, but mark it as expandable.
 		// The client will use HTMX to fetch children when the user expands this node.
-		return new TreeNode(1, "Root", false, List.of(new TreeNode(2, "Child A", true, List.of()),new TreeNode(3, "Child B", true, List.of())));
+		return new TreeNode(1, "Root", false, List.of(new TreeNode(2, "Child A", true, List.of()), new TreeNode(3, "Child B", true, List.of())));
 	}
 
 	public List<TreeNode> retrieveChildren(String parentId) {
@@ -133,7 +148,21 @@ public class ObservatoryService {
 
 	}
 
-	public List<Facade> retrieveDescendants(Facade facade) {
-		return List.of();
+	private Function<SearchResult, ScopeSearchResult> transformToScopeSearchResult() {
+		return searchResult -> {
+			int conceptNid = ikeRepository.findLatestSemanticById(searchResult.id()).get().chronology().referencedComponent().nid();
+			Facade facade = new Facade(new Id(conceptNid, searchResult.id()), calculatorService.getLanguageCalculator().getDescriptionTextOrNid(EntityFacade.make(conceptNid)));
+			return new ScopeSearchResult(facade,
+					calculatorService.getNavigationCalculator().childrenOf(facade.id().nid()).size(),
+					calculatorService.getNavigationCalculator().descendentsOf(facade.id().nid()).size());
+		};
+	}
+
+	public Page<ScopeSearchResult> search(String query, Pageable pageable) {
+		return searchService.tinkarDataSearch(
+				query,
+				pageable,
+				SearchService.SortType.SEMANTIC_SCORE,
+				transformToScopeSearchResult());
 	}
 }

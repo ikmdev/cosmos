@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class DiscoveryService {
@@ -39,21 +40,28 @@ public class DiscoveryService {
 		this.nodeBuilder = nodeBuilder;
 	}
 
+	private Function<SearchResult, Node> transformToNode() {
+		return searchResult -> {
+			Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
+			if (latest.isPresent()) {
+				SemanticEntityVersion semanticEntityVersion = latest.get();
+				return nodeBuilder.buildSemanticVersion(semanticEntityVersion);
+			} else {
+				throw new IllegalStateException("Semantic entity version not found for latest version of search result");
+			}
+		};
+	}
+
 	public ExplorerData buildExplorationVisualization(ExplorerSearchForm explorerSearchForm) {
-		List<Node> nodes = new ArrayList<>();
 		List<Link> links = new ArrayList<>();
 
 		int maxResults = explorerSearchForm.maxResults() != null ? explorerSearchForm.maxResults() : 1;
-		searchService.tinkarDataSearch(explorerSearchForm.query(), maxResults, SearchService.SortType.SEMANTIC_SCORE)
-				.forEach(searchResult -> {
-					Latest<SemanticEntityVersion> latest = ikeRepository.findLatestSemanticById(searchResult.id());
-					if (latest.isPresent()) {
-						SemanticEntityVersion semanticEntityVersion = latest.get();
-						Node versionNode = nodeBuilder.buildSemanticVersion(semanticEntityVersion);
-						nodes.add(versionNode);
-					}
-				});
-
+		List<Node> nodes = new ArrayList<>(
+				searchService.tinkarDataSearch(
+						explorerSearchForm.query(),
+						maxResults,
+						SearchService.SortType.SEMANTIC_SCORE,
+						transformToNode()));
 		return new ExplorerData(nodes, links);
 	}
 
