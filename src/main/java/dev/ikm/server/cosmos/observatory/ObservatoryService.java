@@ -148,9 +148,7 @@ public class ObservatoryService {
 				calculatorService.calculateText(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId())));
 	}
 
-	public Optional<Facade> retrieveParent(Facade facade) {
-		// This assumes a method exists in CalculatorService to get parents.
-		// It returns the first parent found, which is suitable for a simple tree-like navigation.
-		return calculatorService.calculateParents(facade).stream().findFirst();
+	public Optional<List<Facade>> retrieveParents(Facade facade) {
+		return Optional.of(calculatorService.calculateParents(facade));
 	}
 }

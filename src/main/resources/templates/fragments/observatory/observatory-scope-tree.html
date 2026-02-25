@@ -4,19 +4,21 @@
 <div th:fragment="scope-tree(scope, children)">
     <label for="scope-tree">Hierarchy</label>
     <ul class="list-group" id="scope-tree">
-        <!-- "Go up" link to parent -->
-        <li th:if="${parent != null}"
-            class="list-group-item list-group-item-action"
-            style="cursor: pointer;"
-            th:data-nid="${parent.id.nid}"
-            hx-get="/observatory/scope/traverse"
-            hx-vals="js:{nid: this.dataset.nid}"
-            hx-target="#scope-tree-container"
-            hx-swap="innerHTML"
-            hx-indicator="#scope-search-indicator">
-            <i class="bi bi-arrow-90deg-up"></i>
-            <span class="ms-2">..</span>
-        </li>
+        <!-- "Go up" links to parents -->
+        <th:block th:if="${parents != null}">
+            <li th:each="parent : ${parents}"
+                class="list-group-item list-group-item-action"
+                style="cursor: pointer;"
+                th:data-nid="${parent.id.nid}"
+                hx-get="/observatory/scope/traverse"
+                hx-vals="js:{nid: this.dataset.nid}"
+                hx-target="#scope-tree-container"
+                hx-swap="innerHTML"
+                hx-indicator="#scope-search-indicator">
+                <i class="bi bi-arrow-90deg-up"></i>
+                <span class="ms-2" th:text="'.. (' + ${parent.name} + ')'">.. (Parent Name)</span>
+            </li>
+        </th:block>
         <li class="list-group-item">
             <i class="bi bi-folder"></i>
             <span th:text="${scope.name}" class="ms-2">Root Scope</span>
