@@ -134,4 +134,8 @@ public class ObservatoryService {
 				SearchService.SortType.SEMANTIC_SCORE,
 				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty());
 	}
+
+	public List<Facade> retrieveChildren(Facade facade) {
+		return calculatorService.calculateChildren(facade);
+	}
 }

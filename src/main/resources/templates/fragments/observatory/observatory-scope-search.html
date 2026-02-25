@@ -10,8 +10,10 @@
         <!-- Renders the results for the current page -->
         <li th:each="result : ${scopeSearchResultsPage.content}"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-            th:hx-get="@{/observatory/scope/{id}/descendants(id=${result.id})}"
-            hx-target="closest ul"
+            th:data-nid="${result.id.nid}"
+            hx-get="/observatory/scope/children"
+            hx-vals="js:{nid: this.dataset.nid}"
+            hx-target="#scope-tree-container"
             hx-swap="innerHTML"
             hx-indicator="#scope-search-indicator">
 

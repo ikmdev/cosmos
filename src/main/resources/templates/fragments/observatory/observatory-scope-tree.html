@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="scope-tree(scope, children)">
+    <h6 class="card-title">Scope Hierarchy</h6>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <i class="bi bi-folder"></i>
+            <span th:text="${scope.name}" class="ms-2">Root Scope</span>
+            <ul th:if="${not #lists.isEmpty(children)}" class="list-group mt-2">
+                <li th:each="child : ${children}" class="list-group-item border-0 ms-3">
+                    <i class="bi bi-file-earmark"></i>
+                    <span th:text="${child.name}" class="ms-2">Child Scope</span>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

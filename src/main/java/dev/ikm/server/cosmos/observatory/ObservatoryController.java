@@ -127,5 +127,14 @@ public class ObservatoryController {
 		model.addAttribute("query", query);
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
 	}
+	@HxRequest
+	@GetMapping("/observatory/scope/children")
+	public FragmentsRendering getChildren(
+			@RequestParam("nid") @StringToFacade Facade scope,
+			Model model) {
+		model.addAttribute("scope", scope);
+		model.addAttribute("children", observatoryService.retrieveChildren(scope));
+		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
+	}
 
 }

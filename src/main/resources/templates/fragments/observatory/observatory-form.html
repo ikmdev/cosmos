@@ -109,12 +109,9 @@
                             </span>
                             <input type="text" class="form-control" placeholder="Search scopes..." name="query"
                                    aria-label="Search scopes" id="scope-search-input"
-                                   hx-get="/observatory/scope/search"
-                                   hx-vals='{"page": "0"}'
-                                   hx-trigger="keyup changed delay:600ms"
-                                   hx-target="#scope-search-results"
-                                   hx-swap="innerHTML"
-                                   hx-indicator="#scope-search-indicator">
+                                   hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
+                                   hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
+                                   hx-swap="innerHTML" hx-indicator="#scope-search-indicator">
                         </div>
                         <!-- Progress bar indicator for search -->
                         <div id="scope-search-indicator" class="progress htmx-indicator mt-2" style="height: 5px;">
@@ -126,9 +123,10 @@
                             <!-- HTMX will populate search results here -->
                         </ul>
                     </div>
-                    <div class="col-md-6">
-                        <div class="row mb-3">
-                        </div>
+                    <div class="col-md-6" id="scope-tree-container">
+                        <!-- Selected scope tree will be loaded here -->
+                        <p class="text-muted fst-italic">Select a scope from the search results to see its
+                            hierarchy.</p>
                     </div>
                 </div>
                 <div class="row mb-3">
