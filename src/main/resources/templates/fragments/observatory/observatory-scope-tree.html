@@ -2,14 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="scope-tree(scope, children)">
-    <h6 class="card-title">Scope Hierarchy</h6>
-    <ul class="list-group">
+    <label for="scope-tree">Hierarchy</label>
+    <ul class="list-group" id="scope-tree">
         <!-- "Go up" link to parent -->
         <li th:if="${parent != null}"
             class="list-group-item list-group-item-action"
             style="cursor: pointer;"
             th:data-nid="${parent.id.nid}"
-            hx-get="/observatory/scope/ascend"
+            hx-get="/observatory/scope/traverse"
             hx-vals="js:{nid: this.dataset.nid}"
             hx-target="#scope-tree-container"
             hx-swap="innerHTML"
@@ -25,7 +25,7 @@
                     class="list-group-item list-group-item-action border-0 ms-3"
                     style="cursor: pointer;"
                     th:data-nid="${child.id.nid}"
-                    hx-get="/observatory/scope/descend"
+                    hx-get="/observatory/scope/traverse"
                     hx-vals="js:{nid: this.dataset.nid}"
                     hx-target="#scope-tree-container"
                     hx-swap="innerHTML"

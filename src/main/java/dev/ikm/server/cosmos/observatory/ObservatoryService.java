@@ -13,6 +13,7 @@ import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.entity.Entity;
+import dev.ikm.tinkar.terms.TinkarTermV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -88,16 +89,16 @@ public class ObservatoryService {
 		return observatory;
 	}
 
-	public Observatory retrieveObservatory(UUID id) {
+	public Optional<Observatory> retrieveObservatory(UUID id) {
 		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(id);
-		return buildObservatory(observatoryEntity);
+		return Optional.of(buildObservatory(observatoryEntity));
 	}
 
-	public List<Observatory> retrieveAllObservatories() {
-		return observatoryRepository.readAll().stream()
+	public Optional<List<Observatory>> retrieveAllObservatories() {
+		return Optional.of(observatoryRepository.readAll().stream()
 				.sorted(Comparator.comparing(ObservatoryEntity::modified).reversed())
 				.map(this::buildObservatory)
-				.toList();
+				.toList());
 	}
 
 	public void removeObservatory(UUID id) {
@@ -109,35 +110,42 @@ public class ObservatoryService {
 		observatoryRepository.updateObservatory(observatory.id(), entity);
 	}
 
-	public List<Facade> retrieveModules() {
+	public Optional<List<Facade>> retrieveModules() {
 		List<PublicId> publicIds = ikeRepository.findAllModules();
-		return publicIds.stream()
+		return Optional.of(publicIds.stream()
 				.map(publicId -> new Facade(new Id(Entity.nid(publicId), Arrays.asList(publicId.asUuidArray())), Type.CONCEPT, calculatorService.calculateText(publicId)))
-				.toList();
+				.toList());
 	}
 
-	public List<Facade> retrieveStamps() {
-		return StampCoordinate.stampConcepts();
+	public Optional<List<Facade>> retrieveStamps() {
+		return Optional.of(StampCoordinate.stampConcepts());
 	}
 
-	public List<Facade> retrieveLanguages() {
-		return LanguageCoordinate.languageConcepts();
+	public Optional<List<Facade>> retrieveLanguages() {
+		return Optional.of(LanguageCoordinate.languageConcepts());
 	}
 
-	public List<Facade> retrieveNavigations() {
-		return NavigationCoordinate.navigationConcepts();
+	public Optional<List<Facade>> retrieveNavigations() {
+		return Optional.of(NavigationCoordinate.navigationConcepts());
 	}
 
-	public Page<Facade> searchForConceptsWithDescendants(String query, Pageable pageable) {
-		return searchService.search(
+	public Optional<Page<Facade>> searchForConceptsWithDescendants(String query, Pageable pageable) {
+		return Optional.of(searchService.search(
 				query,
 				pageable,
 				SearchService.SortType.SEMANTIC_SCORE,
-				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty());
+				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty()));
 	}
 
-	public List<Facade> retrieveChildren(Facade facade) {
-		return calculatorService.calculateChildren(facade);
+	public Optional<List<Facade>> retrieveChildren(Facade facade) {
+		return Optional.of(calculatorService.calculateChildren(facade));
+	}
+
+	public Optional<Facade> retrieveRootScope() {
+		return Optional.of(new Facade(
+				new Id(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid(), TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId().asUuidList().castToList()),
+				Type.CONCEPT,
+				calculatorService.calculateText(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId())));
 	}
 
 	public Optional<Facade> retrieveParent(Facade facade) {

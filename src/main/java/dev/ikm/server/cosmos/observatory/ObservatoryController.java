@@ -40,20 +40,27 @@ public class ObservatoryController {
 		model.addAttribute("activePage", "observatory");
 		model.addAttribute("titleDisplayName", "Observatory");
 		model.addAttribute("footerText", "Configuring your cosmic viewpoint");
+
+		// Add form backing object with default/empty values
 		model.addAttribute("observatoryForm", new ObservatoryForm(
 				"",
-				observatoryService.retrieveStamps(),
-				observatoryService.retrieveLanguages(),
-				observatoryService.retrieveNavigations(),
-				observatoryService.retrieveModules(),
 				null,
 				null,
 				null,
-				List.of(),
-				List.of(),
-				List.of(),
 				List.of(),
 				List.of()));
+
+		// Add data needed to render the form's select options
+		observatoryService.retrieveStamps().ifPresent(stampCoordinates -> model.addAttribute("stampCoordinates", stampCoordinates));
+		observatoryService.retrieveLanguages().ifPresent(languageCoordinates -> model.addAttribute("languageCoordinates", languageCoordinates));
+		observatoryService.retrieveNavigations().ifPresent(navigationCoordinates -> model.addAttribute("navigationCoordinates", navigationCoordinates));
+		observatoryService.retrieveModules().ifPresent(modules -> model.addAttribute("modules", modules));
+
+		// Add data for the initial scope tree view
+		observatoryService.retrieveRootScope().ifPresent(scope -> {
+			model.addAttribute("scope", scope);
+			observatoryService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
+		});
 	}
 
 	@GetMapping("/observatory")
@@ -99,7 +106,7 @@ public class ObservatoryController {
 		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
 		model.addAttribute("activeObservatoryId", id);
-		model.addAttribute("observatories", observatoryService.retrieveAllObservatories());
+		observatoryService.retrieveAllObservatories().ifPresent(observatories -> model.addAttribute("observatories", observatories));
 		return FragmentsRendering
 				.with("fragments/layout/navigation :: observatorySelector")
 				.build();
@@ -109,7 +116,7 @@ public class ObservatoryController {
 	@DeleteMapping("/observatory/{id}")
 	public FragmentsRendering deleteObservatory(@PathVariable("id") UUID id, Model model) {
 		observatoryService.removeObservatory(id);
-		model.addAttribute("observatories", observatoryService.retrieveAllObservatories());
+		observatoryService.retrieveAllObservatories().ifPresent(observatories -> model.addAttribute("observatories", observatories));
 		return FragmentsRendering
 				.with("fragments/layout/navigation :: observatorySelector")
 				.build();
@@ -122,29 +129,18 @@ public class ObservatoryController {
 			@PageableDefault(size = 10, page = 0) Pageable pageable,
 			Model model) {
 		// Assumes observatoryService.search is updated to return a Page
-		Page<Facade> searchResults = observatoryService.searchForConceptsWithDescendants(query, pageable);
-		model.addAttribute("scopeSearchResultsPage", searchResults);
+		observatoryService.searchForConceptsWithDescendants(query, pageable).ifPresent(searchResults -> model.addAttribute("scopeSearchResultsPage", searchResults));
 		model.addAttribute("query", query);
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
 	}
-	@HxRequest
-	@GetMapping("/observatory/scope/descend")
-	public FragmentsRendering getDescent(
-			@RequestParam("nid") @StringToFacade Facade scope,
-			Model model) {
-		model.addAttribute("scope", scope);
-		model.addAttribute("children", observatoryService.retrieveChildren(scope));
-		observatoryService.retrieveParent(scope).ifPresent(parent -> model.addAttribute("parent", parent));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
-	}
 
 	@HxRequest
-	@GetMapping("/observatory/scope/ascend")
-	public FragmentsRendering getAscent(
+	@GetMapping("/observatory/scope/traverse")
+	public FragmentsRendering getTraverse(
 			@RequestParam("nid") @StringToFacade Facade scope,
 			Model model) {
 		model.addAttribute("scope", scope);
-		model.addAttribute("children", observatoryService.retrieveChildren(scope));
+		observatoryService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
 		observatoryService.retrieveParent(scope).ifPresent(parent -> model.addAttribute("parent", parent));
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
 	}

@@ -11,7 +11,7 @@
         <li th:each="result : ${scopeSearchResultsPage.content}"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
             th:data-nid="${result.id.nid}"
-            hx-get="/observatory/scope/descend"
+            hx-get="/observatory/scope/traverse"
             hx-vals="js:{nid: this.dataset.nid}"
             hx-target="#scope-tree-container"
             hx-swap="innerHTML"

@@ -26,7 +26,7 @@ public class GlobalControllerAdvice {
 
 	@ModelAttribute("observatories")
 	public List<Observatory> addObservatoriesToModel() {
-		return observatoryService.retrieveAllObservatories();
+		return observatoryService.retrieveAllObservatories().orElse(List.of());
 	}
 
 	@ModelAttribute("activeObservatoryId")
