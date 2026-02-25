@@ -5,16 +5,14 @@ import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
 import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
 import dev.ikm.server.cosmos.calculator.StampCoordinate;
-import dev.ikm.server.cosmos.ike.Type;
-import dev.ikm.server.cosmos.search.SearchResult;
-import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.server.cosmos.ike.Type;
+import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.entity.Entity;
-import dev.ikm.tinkar.terms.EntityFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,9 +24,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class ObservatoryService {
@@ -132,24 +127,11 @@ public class ObservatoryService {
 		return NavigationCoordinate.navigationConcepts();
 	}
 
-	public TreeNode retrieveHierarchy() {
-		// Return only the root node, with an empty list of children, but mark it as expandable.
-		// The client will use HTMX to fetch children when the user expands this node.
-		return new TreeNode(1, "Root", false, List.of(new TreeNode(2, "Child A", true, List.of()), new TreeNode(3, "Child B", true, List.of())));
-	}
-
-	public List<TreeNode> retrieveChildren(String parentId) {
-		// In a real application, this would query a database.
-		// Here, we simulate it based on the parentId to demonstrate lazy loading.
-		return null;
-
-	}
-
-	public Page<ScopeSearchResult> searchForParentsOnly(String query, Pageable pageable) {
-
-		return new PageImpl<>(
-				List.of(),
+	public Page<Facade> searchForConceptsWithDescendants(String query, Pageable pageable) {
+		return searchService.search(
+				query,
 				pageable,
-				1);
+				SearchService.SortType.SEMANTIC_SCORE,
+				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty());
 	}
 }

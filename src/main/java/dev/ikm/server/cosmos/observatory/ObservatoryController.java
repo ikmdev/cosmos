@@ -1,5 +1,6 @@
 package dev.ikm.server.cosmos.observatory;
 
+import dev.ikm.server.cosmos.ike.Facade;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -51,7 +51,6 @@ public class ObservatoryController {
 				null,
 				List.of(),
 				List.of(),
-				List.of(observatoryService.retrieveHierarchy()), // Assumes service returns the root TreeData node
 				List.of(),
 				List.of(),
 				List.of()));
@@ -117,26 +116,13 @@ public class ObservatoryController {
 	}
 
 	@HxRequest
-	@GetMapping("/observatory/scope/children")
-	public FragmentsRendering getScopeChildren(@RequestParam("id") String parentId,
-								   @RequestParam("depth") int depth,
-								   Model model) {
-		List<TreeNode> children = observatoryService.retrieveChildren(String.valueOf(parentId));
-		model.addAttribute("depth", depth);
-		model.addAttribute("children", children);
-		return FragmentsRendering
-				.with("fragments/observatory/observatory-form :: children-fragment")
-				.build();
-	}
-
-	@HxRequest
 	@GetMapping("/observatory/scope/search")
 	public FragmentsRendering getSearchResults(
 			@RequestParam(value = "query", required = false, defaultValue = "") String query,
 			@PageableDefault(size = 10, page = 0) Pageable pageable,
 			Model model) {
 		// Assumes observatoryService.search is updated to return a Page
-		Page<ScopeSearchResult> searchResults = observatoryService.searchForParentsOnly(query, pageable);
+		Page<Facade> searchResults = observatoryService.searchForConceptsWithDescendants(query, pageable);
 		model.addAttribute("scopeSearchResultsPage", searchResults);
 		model.addAttribute("query", query);
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();

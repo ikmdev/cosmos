@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Service
 public class SearchService {
@@ -48,12 +49,15 @@ public class SearchService {
 			case NATURAL_ORDER -> search(query, naturalOrderComparator());
 			case SEMANTIC_SCORE -> search(query, semanticScoreComparator());
 		};
-		List<Facade> searchResults = allSearchResults.stream()
+		List<Facade> filteredFacades = allSearchResults.stream()
 				.filter(filter::apply)
+				.toList();
+
+		List<Facade> paginatedFilteredFacades = filteredFacades.stream()
 				.skip(pageable.getOffset())
 				.limit(pageable.getPageSize())
 				.toList();
-		return new PageImpl<>(searchResults, pageable, allSearchResults.size());
+		return new PageImpl<>(paginatedFilteredFacades, pageable, filteredFacades.size());
 	}
 
 	public Page<Facade> search(String query, Pageable pageable, SortType sortType) {

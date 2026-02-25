@@ -3,8 +3,6 @@ package dev.ikm.server.cosmos.discovery;
 import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.IkeRepository;
-import dev.ikm.server.cosmos.ike.Type;
-import dev.ikm.server.cosmos.search.SearchResult;
 import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Service
 public class DiscoveryService {

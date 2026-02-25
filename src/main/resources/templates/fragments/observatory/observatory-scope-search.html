@@ -9,20 +9,13 @@
     <th:block th:fragment="search-results-list">
         <!-- Renders the results for the current page -->
         <li th:each="result : ${scopeSearchResultsPage.content}"
-            class="list-group-item d-flex justify-content-between align-items-center">
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+            th:hx-get="@{/observatory/scope/{id}/descendants(id=${result.id})}"
+            hx-target="closest ul"
+            hx-swap="innerHTML"
+            hx-indicator="#scope-search-indicator">
 
-            <span th:text="${result.facade.name}">Search Result Text</span>
-
-            <div>
-                <span class="badge bg-primary rounded-pill"
-                      title="Children Count"
-                      th:text="${result.childrenCount}"></span>
-                <span class="badge bg-secondary rounded-pill ms-1"
-                      title="Descendant Count"
-                      th:text="${result.descendantCount}"></span>
-                <!-- TODO: This checkbox needs to be wired up to add the scope to the form -->
-                <input class="form-check-input ms-2" type="checkbox" name="selectedScopes" th:value="${result.facade.id.nid}">
-            </div>
+            <span th:text="${result.name}">Search Result Text</span>
         </li>
 
         <!-- If there is a next page, render the 'Load More' button -->
@@ -30,7 +23,14 @@
             <button class="btn btn-outline-secondary w-100 border-0"
                     th:hx-get="@{/observatory/scope/search(query=${query}, page=${scopeSearchResultsPage.number + 1})}"
                     hx-swap="outerHTML"
-                    hx-target="closest li">Load More...</button>        </li>
+                    hx-target="closest li"
+                    hx-indicator="#scope-search-indicator">Load More...</button>        </li>
+
+        <!-- If the search returned no results on the first page for a non-empty query, show a message. -->
+        <li th:if="${scopeSearchResultsPage.empty and scopeSearchResultsPage.first and query != null and !query.trim().isEmpty()}"
+            class="list-group-item text-muted fst-italic">
+            No scopes found.
+        </li>
     </th:block>
 </main>
 </body>

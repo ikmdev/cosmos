@@ -6,16 +6,15 @@ import java.util.List;
 
 public record ObservatoryForm(
 		String name,
-		List<Facade> stampCoordinates,
-		List<Facade> languageCoordinates,
-		List<Facade> navigationCoordinates,
-		List<Facade> modules,
+		@StringToFacade List<Facade> stampCoordinates,
+		@StringToFacade List<Facade> languageCoordinates,
+		@StringToFacade List<Facade> navigationCoordinates,
+		@StringToFacade List<Facade> modules,
 		@StringToFacade Facade selectedStampCoordinate,
 		@StringToFacade Facade selectedLanguageCoordinate,
 		@StringToFacade Facade selectedNavigationCoordinate,
 		@StringToFacade List<Facade> selectedIncludedModules,
 		@StringToFacade List<Facade> selectedExcludedModules,
-		List<TreeNode> hierarchy,
 		@StringToFacade List<Facade> individualScopes,
 		@StringToFacade List<Facade> descendantScopes,
 		@StringToFacade List<Facade> kindOfScopes) {

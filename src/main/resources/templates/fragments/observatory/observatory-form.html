@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
+<style>
+    .htmx-indicator {
+        display: none;
+    }
+
+    .htmx-request .htmx-indicator, .htmx-request.htmx-indicator {
+        display: block;
+    }
+</style>
 <form th:fragment="observatory-form"
       x-data @keydown.enter.prevent
       @htmx:after-request="if($event.detail.successful) $el.reset()"
@@ -18,7 +27,7 @@
                placeholder="Default Name" autocomplete="off">
     </div>
     <div class="mb-3">
-        <div class="card mb-3">
+        <div class="card">
             <div class="card-header">Coordinate</div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -56,7 +65,7 @@
         </div>
     </div>
     <div class="mb-3">
-        <div class="card mb-3">
+        <div class="card">
             <div class="card-header">Modularity</div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -89,7 +98,7 @@
         </div>
     </div>
     <div class="mb-3">
-        <div class="card mb-3">
+        <div class="card">
             <div class="card-header">Scope</div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -102,19 +111,28 @@
                                    aria-label="Search scopes" id="scope-search-input"
                                    hx-get="/observatory/scope/search"
                                    hx-vals='{"page": "0"}'
-                                   hx-trigger="keyup changed delay:300ms"
+                                   hx-trigger="keyup changed delay:600ms"
                                    hx-target="#scope-search-results"
                                    hx-swap="innerHTML"
-                                   hx-indicator="#search-indicator">
+                                   hx-indicator="#scope-search-indicator">
+                        </div>
+                        <!-- Progress bar indicator for search -->
+                        <div id="scope-search-indicator" class="progress htmx-indicator mt-2" style="height: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
                         </div>
                         <ul class="list-group" id="scope-search-results"
-                            style="max-height: 250px; overflow-y: auto;">
+                            style="max-height: 300px; overflow-y: auto;">
                             <!-- HTMX will populate search results here -->
                         </ul>
                     </div>
                     <div class="col-md-6">
-
+                        <div class="row mb-3">
+                        </div>
                     </div>
+                </div>
+                <div class="row mb-3">
+
                 </div>
             </div>
         </div>
