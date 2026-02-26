@@ -10,6 +10,6 @@ public record ObservatoryForm(
 		@StringToFacade Facade selectedLanguageCoordinate,
 		@StringToFacade Facade selectedNavigationCoordinate,
 		@StringToFacade List<Facade> selectedIncludedModules,
-		@StringToFacade List<Facade> selectedExcludedModules
-) {
+		@StringToFacade List<Facade> selectedExcludedModules,
+		@StringToFacade List<Facade> selectedIncludedScopes) {
 }

@@ -69,6 +69,7 @@ public class ObservatoryDatabaseConfig {
 						LanguageCoordinate.US_ENG_REG,
 						NavigationCoordinate.INFERRED,
 						List.of(),
+						List.of(),
 						List.of()));
 			}
 

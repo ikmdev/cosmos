@@ -12,5 +12,6 @@ public record Observatory(
 		@StringToFacade Facade languageCoordinate,
 		@StringToFacade Facade navigationCoordinate,
 		@StringToFacade List<Facade> includedModules,
-		@StringToFacade List<Facade> excludedModules) {
+		@StringToFacade List<Facade> excludedModules,
+		@StringToFacade List<Facade> includedScopes) {
 }

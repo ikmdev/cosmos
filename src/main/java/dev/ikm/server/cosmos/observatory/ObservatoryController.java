@@ -47,6 +47,7 @@ public class ObservatoryController {
 				null,
 				null,
 				List.of(),
+				List.of(),
 				List.of()));
 
 		// Add data needed to render the form's select options
@@ -121,6 +122,18 @@ public class ObservatoryController {
 				.build();
 	}
 
+
+	@HxRequest
+	@GetMapping("/observatory/scope/search")
+	public FragmentsRendering getSearchResults(
+			@RequestParam(value = "query", required = false, defaultValue = "") String query,
+			@PageableDefault(size = 10, page = 0) Pageable pageable,
+			Model model) {
+		observatoryService.search(query, pageable).ifPresent(searchResults -> model.addAttribute("scopeSearchResultsPage", searchResults));
+		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
+	}
+
+
 	@HxRequest
 	@GetMapping("/observatory/scope/traverse")
 	public FragmentsRendering getTraverse(
@@ -131,4 +144,14 @@ public class ObservatoryController {
 		observatoryService.retrieveParents(scope).ifPresent(parents -> model.addAttribute("parents", parents));
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
 	}
+
+	@HxRequest
+	@PostMapping("/observatory/scope/add")
+	public FragmentsRendering includeScope(
+			@RequestParam("nid") @StringToFacade Facade scope,
+			Model model) {
+		model.addAttribute("item", scope);
+		return FragmentsRendering.with("fragments/observatory/observatory-scope-list-item :: scope-list-item").build();
+	}
+
 }

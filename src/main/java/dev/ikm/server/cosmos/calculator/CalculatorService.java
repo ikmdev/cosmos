@@ -51,9 +51,14 @@ public class CalculatorService {
 		setObservatory(observatoryEntity.stampCoordinate(), observatoryEntity.languageCoordinate(), observatoryEntity.navigationCoordinate(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
 
-	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, List<List<UUID>> includedModules, List<List<UUID>> excludedModules) {
-		List<ConceptFacade> include = makeConceptFacadeList(includedModules);
-		IntIdSet exclude = makeIntIdSet(excludedModules);
+	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, List<Facade> includedModules, List<Facade> excludedModules) {
+		List<ConceptFacade> include = includedModules.stream()
+				.map(facade -> ConceptFacade.make(facade.id().nid()))
+				.toList();
+		int[] nids = excludedModules.stream()
+				.mapToInt(facade -> facade.id().nid())
+				.toArray();
+		IntIdSet exclude = IntIds.set.of(nids);
 		this.stampCoordinateRecord = stampCoordinate.getRecord()
 				.withModules(include)
 				.withExcludedModuleNids(exclude);

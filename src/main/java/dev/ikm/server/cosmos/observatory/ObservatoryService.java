@@ -16,7 +16,6 @@ import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -50,27 +49,22 @@ public class ObservatoryService {
 				observatoryEntity.stampCoordinate().getConcept(),
 				observatoryEntity.languageCoordinate().getConcept(),
 				observatoryEntity.navigationCoordinate().getConcept(),
-				observatoryEntity.includedModules().stream()
-						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), Type.CONCEPT, calculatorService.calculateText(PublicIds.of(uuids))))
-						.toList(),
-				observatoryEntity.excludedModules().stream()
-						.map(uuids -> new Facade(new Id(Entity.nid(PublicIds.of(uuids)), uuids), Type.CONCEPT, calculatorService.calculateText(PublicIds.of(uuids))))
-						.toList());
+				observatoryEntity.includedModules(),
+				observatoryEntity.excludedModules(),
+				observatoryEntity.includeScopes());
 	}
 
 	private ObservatoryEntity buildObservatoryEntity(Observatory observatory) {
 		StampCoordinate stampCoordinate = StampCoordinate.fromId(observatory.stampCoordinate().id());
 		LanguageCoordinate languageCoordinate = LanguageCoordinate.fromId(observatory.languageCoordinate().id());
 		NavigationCoordinate navigationCoordinate = NavigationCoordinate.fromId(observatory.navigationCoordinate().id());
-		List<List<UUID>> includedModules = observatory.includedModules().stream()
-				.map(component -> PublicIds.of(component.id().uuids()))
-				.map(publicId -> publicId.asUuidList().castToList())
-				.toList();
-		List<List<UUID>> excludedModules = observatory.excludedModules().stream()
-				.map(component -> PublicIds.of(component.id().uuids()))
-				.map(publicId -> publicId.asUuidList().castToList())
-				.toList();
-		return new ObservatoryEntity(observatory.id(), Instant.now(), observatory.name(), stampCoordinate, languageCoordinate, navigationCoordinate, includedModules, excludedModules);
+		return new ObservatoryEntity(observatory.id(), Instant.now(), observatory.name(),
+				stampCoordinate,
+				languageCoordinate,
+				navigationCoordinate,
+				observatory.includedModules(),
+				observatory.excludedModules(),
+				observatory.includedScopes());
 	}
 
 	public Observatory saveNewObservatory(ObservatoryForm observatoryForm) {
@@ -83,7 +77,8 @@ public class ObservatoryService {
 				observatoryForm.selectedLanguageCoordinate(),
 				observatoryForm.selectedNavigationCoordinate(),
 				observatoryForm.selectedIncludedModules(),
-				observatoryForm.selectedExcludedModules());
+				observatoryForm.selectedExcludedModules(),
+				observatoryForm.selectedIncludedScopes());
 		ObservatoryEntity entity = buildObservatoryEntity(observatory);
 		observatoryRepository.createObservatory(entity);
 		return observatory;
@@ -135,6 +130,13 @@ public class ObservatoryService {
 				pageable,
 				SearchService.SortType.SEMANTIC_SCORE,
 				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty()));
+	}
+
+	public Optional<Page<Facade>> search(String query, Pageable pageable) {
+		return Optional.of(searchService.search(
+				query,
+				pageable,
+				SearchService.SortType.SEMANTIC_SCORE));
 	}
 
 	public Optional<ScopeNode> retrieveRootScope() {
