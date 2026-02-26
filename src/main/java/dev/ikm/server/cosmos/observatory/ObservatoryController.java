@@ -122,18 +122,6 @@ public class ObservatoryController {
 	}
 
 	@HxRequest
-	@GetMapping("/observatory/scope/search")
-	public FragmentsRendering getSearchResults(
-			@RequestParam(value = "query", required = false, defaultValue = "") String query,
-			@PageableDefault(size = 10, page = 0) Pageable pageable,
-			Model model) {
-		// Assumes observatoryService.search is updated to return a Page
-		observatoryService.searchForConceptsWithDescendants(query, pageable).ifPresent(searchResults -> model.addAttribute("scopeSearchResultsPage", searchResults));
-		model.addAttribute("query", query);
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
-	}
-
-	@HxRequest
 	@GetMapping("/observatory/scope/traverse")
 	public FragmentsRendering getTraverse(
 			@RequestParam("nid") @StringToFacade Facade scope,
