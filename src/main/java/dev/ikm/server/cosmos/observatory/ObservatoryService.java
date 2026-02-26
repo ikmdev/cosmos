@@ -137,18 +137,29 @@ public class ObservatoryService {
 				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty()));
 	}
 
-	public Optional<List<Facade>> retrieveChildren(Facade facade) {
-		return Optional.of(calculatorService.calculateChildren(facade));
-	}
-
-	public Optional<Facade> retrieveRootScope() {
-		return Optional.of(new Facade(
+	public Optional<ScopeNode> retrieveRootScope() {
+		Facade rootFacade = new Facade(
 				new Id(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid(), TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId().asUuidList().castToList()),
 				Type.CONCEPT,
-				calculatorService.calculateText(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId())));
+				calculatorService.calculateText(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId()));
+		boolean isLeaf = calculatorService.calculateChildren(rootFacade).isEmpty();
+		return Optional.of(new ScopeNode(rootFacade, isLeaf));
 	}
 
-	public Optional<List<Facade>> retrieveParents(Facade facade) {
-		return Optional.of(calculatorService.calculateParents(facade));
+	public Optional<ScopeNode> buildScopeNode(Facade facade) {
+		boolean isLeaf = calculatorService.calculateChildren(facade).isEmpty();
+		return Optional.of(new ScopeNode(facade, isLeaf));
+	}
+
+	public Optional<List<ScopeNode>> retrieveChildren(Facade facade) {
+		return Optional.of(calculatorService.calculateChildren(facade).stream()
+				.map(fac -> new ScopeNode(fac, calculatorService.calculateChildren(fac).isEmpty()))
+				.toList());
+	}
+
+	public Optional<List<ScopeNode>> retrieveParents(Facade facade) {
+		return Optional.of(calculatorService.calculateParents(facade).stream()
+				.map(fac -> new ScopeNode(fac, calculatorService.calculateChildren(fac).isEmpty()))
+				.toList());
 	}
 }

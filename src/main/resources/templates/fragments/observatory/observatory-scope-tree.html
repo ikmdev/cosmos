@@ -3,37 +3,37 @@
 <body>
 <div th:fragment="scope-tree(scope, children)">
     <label for="scope-tree">Hierarchy</label>
-    <ul class="list-group" id="scope-tree">
+    <ul class="list-group" id="scope-tree" style="max-height: 300px; overflow-y: auto;">
         <!-- "Go up" links to parents -->
         <th:block th:if="${parents != null}">
             <li th:each="parent : ${parents}"
                 class="list-group-item list-group-item-action"
                 style="cursor: pointer;"
-                th:data-nid="${parent.id.nid}"
+                th:data-nid="${parent.facade.id.nid}"
                 hx-get="/observatory/scope/traverse"
                 hx-vals="js:{nid: this.dataset.nid}"
                 hx-target="#scope-tree-container"
                 hx-swap="innerHTML"
                 hx-indicator="#scope-search-indicator">
-                <i class="bi bi-arrow-90deg-up"></i>
-                <span class="ms-2" th:text="'.. (' + ${parent.name} + ')'">.. (Parent Name)</span>
+                <i class="bi bi-list-nested"></i>
+                <span class="ms-2" th:text="'.. (' + ${parent.facade.name} + ')'">.. (Parent Name)</span>
             </li>
         </th:block>
         <li class="list-group-item">
-            <i class="bi bi-folder"></i>
-            <span th:text="${scope.name}" class="ms-2">Root Scope</span>
+            <i class="bi-caret-down"></i>
+            <span th:text="${scope.facade.name}" class="ms-2">Root Scope</span>
             <ul th:if="${not #lists.isEmpty(children)}" class="list-group mt-2">
                 <li th:each="child : ${children}"
                     class="list-group-item list-group-item-action border-0 ms-3"
                     style="cursor: pointer;"
-                    th:data-nid="${child.id.nid}"
+                    th:data-nid="${child.facade.id.nid}"
                     hx-get="/observatory/scope/traverse"
                     hx-vals="js:{nid: this.dataset.nid}"
                     hx-target="#scope-tree-container"
                     hx-swap="innerHTML"
                     hx-indicator="#scope-search-indicator">
-                    <i class="bi bi-folder"></i>
-                    <span th:text="${child.name}" class="ms-2">Child Scope</span>
+                    <i class="bi" th:classappend="${child.isLeaf ? 'bi-dash-square  ' : 'bi-plus-square-fill'}"></i>
+                    <span th:text="${child.facade.name}" class="ms-2">Child Scope</span>
                 </li>
             </ul>
         </li>

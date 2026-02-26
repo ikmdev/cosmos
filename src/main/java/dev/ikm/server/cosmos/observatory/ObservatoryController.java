@@ -58,7 +58,7 @@ public class ObservatoryController {
 		// Add data for the initial scope tree view
 		observatoryService.retrieveRootScope().ifPresent(scope -> {
 			model.addAttribute("scope", scope);
-			observatoryService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
+			observatoryService.retrieveChildren(scope.facade()).ifPresent(children -> model.addAttribute("children", children));
 		});
 	}
 
@@ -138,7 +138,7 @@ public class ObservatoryController {
 	public FragmentsRendering getTraverse(
 			@RequestParam("nid") @StringToFacade Facade scope,
 			Model model) {
-		model.addAttribute("scope", scope);
+		observatoryService.buildScopeNode(scope).ifPresent(scopeNode -> model.addAttribute("scope", scopeNode));
 		observatoryService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
 		observatoryService.retrieveParents(scope).ifPresent(parents -> model.addAttribute("parents", parents));
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
