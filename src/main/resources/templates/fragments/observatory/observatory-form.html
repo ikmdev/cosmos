@@ -3,7 +3,7 @@
 <body>
 <form th:fragment="observatory-form"
       x-data @keydown.enter.prevent
-      @htmx:after-request="if($event.detail.successful) $el.reset()"
+      @htmx:after-request="if($event.detail.successful && $event.detail.pathInfo.path === '/observatory') $el.reset()"
       action="#"
       th:action="@{/observatory}"
       th:object="${observatoryForm}"
@@ -92,45 +92,45 @@
         <div class="card">
             <div class="card-header">Scope</div>
             <div class="card-body">
-                <div class="row mb-3">
-                    <div id="scope-search" class="col-md-6">
-                        <div class="input-group">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div id="scope-search">
+                            <div class="input-group">
                                 <span class="input-group-text" id="scope-search-button">
                                     <i class="bi bi-search"></i>
                                 </span>
-                            <input type="text" class="form-control" placeholder="Search scopes..." name="query"
-                                   aria-label="Search scopes" id="scope-search-input"
-                                   hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
-                                   hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
-                                   hx-swap="innerHTML" hx-indicator="#scope-search-indicator">
+                                <input type="text" class="form-control" placeholder="Search scopes..." name="query"
+                                       aria-label="Search scopes" id="scope-search-input"
+                                       hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
+                                       hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
+                                       hx-swap="innerHTML" hx-indicator="#scope-search-indicator">
+                            </div>
+                            <!-- Progress bar indicator for search -->
+                            <div id="scope-search-indicator" class="progress htmx-indicator mt-2" style="height: 5px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                     aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                                     style="width: 100%"></div>
+                            </div>
+                            <ul class="list-group" id="scope-search-results"
+                                style="max-height: 300px; overflow-y: auto;">
+                                <!-- HTMX will populate search results here -->
+                            </ul>
                         </div>
-                        <!-- Progress bar indicator for search -->
-                        <div id="scope-search-indicator" class="progress htmx-indicator mt-2" style="height: 5px;">
+                    </div>
+                    <div class="col-md-4">
+                        <div id="scope-tree-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
                                  style="width: 100%"></div>
-                        </div>
-                        <ul class="list-group" id="scope-search-results"
-                            style="max-height: 300px; overflow-y: auto;">
-                            <!-- HTMX will populate search results here -->
-                        </ul>
-
-                    </div>
-                    <div class="col-md-6">
-                        <div id="scope-tree-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
                         </div>
                         <div id="scope-tree-container">
                             <th:block
                                     th:replace="~{fragments/observatory/observatory-scope-tree :: scope-tree(scope=${scope}, children=${children})}"></th:block>
                         </div>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="includedScopeContainer">Scopes</label>
-                        <ul id="includedScopeContainer" class="list-group" style="min-height: 150px; max-height: 250px; overflow-y: auto;">
+                    <div class="col-md-4">
+                        <ul id="includedScopeContainer" class="list-group"
+                            style="max-height: 300px; overflow-y: auto;">
                         </ul>
                     </div>
                 </div>

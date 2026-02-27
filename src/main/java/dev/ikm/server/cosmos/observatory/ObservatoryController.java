@@ -151,6 +151,7 @@ public class ObservatoryController {
 			@RequestParam("nid") @StringToFacade Facade scope,
 			Model model) {
 		model.addAttribute("item", scope);
+		model.addAttribute("fieldName", "includedScopes");
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-list-item :: scope-list-item").build();
 	}
 

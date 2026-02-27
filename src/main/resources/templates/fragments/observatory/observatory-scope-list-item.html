@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<li th:fragment="scope-list-item(item, fieldName)"
+<li th:fragment="scope-list-item(item)"
     class="list-group-item d-flex justify-content-between align-items-center">
     <span th:text="${item.name}">Scope Name</span>
     <button type="button" class="btn btn-sm text-danger" aria-label="Remove" onclick="this.closest('li').remove()">
         <i class="bi bi-trash"></i>
     </button>
-    <input type="hidden" th:name="${fieldName}" th:value="${item.id.nid}">
+    <input type="hidden" name="selectedIncludedScopes" th:value="${item.id.nid}">
 </li>
 </body>
 </html>

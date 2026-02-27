@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="scope-tree(scope, children)">
-    <div style="height: 335px; overflow-y: auto;">
+    <div style="height: 350px; overflow-y: auto;">
         <ul class="list-group" id="scope-tree">
         <!-- "Go up" links to parents -->
         <th:block th:if="${parents != null}">
