@@ -20,8 +20,6 @@
                 <th:block th:each="module : ${observatory.includedModules()}">
                     <span class="badge bg-primary-subtle text-primary-emphasis me-1 mb-1" th:text="${module.name()}"></span>
                 </th:block>
-            </td>
-            <td>
                 <th:block th:each="module : ${observatory.excludedModules()}">
                     <span class="badge bg-secondary-subtle text-secondary-emphasis me-1 mb-1" th:text="${module.name()}"></span>
                 </th:block>

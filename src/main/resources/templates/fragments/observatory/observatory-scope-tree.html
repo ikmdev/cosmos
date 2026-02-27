@@ -14,7 +14,7 @@
                 hx-vals="js:{nid: this.dataset.nid}"
                 hx-target="#scope-tree-container"
                 hx-swap="innerHTML"
-                hx-indicator="#scope-tree-indicator">
+                hx-indicator="#scope-activity-indicator">
                 <i class="bi bi-list-nested"></i>
                 <span class="ms-2" th:text="${parent.facade.name}">.. (Parent Name)</span>
             </li>
@@ -31,7 +31,7 @@
                          hx-vals="js:{nid: this.dataset.nid}"
                          hx-target="#scope-tree-container"
                          hx-swap="innerHTML"
-                         hx-indicator="#scope-tree-indicator">
+                         hx-indicator="#scope-activity-indicator">
                         <i class="bi" th:classappend="${child.isLeaf ? 'bi-dash-square  ' : 'bi-plus-square-fill'}"></i>
                         <span th:text="${child.facade.name}" class="ms-2">Child Scope</span>
                     </div>

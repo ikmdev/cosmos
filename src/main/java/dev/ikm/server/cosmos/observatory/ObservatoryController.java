@@ -91,7 +91,7 @@ public class ObservatoryController {
 		//Create a new Observatory
 		Observatory newObservatory = observatoryService.saveNewObservatory(observatoryForm);
 		model.addAttribute("newObservatory", newObservatory);
-		model.addAttribute("observatories", observatoryService.retrieveAllObservatories());
+		observatoryService.retrieveAllObservatories().ifPresent(observatories -> model.addAttribute("observatories", observatories));
 		return FragmentsRendering
 				.with("fragments/observatory/observatory-table-row :: new-observatory-row")
 				.fragment("fragments/layout/navigation :: observatorySelector")
@@ -147,11 +147,11 @@ public class ObservatoryController {
 
 	@HxRequest
 	@PostMapping("/observatory/scope/add")
-	public FragmentsRendering includeScope(
+	public FragmentsRendering addScope(
 			@RequestParam("nid") @StringToFacade Facade scope,
 			Model model) {
 		model.addAttribute("item", scope);
-		model.addAttribute("fieldName", "includedScopes");
+		observatoryService.retrieveDescendantCount(scope).ifPresent(count -> model.addAttribute("descendantCount", count));
 		return FragmentsRendering.with("fragments/observatory/observatory-scope-list-item :: scope-list-item").build();
 	}
 

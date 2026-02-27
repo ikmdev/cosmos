@@ -12,6 +12,11 @@
       hx-target="#observatories-table-body"
       hx-swap="afterbegin"
       hx-trigger="submit">
+    <style>
+        #includedScopeContainer:has(li:not(.scope-list-placeholder)) .scope-list-placeholder {
+            display: none;
+        }
+    </style>
     <div class="mb-3">
         <label for="nameInput">Name</label>
         <input th:field="*{name}" type="text" class="form-control" id="nameInput"
@@ -92,6 +97,11 @@
         <div class="card">
             <div class="card-header">Scope</div>
             <div class="card-body">
+                <div id="scope-activity-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                         style="width: 100%"></div>
+                </div>
                 <div class="row">
                     <div class="col-md-4">
                         <div id="scope-search">
@@ -103,26 +113,17 @@
                                        aria-label="Search scopes" id="scope-search-input"
                                        hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
                                        hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
-                                       hx-swap="innerHTML" hx-indicator="#scope-search-indicator">
-                            </div>
-                            <!-- Progress bar indicator for search -->
-                            <div id="scope-search-indicator" class="progress htmx-indicator mt-2" style="height: 5px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                     aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
-                                     style="width: 100%"></div>
+                                       hx-swap="innerHTML" hx-indicator="#scope-activity-indicator">
                             </div>
                             <ul class="list-group" id="scope-search-results"
                                 style="max-height: 300px; overflow-y: auto;">
-                                <!-- HTMX will populate search results here -->
+                                <li class="list-group-item text-muted fst-italic">
+                                    Start typing to search for scopes.
+                                </li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div id="scope-tree-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
-                                 style="width: 100%"></div>
-                        </div>
                         <div id="scope-tree-container">
                             <th:block
                                     th:replace="~{fragments/observatory/observatory-scope-tree :: scope-tree(scope=${scope}, children=${children})}"></th:block>
@@ -131,6 +132,9 @@
                     <div class="col-md-4">
                         <ul id="includedScopeContainer" class="list-group"
                             style="max-height: 300px; overflow-y: auto;">
+                            <li class="scope-list-placeholder list-group-item text-muted fst-italic">
+                                No scopes selected.
+                            </li>
                         </ul>
                     </div>
                 </div>

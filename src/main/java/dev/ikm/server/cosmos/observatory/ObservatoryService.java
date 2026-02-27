@@ -164,4 +164,9 @@ public class ObservatoryService {
 				.map(fac -> new ScopeNode(fac, calculatorService.calculateChildren(fac).isEmpty()))
 				.toList());
 	}
+
+	public Optional<Integer> retrieveDescendantCount(Facade facade) {
+		return Optional.of(calculatorService.calculateDescendants(facade).size());
+	}
+
 }

@@ -95,14 +95,14 @@
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                         <span th:if="${activeObservatoryId == null}">Select Observatory</span>
                                         <span th:each="observatory : ${observatories}"
-                                              th:if="${activeObservatoryId != null and observatory.id() == activeObservatoryId}"
+                                              th:if="${activeObservatoryId != null and observatory.id == activeObservatoryId}"
                                               th:text="${observatory.name()}" th:remove="tag"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="#"
                                                th:each="observatory : ${observatories}"
                                                th:text="${observatory.name()}"
-                                               th:hx-post="@{/observatory/selected(observatoryId=${observatory.id()})}"
+                                               th:hx-post="@{/observatory/selected(observatoryId=${observatory.id})}"
                                                hx-target="#observatorySelector"
                                                hx-swap="outerHTML">Observatory Name</a></li>
                                     </ul>

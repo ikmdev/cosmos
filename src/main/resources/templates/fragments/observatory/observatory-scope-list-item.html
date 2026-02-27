@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<li th:fragment="scope-list-item(item)"
+<li th:fragment="scope-list-item(item, descendantCount)"
     class="list-group-item d-flex justify-content-between align-items-center">
-    <span th:text="${item.name}">Scope Name</span>
+    <span>
+        <span th:text="${item.name}">Scope Name</span>
+        <span class="badge rounded-pill bg-secondary ms-2" th:text="${descendantCount}" title="Number of descendants">0</span>
+    </span>
     <button type="button" class="btn btn-sm text-danger" aria-label="Remove" onclick="this.closest('li').remove()">
         <i class="bi bi-trash"></i>
     </button>
