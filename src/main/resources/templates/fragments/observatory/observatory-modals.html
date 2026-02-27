@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="observatory-modals">
+    <!-- Create Observatory Modal -->
+    <div class="modal fade" id="createObservatoryModal" tabindex="-1" aria-labelledby="createObservatoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="createObservatoryModalLabel">Create New Observatory</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="createObservatoryModalBody">
+                    <!-- The observatory-form fragment will be loaded here by HTMX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="create-observatory-form" class="btn btn-primary">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Observatories Modal -->
+    <div class="modal fade" id="manageObservatoryModal" tabindex="-1" aria-labelledby="manageObservatoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="manageObservatoryModalLabel">Manage Observatories</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="manageObservatoryModalBody">
+                    <!-- The observatory management table will be loaded here by HTMX -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

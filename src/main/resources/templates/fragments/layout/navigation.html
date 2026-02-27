@@ -25,15 +25,6 @@
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${activePage == 'observatory' ? 'active' : ''}"
-                               href="/observatory"
-                               hx-get="/observatory"
-                               hx-target="#main-content"
-                               hx-swap="outerHTML"
-                               hx-push-url="true">Observatory</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"
                                th:classappend="${activePage == 'discovery' ? 'active' : ''}"
                                href="/discovery"
                                hx-get="/discovery"
@@ -92,7 +83,8 @@
                             <li class="nav-item dropstart">
                                 <div th:fragment="observatorySelector" class="dropdown" id="observatorySelector" hx-swap-oob="true">
                                     <button class="btn btn-secondary dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            data-bs-toggle="dropdown" aria-expanded="false"
+                                            data-bs-auto-close="outside">
                                         <span th:if="${activeObservatoryId == null}">Select Observatory</span>
                                         <span th:each="observatory : ${observatories}"
                                               th:if="${activeObservatoryId != null and observatory.id == activeObservatoryId}"
@@ -105,6 +97,19 @@
                                                th:hx-post="@{/observatory/selected(observatoryId=${observatory.id})}"
                                                hx-target="#observatorySelector"
                                                hx-swap="outerHTML">Observatory Name</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#"
+                                               hx-get="/observatory/new"
+                                               hx-target="#createObservatoryModalBody"
+                                               hx-trigger="click consume"
+                                               hx-on:htmx:after-on-load="const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('createObservatoryModal')); modal.show();">
+                                               Create New...</a></li>
+                                        <li><a class="dropdown-item" href="#"
+                                               hx-get="/observatory/manage"
+                                               hx-target="#manageObservatoryModalBody"
+                                               hx-trigger="click consume"
+                                               hx-on:htmx:after-on-load="const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('manageObservatoryModal')); modal.show();">
+                                               Manage...</a></li>
                                     </ul>
                                 </div>
                             </li>

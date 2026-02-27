@@ -35,11 +35,7 @@ public class ObservatoryController {
 		this.observatoryService = observatoryService;
 	}
 
-	private void addSharedModelAttributes(Model model) {
-		model.addAttribute("activePage", "observatory");
-		model.addAttribute("titleDisplayName", "Observatory");
-		model.addAttribute("footerText", "Configuring your cosmic viewpoint");
-
+	private void addNewObservatoryModelAttributes(Model model) {
 		// Add form backing object with default/empty values
 		model.addAttribute("observatoryForm", new ObservatoryForm(
 				"",
@@ -63,23 +59,23 @@ public class ObservatoryController {
 		});
 	}
 
-	@GetMapping("/observatory")
-	public String getObservatory(
+	@HxRequest
+	@GetMapping("/observatory/manage")
+	public FragmentsRendering getManageObservatories(
 			Model model) {
-		addSharedModelAttributes(model);
-		return "observatory";
+		observatoryService.retrieveAllObservatories().ifPresent(observatories -> model.addAttribute("observatories", observatories));
+		return FragmentsRendering
+				.with("fragments/observatory/observatory-manage :: observatory-manage-table")
+				.build();
 	}
 
 	@HxRequest
-	@GetMapping("/observatory")
-	public FragmentsRendering getObservatoryWithFragments(
+	@GetMapping("/observatory/new")
+	public FragmentsRendering getNewObservatory(
 			Model model) {
-		addSharedModelAttributes(model);
+		addNewObservatoryModelAttributes(model);
 		return FragmentsRendering
-				.with("observatory :: main-content")
-				.fragment("fragments/layout/title :: title-content")
-				.fragment("fragments/layout/navigation :: navigation-content")
-				.fragment("fragments/layout/footer :: footer-content")
+				.with("fragments/observatory/observatory-form :: create-observatory-form")
 				.build();
 	}
 

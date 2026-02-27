@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="observatory-manage-table">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">STAMP</th>
+            <th scope="col">Language</th>
+            <th scope="col">Navigation</th>
+            <th scope="col">Modules</th>
+            <th scope="col">Scopes</th>
+            <th scope="col" class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="observatories-table-body">
+            <th:block th:each="observatory : ${observatories}" th:insert="~{fragments/observatory/observatory-table-row :: observatory-row(observatory=${observatory})}"></th:block>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

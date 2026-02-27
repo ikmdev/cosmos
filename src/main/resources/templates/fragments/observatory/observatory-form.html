@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<form th:fragment="observatory-form"
+<form th:fragment="create-observatory-form"
+      id="create-observatory-form"
       x-data @keydown.enter.prevent
-      @htmx:after-request="if($event.detail.successful && $event.detail.pathInfo.path === '/observatory') $el.reset()"
-      action="#"
-      th:action="@{/observatory}"
+      @htmx:after-request="if($event.detail.successful && $event.detail.elt.id === 'create-observatory-form') {
+            $el.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createObservatoryModal'));
+            if (modal) modal.hide();
+          }"
       th:object="${observatoryForm}"
-      method="post"
       hx-post="/observatory"
-      hx-target="#observatories-table-body"
-      hx-swap="afterbegin"
-      hx-trigger="submit">
+      hx-target="#observatorySelector"
+      hx-swap="outerHTML">
     <style>
         #includedScopeContainer:has(li:not(.scope-list-placeholder)) .scope-list-placeholder {
             display: none;
@@ -161,7 +162,6 @@
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
 </form>
 </body>
 </html>
