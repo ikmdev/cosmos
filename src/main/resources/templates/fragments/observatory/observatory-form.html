@@ -22,120 +22,140 @@
         <input th:field="*{name}" type="text" class="form-control" id="nameInput"
                placeholder="Default Name" autocomplete="off">
     </div>
-    <div class="mb-3">
-        <div class="card">
-            <div class="card-header">Coordinate</div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <label for="stampSelect">STAMP</label>
-                    <select th:field="*{selectedStampCoordinate}" class="form-select"
-                            id="stampSelect">
-                        <option
-                                56 th:each="stampCoordinate : ${stampCoordinates}"
-                                th:value="${stampCoordinate.id().nid()}"
-                                th:text="${stampCoordinate.name()}"></option>
-                    </select>
-                </div>
-                <div class="row mb-3">
-                    <label for="languageSelect">Language</label>
-                    <select th:field="*{selectedLanguageCoordinate}" class="form-select"
-                            id="languageSelect">
-                        <option
-                                th:each="languageCoordinate : ${languageCoordinates}"
-                                th:value="${languageCoordinate.id().nid()}"
-                                th:text="${languageCoordinate.name()}"></option>
-                    </select>
-                </div>
+    <div class="accordion mb-3" id="observatoryAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCoordinates">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseCoordinates" aria-expanded="true" aria-controls="collapseCoordinates">
+                    Coordinate
+                </button>
+            </h2>
+            <div id="collapseCoordinates" class="accordion-collapse collapse show" aria-labelledby="headingCoordinates"
+                 data-bs-parent="#observatoryAccordion">
+                <div class="accordion-body">
+                    <div class="row mb-3">
+                        <label for="stampSelect">STAMP</label>
+                        <select th:field="*{selectedStampCoordinate}" class="form-select"
+                                id="stampSelect">
+                            <option
+                                    th:each="stampCoordinate : ${stampCoordinates}"
+                                    th:value="${stampCoordinate.id().nid()}"
+                                    th:text="${stampCoordinate.name()}"></option>
+                        </select>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="languageSelect">Language</label>
+                        <select th:field="*{selectedLanguageCoordinate}" class="form-select"
+                                id="languageSelect">
+                            <option
+                                    th:each="languageCoordinate : ${languageCoordinates}"
+                                    th:value="${languageCoordinate.id().nid()}"
+                                    th:text="${languageCoordinate.name()}"></option>
+                        </select>
+                    </div>
 
-                <div class="row mb-3">
-                    <label for="navigationSelect">Navigation</label>
-                    <select th:field="*{selectedNavigationCoordinate}" class="form-select"
-                            id="navigationSelect">
-                        <option
-                                th:each="navigationCoordinate : ${navigationCoordinates}"
-                                th:value="${navigationCoordinate.id().nid()}"
-                                th:text="${navigationCoordinate.name()}"></option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mb-3">
-        <div class="card">
-            <div class="card-header">Modularity</div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="includedModuleSelect">Included</label>
-                        <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect"
-                                multiple
-                                aria-label="Multiple select for Included Modules"
-                                style="min-height: 250px;">
+                    <div class="row mb-3">
+                        <label for="navigationSelect">Navigation</label>
+                        <select th:field="*{selectedNavigationCoordinate}" class="form-select"
+                                id="navigationSelect">
                             <option
-                                    th:each="module : ${modules}"
-                                    th:value="${module.id().nid()}"
-                                    th:text="${module.name()}"></option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="excludedModuleSelect">Excluded</label>
-                        <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect"
-                                multiple
-                                aria-label="Multiple select for Excluded Modules"
-                                style="min-height: 250px;">
-                            <option
-                                    th:each="module : ${modules}"
-                                    th:value="${module.id().nid()}"
-                                    th:text="${module.name()}"></option>
+                                    th:each="navigationCoordinate : ${navigationCoordinates}"
+                                    th:value="${navigationCoordinate.id().nid()}"
+                                    th:text="${navigationCoordinate.name()}"></option>
                         </select>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="mb-3">
-        <div class="card">
-            <div class="card-header">Scope</div>
-            <div class="card-body">
-                <div id="scope-activity-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
-                         style="width: 100%"></div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingModularity">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseModularity" aria-expanded="false" aria-controls="collapseModularity">
+                    Modularity
+                </button>
+            </h2>
+            <div id="collapseModularity" class="accordion-collapse collapse" aria-labelledby="headingModularity"
+                 data-bs-parent="#observatoryAccordion">
+                <div class="accordion-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="includedModuleSelect">Included</label>
+                            <select th:field="*{selectedIncludedModules}" class="form-select" id="includedModuleSelect"
+                                    multiple
+                                    aria-label="Multiple select for Included Modules"
+                                    style="min-height: 250px;">
+                                <option
+                                        th:each="module : ${modules}"
+                                        th:value="${module.id().nid()}"
+                                        th:text="${module.name()}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="excludedModuleSelect">Excluded</label>
+                            <select th:field="*{selectedExcludedModules}" class="form-select" id="excludedModuleSelect"
+                                    multiple
+                                    aria-label="Multiple select for Excluded Modules"
+                                    style="min-height: 250px;">
+                                <option
+                                        th:each="module : ${modules}"
+                                        th:value="${module.id().nid()}"
+                                        th:text="${module.name()}"></option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div id="scope-search">
-                            <div class="input-group">
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingScope">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseScope" aria-expanded="false" aria-controls="collapseScope">
+                    Scope
+                </button>
+            </h2>
+            <div id="collapseScope" class="accordion-collapse collapse" aria-labelledby="headingScope"
+                 data-bs-parent="#observatoryAccordion">
+                <div class="accordion-body">
+                    <div id="scope-activity-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                             aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                             style="width: 100%"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div id="scope-search">
+                                <div class="input-group">
                                 <span class="input-group-text" id="scope-search-button">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input type="text" class="form-control" placeholder="Search scopes..." name="query"
-                                       aria-label="Search scopes" id="scope-search-input"
-                                       hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
-                                       hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
-                                       hx-swap="innerHTML" hx-indicator="#scope-activity-indicator">
+                                    <input type="text" class="form-control" placeholder="Search scopes..." name="query"
+                                           aria-label="Search scopes" id="scope-search-input"
+                                           hx-get="/observatory/scope/search" hx-vals='{"page": "0"}'
+                                           hx-trigger="keyup changed delay:600ms" hx-target="#scope-search-results"
+                                           hx-swap="innerHTML" hx-indicator="#scope-activity-indicator">
+                                </div>
+                                <ul class="list-group" id="scope-search-results"
+                                    style="max-height: 300px; overflow-y: auto;">
+                                    <li class="list-group-item text-muted fst-italic">
+                                        Start typing to search for scopes.
+                                    </li>
+                                </ul>
                             </div>
-                            <ul class="list-group" id="scope-search-results"
+                        </div>
+                        <div class="col-md-4">
+                            <div id="scope-tree-container">
+                                <th:block
+                                        th:replace="~{fragments/observatory/observatory-scope-tree :: scope-tree(scope=${scope}, children=${children})}"></th:block>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <ul id="includedScopeContainer" class="list-group"
                                 style="max-height: 300px; overflow-y: auto;">
-                                <li class="list-group-item text-muted fst-italic">
-                                    Start typing to search for scopes.
+                                <li class="scope-list-placeholder list-group-item text-muted fst-italic">
+                                    No scopes selected.
                                 </li>
                             </ul>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div id="scope-tree-container">
-                            <th:block
-                                    th:replace="~{fragments/observatory/observatory-scope-tree :: scope-tree(scope=${scope}, children=${children})}"></th:block>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <ul id="includedScopeContainer" class="list-group"
-                            style="max-height: 300px; overflow-y: auto;">
-                            <li class="scope-list-placeholder list-group-item text-muted fst-italic">
-                                No scopes selected.
-                            </li>
-                        </ul>
                     </div>
                 </div>
             </div>
