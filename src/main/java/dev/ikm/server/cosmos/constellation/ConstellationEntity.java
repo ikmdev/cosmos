@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record ConstellationEntity(
 		UUID id,
+		UUID observatoryId,
 		Phase phase,
 		String name,
 		long concepts,
@@ -16,15 +17,15 @@ public record ConstellationEntity(
 		Instant completed) implements Serializable {
 
 	public ConstellationEntity with(Phase phase) {
-		return new ConstellationEntity(id, phase, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(Instant completed) {
-		return new ConstellationEntity(id, phase, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(long concepts, long semantics, long patterns) {
-		return new ConstellationEntity(id, phase, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public boolean isCompleted() {

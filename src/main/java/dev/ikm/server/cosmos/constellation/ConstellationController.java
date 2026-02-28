@@ -23,10 +23,12 @@ public class ConstellationController {
 	private final Logger LOG = LoggerFactory.getLogger(ConstellationController.class);
 
 	private final ConstellationService constellationService;
+	private final CalculatorService calculatorService;
 
 	@Autowired
-	public ConstellationController(ConstellationService constellationService) {
+	public ConstellationController(ConstellationService constellationService, CalculatorService calculatorService) {
 		this.constellationService = constellationService;
+		this.calculatorService = calculatorService;
 	}
 
 	private void addSharedModelAttributes(Model model) {
@@ -34,7 +36,8 @@ public class ConstellationController {
 		model.addAttribute("titleDisplayName", "Constellation");
 		model.addAttribute("footerText", "Mapping the stars of knowledge");
 		model.addAttribute("constellationForm", new ConstellationForm(""));
-		model.addAttribute("constellations", constellationService.retrieveAllConstellations());
+		constellationService.retrieveAllConstellations(calculatorService.getObservatoryId())
+				.ifPresent(constellations -> model.addAttribute("constellations", constellations));
 	}
 
 	@GetMapping("/constellation")
@@ -60,11 +63,8 @@ public class ConstellationController {
 	public FragmentsRendering postConstellation(
 			@ModelAttribute("constellationForm") ConstellationForm constellationForm,
 			Model model) {
-		// This method should save the constellation with an initial status like "QUEUED"
-		Constellation newConstellation = constellationService.formConstellation(constellationForm);
-
-		// The new row will immediately reflect the "QUEUED" status
-		model.addAttribute("newConstellation", newConstellation);
+		constellationService.formConstellation(calculatorService.getObservatoryId(), constellationForm)
+				.ifPresent(constellation -> model.addAttribute("newConstellation", constellation));
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: new-constellation-row")
 				.build();
@@ -81,8 +81,8 @@ public class ConstellationController {
 	@HxRequest
 	@GetMapping("/constellations/status/{id}")
 	public FragmentsRendering getConstellationStatus(@PathVariable("id") UUID id, Model model) {
-		Constellation constellation = constellationService.getConstellationStatus(id);
-		model.addAttribute("constellation", constellation);
+		constellationService.getConstellationStatus(id)
+				.ifPresent(constellation -> model.addAttribute("constellation", constellation));
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: constellation-row")
 				.build();
@@ -91,13 +91,20 @@ public class ConstellationController {
 	@HxRequest
 	@PostMapping("/constellation/{id}/chart")
 	public FragmentsRendering processConstellation(@PathVariable("id") UUID id, Model model) {
-		// Call the service to start the charting process and get the updated state
-		Constellation updatedConstellation = constellationService.startCharting(id);
-		model.addAttribute("constellation", updatedConstellation);
-
-		// Return the updated table row fragment, which HTMX will swap into the DOM
+		constellationService.startCharting(id)
+				.ifPresent(constellation -> model.addAttribute("constellation", constellation));
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: constellation-row")
+				.build();
+	}
+
+	@HxRequest
+	@GetMapping("/constellation/table")
+	public FragmentsRendering getConstellationDataForTable(Model model) {
+		constellationService.retrieveAllConstellations(calculatorService.getObservatoryId())
+						.ifPresent(constellations -> model.addAttribute("constellations", constellations));
+		return FragmentsRendering
+				.with("constellation :: constellation-table-body")
 				.build();
 	}
 }

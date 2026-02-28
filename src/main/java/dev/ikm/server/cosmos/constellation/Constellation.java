@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public record Constellation(
 		UUID id,
+		UUID observatoryId,
 		String phase,
 		String name,
 		String created,

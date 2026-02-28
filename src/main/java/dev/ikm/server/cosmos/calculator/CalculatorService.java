@@ -37,6 +37,7 @@ public class CalculatorService {
 	private final ObservatoryRepository observatoryRepository;
 	private final IkeRepository ikeRepository;
 
+	private UUID observatoryId;
 	private StampCoordinateRecord stampCoordinateRecord;
 	private LanguageCoordinateRecord languageCoordinateRecord;
 	private NavigationCoordinateRecord navigationCoordinateRecord;
@@ -47,6 +48,7 @@ public class CalculatorService {
 	}
 
 	public void setObservatory(UUID observatoryId) {
+		this.observatoryId = observatoryId;
 		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(observatoryId);
 		setObservatory(observatoryEntity.stampCoordinate(), observatoryEntity.languageCoordinate(), observatoryEntity.navigationCoordinate(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
@@ -59,28 +61,28 @@ public class CalculatorService {
 				.mapToInt(facade -> facade.id().nid())
 				.toArray();
 		IntIdSet exclude = IntIds.set.of(nids);
-		this.stampCoordinateRecord = stampCoordinate.getRecord()
-				.withModules(include)
-				.withExcludedModuleNids(exclude);
+//		this.stampCoordinateRecord = stampCoordinate.getRecord()
+//				.withModules(include)
+//				.withExcludedModuleNids(exclude);
 
+		//TODO-aks8m:
+		// Need further testing to see implications for exclude and include of modules in STAMP Coordinate
+		// when being used in conjunction with the calculators. Currently to do the Constellation transforms,
+		// we need to have the include and exclude (to limit the proliferation of types of knowledge in our knowledge
+		// graph schema).
+		// The intention was to leverage the Latest<> calculations to help speed up what's "in scope"
+		// and "out of scope", but there is still more testing to better understand how Latest<> handles module
+		// precedence (for example).
+		// There is also just the issue of what parts of the Web App UI should be restricted
+		// text (description semantic) wise. Including and excluding can quickly render the UI with out any text (because
+		// we can simply exclude or not include the primordial module where Language/Description Type live).
+		this.stampCoordinateRecord = stampCoordinate.getRecord();
 		this.languageCoordinateRecord = languageCoordinate.getRecord();
 		this.navigationCoordinateRecord = navigationCoordinate.getRecord();
 	}
 
-	private List<ConceptFacade> makeConceptFacadeList(List<List<UUID>> publicIds) {
-		return publicIds.stream()
-				.map(PublicIds::of)
-				.map(Entity::nid)
-				.map(ConceptFacade::make)
-				.toList();
-	}
-
-	private IntIdSet makeIntIdSet(List<List<UUID>> publicIds) {
-		int[] nids = publicIds.stream()
-				.map(PublicIds::of)
-				.mapToInt(Entity::nid)
-				.toArray();
-		return IntIds.set.of(nids);
+	public UUID getObservatoryId() {
+		return observatoryId;
 	}
 
 	public StampCalculator getStampCalculator() {

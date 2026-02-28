@@ -11,7 +11,7 @@
             <tr th:replace="~{:: constellation-row(constellation=${newConstellation})}"></tr>
         </th:block>
 
-        <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id()}">
+        <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id}">
             <td th:text="${constellation.phase()}"></td>
             <td th:text="${constellation.name()}"></td>
             <td th:text="${constellation.created()}"></td>

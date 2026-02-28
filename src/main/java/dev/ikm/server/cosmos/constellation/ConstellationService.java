@@ -3,11 +3,13 @@ package dev.ikm.server.cosmos.constellation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,12 +26,13 @@ public class ConstellationService {
 		this.chartingService = chartingService;
 	}
 
-	public Constellation formConstellation(ConstellationForm constellationForm) {
+	public Optional<Constellation> formConstellation(UUID observatoryId, ConstellationForm constellationForm) {
 		UUID id = UUID.randomUUID();
 		Instant created = Instant.now();
 
 		ConstellationEntity constellationEntity = new ConstellationEntity(
 				id,
+				observatoryId,
 				Phase.FORMING,
 				constellationForm.name(),
 				0,
@@ -39,48 +42,58 @@ public class ConstellationService {
 				null);
 		constellationRepository.createConstellation(constellationEntity);
 
-		return new Constellation(
+		return Optional.of(new Constellation(
 				id,
+				observatoryId,
 				constellationEntity.phase().display(),
 				constellationForm.name(),
 				formatter.format(created),
 				0,
 				formatDuration(constellationEntity.getDuration()),
-				constellationEntity.isCompleted());
+				constellationEntity.isCompleted()));
 	}
 
-	public List<Constellation> retrieveAllConstellations() {
-		return constellationRepository.readAll().stream()
+	public Optional<List<Constellation>> retrieveAllConstellations() {
+		return Optional.of(constellationRepository.readAll().stream()
 				.map(entity ->
 						new Constellation(
 								entity.id(),
+								entity.observatoryId(),
 								entity.phase().display(),
 								entity.name(),
 								formatter.format(entity.created()),
 								entity.total(),
 								formatDuration(entity.getDuration()),
 								entity.isCompleted()))
-				.toList();
+				.toList());
+	}
+
+	public Optional<List<Constellation>> retrieveAllConstellations(UUID observatoryId) {
+		Optional<List<Constellation>> optionalConstellations = retrieveAllConstellations();
+		return optionalConstellations.map(constellations -> constellations.stream()
+				.filter(constellation -> constellation.observatoryId().equals(observatoryId))
+				.toList());
 	}
 
 	public void removeConstellation(UUID id) {
 		constellationRepository.deleteConstellation(id);
 	}
 
-	public Constellation getConstellationStatus(UUID id) {
+	public Optional<Constellation> getConstellationStatus(UUID id) {
 		ConstellationEntity constellationEntity = constellationRepository.readConstellation(id);
 		Duration processDuration = constellationEntity.getDuration();
-		return new Constellation(
+		return Optional.of(new Constellation(
 				id,
+				constellationEntity.observatoryId(),
 				constellationEntity.phase().display(),
 				constellationEntity.name(),
 				formatter.format(constellationEntity.created()),
 				constellationEntity.total(),
 				formatDuration(processDuration),
-				constellationEntity.isCompleted());
+				constellationEntity.isCompleted()));
 	}
 
-	public Constellation startCharting(UUID id) {
+	public Optional<Constellation> startCharting(UUID id) {
 		// Synchronously update the phase to give the user immediate feedback.
 		constellationRepository.updatePhase(id, Phase.QUEUED);
 		chartingService.submitChartingJob(id);
