@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public class ChartingContext {
 
-	public record ProgressUpdate(ChartStep chartStep, long processedCount) {}
+	public record ProgressUpdate(Step step, long processedCount) {}
 
 	private final Chart chart;
 	private final Map<Facade, List<Integer>> scopedConcepts;
@@ -37,10 +37,10 @@ public class ChartingContext {
 		return neo4jClient;
 	}
 
-	public void reportProgress(ChartStep chartStep, long processedCount) {
+	public void reportProgress(Step step, long processedCount) {
 		if (this.progressConsumer != null) {
 			this.processCount += processedCount;
-			this.progressConsumer.accept(new ProgressUpdate(chartStep, processCount));
+			this.progressConsumer.accept(new ProgressUpdate(step, processCount));
 		}
 	}
 }

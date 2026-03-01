@@ -130,9 +130,9 @@ public class ChartingService {
 				scopedConcepts,
 				neo4jClient,
 				progressUpdate -> {
-					switch (progressUpdate.chartStep()) {
-						case WRITE_CONCEPTS -> constellationRepository.updateConceptCount(chart.constellationId(), progressUpdate.processedCount());
-						case WRITE_HIERARCHY, WRITE_SEMANTICS, WRITE_LOGICAL_DEFINITIONS ->
+					switch (progressUpdate.step()) {
+						case PROCESS_CONCEPTS -> constellationRepository.updateConceptCount(chart.constellationId(), progressUpdate.processedCount());
+						case PROCESS_HIERARCHY, PROCESS_SEMANTICS, PROCESS_LOGICAL_DEFINITIONS ->
 								constellationRepository.updateSemanticCount(chart.constellationId(), progressUpdate.processedCount());
 					}
 				});

@@ -9,15 +9,15 @@ import java.util.Map;
 
 public class ConceptChartProcessor implements ChartProcessor {
 
-	private final String cypherQueryTemplate = """
+	private final String cypherQuery = """
 						UNWIND $batch AS row
-						MERGE (n:%s {id: row.id, constellationId: row.constellationId})
+						MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
 						SET n.name = row.name
 						""";
 
 	@Override
-	public ChartStep getStep() {
-		return ChartStep.WRITE_CONCEPTS;
+	public Step getStep() {
+		return Step.PROCESS_CONCEPTS;
 	}
 
 	@Override
@@ -30,25 +30,28 @@ public class ConceptChartProcessor implements ChartProcessor {
 		Chart chart = chartContext.getChart();
 		Neo4jClient neo4jClient = chartContext.getNeo4jClient();
 		chartContext.getScopedConcepts().forEach((scope, descendants) -> {
-
-			String nodeLabel = scope.name().replaceAll("[^a-zA-Z0-9]", "");
-			String cypherQuery = String.format(cypherQueryTemplate, nodeLabel);
-
 			List<Map<String, Object>> batch = new ArrayList<>();
 			for (Integer conceptNid : descendants) {
 				Map<String, Object> row = new HashMap<>();
 				row.put("id", conceptNid);
+				row.put("label", scope.name().replaceAll("[^a-zA-Z0-9]", ""));
 				row.put("name", chart.languageCalculator().getDescriptionTextOrNid(conceptNid));
 				row.put("constellationId", chart.constellationId().toString());
 				batch.add(row);
 				if (batch.size() == batchSize) {
-					neo4jClient.query(cypherQuery).bind(batch).to("batch").run();
+					neo4jClient.query(cypherQuery)
+							.bind(batch)
+							.to("batch")
+							.run();
 					chartContext.reportProgress(getStep(), batch.size());
 					batch.clear();
 				}
 			}
 			if (!batch.isEmpty()) {
-				neo4jClient.query(cypherQuery).bind(batch).to("batch").run();
+				neo4jClient.query(cypherQuery)
+						.bind(batch)
+						.to("batch")
+						.run();
 				chartContext.reportProgress(getStep(), batch.size());
 			}
 		});

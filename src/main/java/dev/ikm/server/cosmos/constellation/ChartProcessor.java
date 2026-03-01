@@ -2,7 +2,7 @@ package dev.ikm.server.cosmos.constellation;
 
 public interface ChartProcessor {
 
-	ChartStep getStep();
+	Step getStep();
 
 	String getProcessorName();
 
