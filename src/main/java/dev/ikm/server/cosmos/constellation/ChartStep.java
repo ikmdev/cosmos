@@ -1,15 +1,15 @@
 package dev.ikm.server.cosmos.constellation;
 
-public enum Step {
+public enum ChartStep {
 
 	WRITE_CONCEPTS("Writing Concept Knowledge"),
 	WRITE_HIERARCHY("Writing Hierarchy Knowledge"),
 	WRITE_LOGICAL_DEFINITIONS("Writing Logical Definition Knowledge"),
 	WRITE_SEMANTICS("Writing Semantic Knowledge");
 
-	private String display;
+	private final String display;
 
-	private Step(String display) {
+	private ChartStep(String display) {
 		this.display = display;
 	}
 

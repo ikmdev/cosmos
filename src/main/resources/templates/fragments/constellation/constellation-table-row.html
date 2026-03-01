@@ -29,14 +29,6 @@
                     <ul class="dropdown-menu">
                         <!-- Actions for constellations that are not yet completed -->
                         <th:block th:if="${!constellation.isCompleted}">
-                            <li th:if="${constellation.phase == 'Forming'}">
-                                <button class="dropdown-item"
-                                        th:attr="hx-post=@{/constellation/{id}/chart(id=${constellation.id})}"
-                                        hx-target="closest tr"
-                                        hx-swap="outerHTML">
-                                    <i class="bi bi-diagram-3 me-2"></i>Chart
-                                </button>
-                            </li>
                             <li th:if="${constellation.phase() == 'Forming'}"><hr class="dropdown-divider"></li>
                             <li>
                                 <button class="dropdown-item"

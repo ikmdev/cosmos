@@ -1,6 +1,5 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
@@ -13,14 +12,12 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.function.Consumer;
 
 /**
  * A dedicated service for running long-running, asynchronous charting tasks.
@@ -31,19 +28,23 @@ public class ChartingService {
 	private static final Logger LOG = LoggerFactory.getLogger(ChartingService.class);
 
 	private final Neo4jClient neo4jClient;
+	private final ConstellationRepository constellationRepository;
 	private final ObservatoryRepository observatoryRepository;
 	private final IkeRepository ikeRepository;
 	private final BlockingQueue<Chart> chartingQueue;
+	private final List<ChartProcessor> chartProcessors;
+
 	private Thread consumerThread;
 
-	private final int batchSize = 5_000;
 
 	@Autowired
-	public ChartingService(Neo4jClient neo4jClient, ObservatoryRepository observatoryRepository, IkeRepository ikeRepository) {
+	public ChartingService(Neo4jClient neo4jClient, ConstellationRepository constellationRepository, ObservatoryRepository observatoryRepository, IkeRepository ikeRepository) {
 		this.neo4jClient = neo4jClient;
 		this.observatoryRepository = observatoryRepository;
+		this.constellationRepository = constellationRepository;
 		this.ikeRepository = ikeRepository;
 		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
+		this.chartProcessors = List.of(new ConceptChartProcessor());
 	}
 
 	/**
@@ -58,12 +59,13 @@ public class ChartingService {
 				try {
 					Chart chart = chartingQueue.take(); // Blocks until an item is available
 					LOG.info("Pulled constellation {} from queue for charting.", chart.constellationId());
+					if (chart.action() == Action.DELETE) {
+						performChartDelete(chart);
+					} else if (chart.action() == Action.CREATE) {
+						constellationRepository.updatePhase(chart.constellationId(), Phase.CHARTING);
+						performCharting(chart);
+					}
 
-					// Manually create and configure a new CalculatorService instance for this job.
-					CalculatorService calculatorService = new CalculatorService(observatoryRepository, ikeRepository);
-					calculatorService.setObservatory(chart.observatoryId());
-
-					performCharting(chart, calculatorService);
 				} catch (InterruptedException e) {
 					LOG.warn("Charting queue consumer was interrupted.", e);
 					Thread.currentThread().interrupt();
@@ -101,58 +103,56 @@ public class ChartingService {
 		}
 	}
 
+	private void performChartDelete(Chart chart) {
+		String cypherQuery = """
+				MATCH (n {constellationId: $constellationId})
+				DETACH DELETE n
+				""";
+		neo4jClient.query(cypherQuery)
+				.bind(chart.constellationId().toString())
+				.to("constellationId")
+				.run();
+	}
+
 	/**
 	 * The actual, synchronous charting logic for a single constellation.
 	 * This method is called by the single-threaded queue consumer.
 	 */
-	private void performCharting(Chart chart, CalculatorService calculatorService) {
+	private void performCharting(Chart chart) {
 		LOG.info("Starting to chart constellation: {}", chart.constellationId());
-		List<Integer> conceptsInScope = new ArrayList<>();
 
-		//Extract, Transform, and Load Concept Knowledge into Knowledge Graph
-		for (Facade scope : chart.scopes()) {
-			List<Integer> conceptNids = extractConcepts(scope, calculatorService);
-			if (conceptNids.isEmpty()) {
-				throw new IllegalStateException(String.format("No concepts found for scope: %s", scope.name()));
-			}
-			conceptsInScope.addAll(conceptNids);
+		//Map Facades to their descendants or concepts within "scope" of the knowledge graph
+		Map<Facade, List<Integer>> scopedConcepts = extractConcepts(chart, chart.scopes());
+
+		//Create ChartContext and fire off ChartProcessors
+		ChartingContext chartContext = new ChartingContext(
+				chart,
+				scopedConcepts,
+				neo4jClient,
+				progressUpdate -> {
+					switch (progressUpdate.chartStep()) {
+						case WRITE_CONCEPTS -> constellationRepository.updateConceptCount(chart.constellationId(), progressUpdate.processedCount());
+						case WRITE_HIERARCHY, WRITE_SEMANTICS, WRITE_LOGICAL_DEFINITIONS ->
+								constellationRepository.updateSemanticCount(chart.constellationId(), progressUpdate.processedCount());
+					}
+				});
+
+		//Apply ChartContext to each ChartProcessor
+		for (ChartProcessor processor : chartProcessors) {
+			processor.process(chartContext, 5_000);
 		}
 
-		// Now, transform and load the extracted concepts into the knowledge graph.
-		transformConcepts(chart.constellationId(), conceptsInScope, getConceptLoadProcess("ChartedConcept"), calculatorService);
+		constellationRepository.updateCompleted(chart.constellationId(), Instant.now());
+		constellationRepository.updatePhase(chart.constellationId(), Phase.CHARTED);
 		LOG.info("Finished charting constellation: {}", chart.constellationId());
 	}
 
-	private List<Integer> extractConcepts(Facade scope, CalculatorService calculatorService) {
-		return calculatorService.calculateDescendants(scope).stream().map(facade -> facade.id().nid()).toList();
+	private Map<Facade, List<Integer>> extractConcepts(Chart chart, List<Facade> scopes) {
+		Map<Facade, List<Integer>> scopedConcepts = new HashMap<>();
+		for (Facade scope : scopes) {
+			scopedConcepts.put(scope, chart.navigationCalculator().descendentsOf(scope.id().nid()).mapToList(nid -> nid));
+		}
+		return scopedConcepts;
 	}
 
-	private void transformConcepts(UUID constellationId, List<Integer> conceptNids, Consumer<List<Map<String, Object>>> loadProcess, CalculatorService calculatorService) {
-		List<Map<String, Object>> batch = new ArrayList<>();
-		for (Integer conceptNid : conceptNids) {
-			Map<String, Object> row = new HashMap<>();
-			row.put("id", conceptNid);
-			row.put("name", calculatorService.calculateText(conceptNid));
-			row.put("partitionId", constellationId.toString());
-			batch.add(row);
-			if (batch.size() == batchSize) {
-				loadProcess.accept(batch);
-				batch.clear();
-			}
-		}
-		if (!batch.isEmpty()) {
-			loadProcess.accept(batch);
-		}
-	}
-
-	private Consumer<List<Map<String, Object>>> getConceptLoadProcess(String nodeLabel) {
-		return batch -> {
-			String cypher = String.format("""
-					UNWIND $batch AS row
-					MERGE (n:%s {id: row.id, partitionId: row.partitionId})
-					SET n.name = row.name
-					""", nodeLabel);
-			neo4jClient.query(cypher).bind(batch).to("batch").run();
-		};
-	}
 }

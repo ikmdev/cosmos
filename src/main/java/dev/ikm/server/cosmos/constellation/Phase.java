@@ -10,8 +10,6 @@ public enum Phase {
 	 * akin to a star or nebula forming from cosmic dust.
 	 * Corresponds to the creation of the Neo4j database.
 	 */
-	FORMING("Forming"),
-	FORMED("Formed"),
 	QUEUED("Queued"),
 	/**
 	 * The active processing phase where the constellation is being built and populated,
@@ -23,6 +21,9 @@ public enum Phase {
 	 * The constellation is now fully mapped and established.
 	 */
 	CHARTED("Charted"),
+
+	DELETED("Deleted"),
+
 	/**
 	 * The failed state, indicating that the constellation didn't finish it's charting phase.
 	 */

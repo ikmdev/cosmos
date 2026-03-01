@@ -4,7 +4,6 @@ import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
 import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
 import dev.ikm.server.cosmos.calculator.StampCoordinate;
 import dev.ikm.server.cosmos.ike.Facade;
-import dev.ikm.tinkar.common.id.PublicId;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -20,5 +19,5 @@ public record ObservatoryEntity(
 		NavigationCoordinate navigationCoordinate,
 		List<Facade> includedModules,
 		List<Facade> excludedModules,
-		List<Facade> includeScopes) implements Serializable {
+		List<Facade> includedScopes) implements Serializable {
 }

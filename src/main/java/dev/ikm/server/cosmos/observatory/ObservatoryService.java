@@ -52,7 +52,7 @@ public class ObservatoryService {
 				observatoryEntity.navigationCoordinate().getConcept(),
 				observatoryEntity.includedModules(),
 				observatoryEntity.excludedModules(),
-				observatoryEntity.includeScopes());
+				observatoryEntity.includedScopes());
 	}
 
 	private ObservatoryEntity buildObservatoryEntity(Observatory observatory) {
@@ -84,7 +84,6 @@ public class ObservatoryService {
 
 	public Observatory saveNewObservatory(ObservatoryForm observatoryForm) {
 		UUID id = UUID.randomUUID();
-		//TODO - Handle the edge case where the coordinate ids aren't correct
 		Observatory observatory = new Observatory(
 				id,
 				observatoryForm.name(),

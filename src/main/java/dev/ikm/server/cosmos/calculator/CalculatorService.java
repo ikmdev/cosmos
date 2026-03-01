@@ -12,6 +12,7 @@ import dev.ikm.tinkar.common.id.IntIds;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.common.service.PrimitiveData;
+import dev.ikm.tinkar.coordinate.Coordinates;
 import dev.ikm.tinkar.coordinate.language.LanguageCoordinateRecord;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculator;
 import dev.ikm.tinkar.coordinate.language.calculator.LanguageCalculatorWithCache;
@@ -28,8 +29,11 @@ import org.eclipse.collections.impl.factory.Lists;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
 
 @Service
 @RequestScope
@@ -51,32 +55,37 @@ public class CalculatorService {
 	public void setObservatory(UUID observatoryId) {
 		this.observatoryId = observatoryId;
 		ObservatoryEntity observatoryEntity = observatoryRepository.readObservatory(observatoryId);
+		if (observatoryEntity == null) {
+			observatoryEntity = new ObservatoryEntity(
+					DEFAULT_OBSERVATORY_ID,
+					Instant.now(),
+					"Default Observatory",
+					StampCoordinate.DEV_LATEST,
+					LanguageCoordinate.US_ENG_REG,
+					NavigationCoordinate.INFERRED,
+					List.of(),
+					List.of(),
+					List.of());
+			observatoryRepository.createObservatory(observatoryEntity);
+		}
 		setObservatory(observatoryEntity.stampCoordinate(), observatoryEntity.languageCoordinate(), observatoryEntity.navigationCoordinate(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
 
 	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, List<Facade> includedModules, List<Facade> excludedModules) {
-		List<ConceptFacade> include = includedModules.stream()
-				.map(facade -> ConceptFacade.make(facade.id().nid()))
-				.toList();
-		int[] nids = excludedModules.stream()
-				.mapToInt(facade -> facade.id().nid())
-				.toArray();
-		IntIdSet exclude = IntIds.set.of(nids);
-//		this.stampCoordinateRecord = stampCoordinate.getRecord()
-//				.withModules(include)
-//				.withExcludedModuleNids(exclude);
+		/*
+		 Need further testing to see implications for exclude and include of modules in STAMP Coordinate
+		 when being used in conjunction with the calculators. Currently to do the Constellation transforms,
+		 we need to have the include and exclude (to limit the proliferation of types of knowledge in our knowledge
+		 graph schema).
 
-		//TODO-aks8m:
-		// Need further testing to see implications for exclude and include of modules in STAMP Coordinate
-		// when being used in conjunction with the calculators. Currently to do the Constellation transforms,
-		// we need to have the include and exclude (to limit the proliferation of types of knowledge in our knowledge
-		// graph schema).
-		// The intention was to leverage the Latest<> calculations to help speed up what's "in scope"
-		// and "out of scope", but there is still more testing to better understand how Latest<> handles module
-		// precedence (for example).
-		// There is also just the issue of what parts of the Web App UI should be restricted
-		// text (description semantic) wise. Including and excluding can quickly render the UI with out any text (because
-		// we can simply exclude or not include the primordial module where Language/Description Type live).
+		 The intention was to leverage the Latest<> calculations to help speed up what's "in scope"
+		 and "out of scope", but there is still more testing to better understand how Latest<> handles module
+		 precedence (for example).
+
+		 There is also just the issue of what parts of the Web App UI should be restricted
+		 text (description semantic) wise. Including and excluding can quickly render the UI with out any text (because
+		 we can simply exclude or not include the primordial module where Language/Description Type live).
+		*/
 		this.stampCoordinateRecord = stampCoordinate.getRecord();
 		this.languageCoordinateRecord = languageCoordinate.getRecord();
 		this.navigationCoordinateRecord = navigationCoordinate.getRecord();

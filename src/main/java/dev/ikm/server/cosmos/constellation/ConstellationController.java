@@ -63,7 +63,7 @@ public class ConstellationController {
 	public FragmentsRendering postConstellation(
 			@ModelAttribute("constellationForm") ConstellationForm constellationForm,
 			Model model) {
-		constellationService.formConstellation(calculatorService.getObservatoryId(), constellationForm)
+		constellationService.createConstellation(calculatorService.getObservatoryId(), constellationForm)
 				.ifPresent(constellation -> model.addAttribute("newConstellation", constellation));
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: new-constellation-row")
@@ -82,16 +82,6 @@ public class ConstellationController {
 	@GetMapping("/constellations/status/{id}")
 	public FragmentsRendering getConstellationStatus(@PathVariable("id") UUID id, Model model) {
 		constellationService.getConstellationStatus(id)
-				.ifPresent(constellation -> model.addAttribute("constellation", constellation));
-		return FragmentsRendering
-				.with("fragments/constellation/constellation-table-row :: constellation-row")
-				.build();
-	}
-
-	@HxRequest
-	@PostMapping("/constellation/{id}/chart")
-	public FragmentsRendering processConstellation(@PathVariable("id") UUID id, Model model) {
-		constellationService.startCharting(id)
 				.ifPresent(constellation -> model.addAttribute("constellation", constellation));
 		return FragmentsRendering
 				.with("fragments/constellation/constellation-table-row :: constellation-row")

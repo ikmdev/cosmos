@@ -1,0 +1,46 @@
+package dev.ikm.server.cosmos.constellation;
+
+import dev.ikm.server.cosmos.ike.Facade;
+import org.springframework.data.neo4j.core.Neo4jClient;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+public class ChartingContext {
+
+	public record ProgressUpdate(ChartStep chartStep, long processedCount) {}
+
+	private final Chart chart;
+	private final Map<Facade, List<Integer>> scopedConcepts;
+	private final Neo4jClient neo4jClient;
+	private final Consumer<ProgressUpdate> progressConsumer;
+	private long processCount;
+
+	public ChartingContext(Chart chart, Map<Facade, List<Integer>> scopedConcepts, Neo4jClient neo4jClient, Consumer<ProgressUpdate> progressConsumer) {
+		this.chart = chart;
+		this.scopedConcepts = scopedConcepts;
+		this.neo4jClient = neo4jClient;
+		this.progressConsumer = progressConsumer;
+		this.processCount = 0;
+	}
+
+	public Chart getChart() {
+		return chart;
+	}
+
+	public Map<Facade, List<Integer>> getScopedConcepts() {
+		return scopedConcepts;
+	}
+
+	public Neo4jClient getNeo4jClient() {
+		return neo4jClient;
+	}
+
+	public void reportProgress(ChartStep chartStep, long processedCount) {
+		if (this.progressConsumer != null) {
+			this.processCount += processedCount;
+			this.progressConsumer.accept(new ProgressUpdate(chartStep, processCount));
+		}
+	}
+}

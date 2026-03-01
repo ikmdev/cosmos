@@ -24,22 +24,22 @@ public class ConstellationService {
 	private final ObservatoryService observatoryService;
 
 	@Autowired
-	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService, CalculatorService calculatorService,  ObservatoryService observatoryService) {
+	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService, CalculatorService calculatorService, ObservatoryService observatoryService) {
 		this.constellationRepository = constellationRepository;
 		this.chartingService = chartingService;
 		this.calculatorService = calculatorService;
 		this.observatoryService = observatoryService;
 	}
 
-	public Optional<Constellation> formConstellation(UUID observatoryId, ConstellationForm constellationForm) {
+	public Optional<Constellation> createConstellation(UUID observatoryId, ConstellationForm constellationForm) {
 		UUID id = UUID.randomUUID();
 		Instant created = Instant.now();
 
 		ConstellationEntity constellationEntity = new ConstellationEntity(
 				id,
 				observatoryId,
-				Phase.FORMING,
-				Step.WRITE_CONCEPTS,
+				Phase.QUEUED,
+				ChartStep.WRITE_CONCEPTS,
 				constellationForm.name(),
 				0,
 				0,
@@ -48,11 +48,14 @@ public class ConstellationService {
 				null);
 		constellationRepository.createConstellation(constellationEntity);
 
+		//Start the charting process
+		startCharting(id);
+
 		return Optional.of(new Constellation(
 				id,
 				observatoryId,
 				constellationEntity.phase().display(),
-				constellationEntity.step().getDisplay(),
+				constellationEntity.chartStep().getDisplay(),
 				constellationForm.name(),
 				formatter.format(created),
 				0,
@@ -83,6 +86,7 @@ public class ConstellationService {
 	}
 
 	public void removeConstellation(UUID id) {
+		chartingService.submitChartingJob(new Chart(Action.DELETE, id, null, List.of(), null, null, null));
 		constellationRepository.deleteConstellation(id);
 	}
 
@@ -91,14 +95,14 @@ public class ConstellationService {
 		return Optional.of(mapEntityToDto(constellationEntity));
 	}
 
-	public Optional<Constellation> startCharting(UUID id) {
+	private void startCharting(UUID constellationId) {
 		// Synchronously update the phase to give the user immediate feedback.
-		constellationRepository.updatePhase(id, Phase.QUEUED);
+		constellationRepository.updatePhase(constellationId, Phase.QUEUED);
 		UUID observatoryId = calculatorService.getObservatoryId();
 		Observatory observatory = observatoryService.retrieveObservatory(observatoryId).orElseThrow();
-		Chart chart = new Chart(id,observatoryId, observatory.includedScopes());
+		Chart chart = new Chart(Action.CREATE, constellationId, observatoryId, observatory.includedScopes(),
+				calculatorService.getStampCalculator(), calculatorService.getLanguageCalculator(), calculatorService.getNavigationCalculator());
 		chartingService.submitChartingJob(chart);
-		return getConstellationStatus(id);
 	}
 
 	public void changeConstellationPhase(UUID id, Phase phase) {
@@ -124,7 +128,7 @@ public class ConstellationService {
 				entity.id(),
 				entity.observatoryId(),
 				entity.phase().display(),
-				entity.step().getDisplay(),
+				entity.chartStep().getDisplay(),
 				entity.name(),
 				formatter.format(entity.created()),
 				entity.total(),

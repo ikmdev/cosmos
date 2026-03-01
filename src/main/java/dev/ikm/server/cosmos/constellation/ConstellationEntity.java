@@ -9,7 +9,7 @@ public record ConstellationEntity(
 		UUID id,
 		UUID observatoryId,
 		Phase phase,
-		Step step,
+		ChartStep chartStep,
 		String name,
 		long concepts,
 		long semantics,
@@ -18,15 +18,15 @@ public record ConstellationEntity(
 		Instant completed) implements Serializable {
 
 	public ConstellationEntity with(Phase phase) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, chartStep, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(Instant completed) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, chartStep, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(long concepts, long semantics, long patterns) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, chartStep, name, concepts, semantics, patterns, created, completed);
 	}
 
 	public boolean isCompleted() {
