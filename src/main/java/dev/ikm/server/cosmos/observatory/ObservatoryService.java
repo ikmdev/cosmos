@@ -11,7 +11,6 @@ import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.server.cosmos.ike.Type;
 import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicId;
-import dev.ikm.tinkar.common.id.PublicIds;
 import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
 
 @Service
 public class ObservatoryService {
@@ -65,6 +66,20 @@ public class ObservatoryService {
 				observatory.includedModules(),
 				observatory.excludedModules(),
 				observatory.includedScopes());
+	}
+
+	public void bootstrapDefaultObservatory() {
+		ObservatoryEntity defaultObservatory = new ObservatoryEntity(
+				DEFAULT_OBSERVATORY_ID,
+				Instant.now(),
+				"Default Observatory",
+				StampCoordinate.DEV_LATEST,
+				LanguageCoordinate.US_ENG_REG,
+				NavigationCoordinate.INFERRED,
+				List.of(),
+				List.of(),
+				List.of());
+		observatoryRepository.createObservatory(defaultObservatory);
 	}
 
 	public Observatory saveNewObservatory(ObservatoryForm observatoryForm) {

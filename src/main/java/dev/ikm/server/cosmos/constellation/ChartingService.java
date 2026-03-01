@@ -1,7 +1,11 @@
 package dev.ikm.server.cosmos.constellation;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.ike.IkeRepository;
+import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +13,14 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 /**
  * A dedicated service for running long-running, asynchronous charting tasks.
@@ -22,17 +30,20 @@ public class ChartingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChartingService.class);
 
-	private final ConstellationRepository constellationRepository;
-	private final CalculatorService calculatorService;
 	private final Neo4jClient neo4jClient;
-	private final BlockingQueue<UUID> chartingQueue;
+	private final ObservatoryRepository observatoryRepository;
+	private final IkeRepository ikeRepository;
+	private final BlockingQueue<Chart> chartingQueue;
+	private Thread consumerThread;
+
+	private final int batchSize = 5_000;
 
 	@Autowired
-	public ChartingService(ConstellationRepository constellationRepository, CalculatorService calculatorService, Neo4jClient neo4jClient) {
-		this.constellationRepository = constellationRepository;
-		this.calculatorService = calculatorService;
+	public ChartingService(Neo4jClient neo4jClient, ObservatoryRepository observatoryRepository, IkeRepository ikeRepository) {
 		this.neo4jClient = neo4jClient;
-		this.chartingQueue = new ArrayBlockingQueue<>(10_000);
+		this.observatoryRepository = observatoryRepository;
+		this.ikeRepository = ikeRepository;
+		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
 	}
 
 	/**
@@ -41,14 +52,18 @@ public class ChartingService {
 	 */
 	@PostConstruct
 	public void startQueueConsumer() {
-		Thread.ofVirtual().start(() -> {
+		this.consumerThread = Thread.ofVirtual().start(() -> {
 			LOG.info("Charting queue consumer started.");
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
-					UUID constellationId = chartingQueue.take(); // Blocks until an item is available
-					LOG.info("Pulled constellation {} from queue for charting.", constellationId);
-					constellationRepository.updatePhase(constellationId, Phase.CHARTING);
-					performCharting(constellationId);
+					Chart chart = chartingQueue.take(); // Blocks until an item is available
+					LOG.info("Pulled constellation {} from queue for charting.", chart.constellationId());
+
+					// Manually create and configure a new CalculatorService instance for this job.
+					CalculatorService calculatorService = new CalculatorService(observatoryRepository, ikeRepository);
+					calculatorService.setObservatory(chart.observatoryId());
+
+					performCharting(chart, calculatorService);
 				} catch (InterruptedException e) {
 					LOG.warn("Charting queue consumer was interrupted.", e);
 					Thread.currentThread().interrupt();
@@ -61,20 +76,28 @@ public class ChartingService {
 		});
 	}
 
+	@PreDestroy
+	public void stopQueueConsumer() {
+		if (consumerThread != null && consumerThread.isAlive()) {
+			LOG.info("Interrupting charting queue consumer thread for shutdown.");
+			consumerThread.interrupt();
+		}
+	}
+
 	/**
 	 * Asynchronously adds a constellation to the charting queue.
 	 * The @Async annotation allows the calling thread (e.g., from the controller) to return immediately.
 	 *
-	 * @param constellationId The ID of the constellation to chart.
+	 * @param chart The ID of the constellation to chart.
 	 */
 	@Async("chartingTaskExecutor")
-	public void submitChartingJob(UUID constellationId) {
+	public void submitChartingJob(Chart chart) {
 		try {
-			chartingQueue.put(constellationId);
-			LOG.info("Successfully queued constellation {} for charting.", constellationId);
+			chartingQueue.put(chart);
+			LOG.info("Successfully queued constellation {} for charting.", chart.constellationId());
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			LOG.error("Failed to queue constellation {} for charting.", constellationId, e);
+			LOG.error("Failed to queue constellation {} for charting.", chart.constellationId(), e);
 		}
 	}
 
@@ -82,46 +105,54 @@ public class ChartingService {
 	 * The actual, synchronous charting logic for a single constellation.
 	 * This method is called by the single-threaded queue consumer.
 	 */
-	private void performCharting(UUID constellationId) {
-		LOG.info("Starting to chart constellation: {}", constellationId);
+	private void performCharting(Chart chart, CalculatorService calculatorService) {
+		LOG.info("Starting to chart constellation: {}", chart.constellationId());
+		List<Integer> conceptsInScope = new ArrayList<>();
 
-		try {
-
-			for (int i = 0; i < 10; i++) {
-				Thread.sleep(1_000);
-				constellationRepository.updateConceptCount(constellationId, i+2);
-				constellationRepository.updateSemanticCount(constellationId, i *10);
-				constellationRepository.updatePatternCount(constellationId, i +1);
+		//Extract, Transform, and Load Concept Knowledge into Knowledge Graph
+		for (Facade scope : chart.scopes()) {
+			List<Integer> conceptNids = extractConcepts(scope, calculatorService);
+			if (conceptNids.isEmpty()) {
+				throw new IllegalStateException(String.format("No concepts found for scope: %s", scope.name()));
 			}
-
-
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+			conceptsInScope.addAll(conceptNids);
 		}
 
-		constellationRepository.updatePhase(constellationId, Phase.CHARTED);
-		constellationRepository.updateCompleted(constellationId, Instant.now());
+		// Now, transform and load the extracted concepts into the knowledge graph.
+		transformConcepts(chart.constellationId(), conceptsInScope, getConceptLoadProcess("ChartedConcept"), calculatorService);
+		LOG.info("Finished charting constellation: {}", chart.constellationId());
+	}
 
-//		// Here, you would update the constellation's status to "CHARTING".
-//
-//		// 1. Create indices to ensure fast lookups by constellationId.
-//		neo4jClient.query("CREATE INDEX constellation_id_index IF NOT EXISTS FOR (n:Constellation) ON (n.id)").run();
-//		neo4jClient.query("CREATE INDEX star_constellation_id_index IF NOT EXISTS FOR (n:Star) ON (n.constellationId)").run();
-//
-//		// 2. Example: Create a root node for this constellation.
-//		neo4jClient.query("""
-//			MERGE (c:Constellation {id: $constellationId})
-//			ON CREATE SET c.name = 'Constellation ' + $constellationId, c.createdAt = timestamp()
-//			""").bind(constellationId.toString()).to("constellationId").run();
-//
-//		// 3. Example: Create a new 'Star' node and link it to its constellation.
-//		neo4jClient.query("""
-//			MATCH (c:Constellation {id: $constellationId})
-//			CREATE (s:Star {name: 'New Star', constellationId: $constellationId})
-//			CREATE (c)-[:CONTAINS]->(s)
-//			""").bind(constellationId.toString()).to("constellationId").run();
-//
-		LOG.info("Finished charting constellation: {}", constellationId);
-//		// Here, you would update the constellation's status to "COMPLETED".
+	private List<Integer> extractConcepts(Facade scope, CalculatorService calculatorService) {
+		return calculatorService.calculateDescendants(scope).stream().map(facade -> facade.id().nid()).toList();
+	}
+
+	private void transformConcepts(UUID constellationId, List<Integer> conceptNids, Consumer<List<Map<String, Object>>> loadProcess, CalculatorService calculatorService) {
+		List<Map<String, Object>> batch = new ArrayList<>();
+		for (Integer conceptNid : conceptNids) {
+			Map<String, Object> row = new HashMap<>();
+			row.put("id", conceptNid);
+			row.put("name", calculatorService.calculateText(conceptNid));
+			row.put("partitionId", constellationId.toString());
+			batch.add(row);
+			if (batch.size() == batchSize) {
+				loadProcess.accept(batch);
+				batch.clear();
+			}
+		}
+		if (!batch.isEmpty()) {
+			loadProcess.accept(batch);
+		}
+	}
+
+	private Consumer<List<Map<String, Object>>> getConceptLoadProcess(String nodeLabel) {
+		return batch -> {
+			String cypher = String.format("""
+					UNWIND $batch AS row
+					MERGE (n:%s {id: row.id, partitionId: row.partitionId})
+					SET n.name = row.name
+					""", nodeLabel);
+			neo4jClient.query(cypher).bind(batch).to("batch").run();
+		};
 	}
 }

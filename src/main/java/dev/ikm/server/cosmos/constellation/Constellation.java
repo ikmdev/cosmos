@@ -6,6 +6,7 @@ public record Constellation(
 		UUID id,
 		UUID observatoryId,
 		String phase,
+		String step,
 		String name,
 		String created,
 		long processed,

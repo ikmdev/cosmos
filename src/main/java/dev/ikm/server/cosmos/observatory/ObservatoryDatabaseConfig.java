@@ -60,19 +60,6 @@ public class ObservatoryDatabaseConfig {
 
 			//Create Default Observatory
 			ConcurrentMap<UUID, ObservatoryEntity> dbMap = database.hashMap(name, Serializer.UUID, Serializer.JAVA).createOrOpen();
-			if (!dbMap.containsKey(DEFAULT_OBSERVATORY_ID)) {
-				dbMap.put(DEFAULT_OBSERVATORY_ID, new ObservatoryEntity(
-						DEFAULT_OBSERVATORY_ID,
-						Instant.now(),
-						"Default Observatory",
-						StampCoordinate.DEV_LATEST,
-						LanguageCoordinate.US_ENG_REG,
-						NavigationCoordinate.INFERRED,
-						List.of(),
-						List.of(),
-						List.of()));
-			}
-
 			LOG.info("Observatory database initialized");
 		} else {
 			throw new RuntimeException("Observatory database directory does not exist");

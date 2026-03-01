@@ -12,12 +12,13 @@
         </th:block>
 
         <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id}">
-            <td th:text="${constellation.phase()}"></td>
-            <td th:text="${constellation.name()}"></td>
-            <td th:text="${constellation.created()}"></td>
-            <td th:text="${constellation.processed()}"></td>
-            <td th:text="${constellation.duration()}"></td>
-            <td class="text-center">
+            <td th:text="${constellation.phase}"></td>
+            <td th:text="${constellation.step}"></td>
+            <td th:text="${constellation.name}"></td>
+            <td th:text="${constellation.created}"></td>
+            <td th:text="${constellation.processed}"></td>
+            <td th:text="${constellation.duration}"></td>
+            <td>
                 <div class="dropdown">
                     <!-- The dropdown toggle button with a "kebab menu" icon -->
                     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -27,10 +28,10 @@
                     <!-- The dropdown menu with action items -->
                     <ul class="dropdown-menu">
                         <!-- Actions for constellations that are not yet completed -->
-                        <th:block th:if="${!constellation.isCompleted()}">
-                            <li th:if="${constellation.phase() == 'Forming'}">
+                        <th:block th:if="${!constellation.isCompleted}">
+                            <li th:if="${constellation.phase == 'Forming'}">
                                 <button class="dropdown-item"
-                                        th:attr="hx-post=@{/constellation/{id}/chart(id=${constellation.id()})}"
+                                        th:attr="hx-post=@{/constellation/{id}/chart(id=${constellation.id})}"
                                         hx-target="closest tr"
                                         hx-swap="outerHTML">
                                     <i class="bi bi-diagram-3 me-2"></i>Chart
@@ -39,7 +40,7 @@
                             <li th:if="${constellation.phase() == 'Forming'}"><hr class="dropdown-divider"></li>
                             <li>
                                 <button class="dropdown-item"
-                                        th:attr="hx-get=@{/constellations/status/{id}(id=${constellation.id()})}"
+                                        th:attr="hx-get=@{/constellations/status/{id}(id=${constellation.id})}"
                                         hx-target="closest tr"
                                         hx-swap="outerHTML">
                                     <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
@@ -50,7 +51,7 @@
                         <!-- The delete action is always available -->
                         <li>
                             <button class="dropdown-item text-danger"
-                                    th:attr="hx-delete=@{/constellation/{id}(id=${constellation.id()})}"
+                                    th:attr="hx-delete=@{/constellation/{id}(id=${constellation.id})}"
                                     hx-target="closest tr"
                                     hx-swap="outerHTML">
                                 <i class="bi bi-trash me-2"></i>Delete

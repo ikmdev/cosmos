@@ -1,9 +1,11 @@
 package dev.ikm.server.cosmos.constellation;
 
+import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.observatory.Observatory;
+import dev.ikm.server.cosmos.observatory.ObservatoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -17,13 +19,16 @@ public class ConstellationService {
 
 	private final ConstellationRepository constellationRepository;
 	private final ChartingService chartingService;
-	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-			.withZone(ZoneId.systemDefault());
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+	private final CalculatorService calculatorService;
+	private final ObservatoryService observatoryService;
 
 	@Autowired
-	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService) {
+	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService, CalculatorService calculatorService,  ObservatoryService observatoryService) {
 		this.constellationRepository = constellationRepository;
 		this.chartingService = chartingService;
+		this.calculatorService = calculatorService;
+		this.observatoryService = observatoryService;
 	}
 
 	public Optional<Constellation> formConstellation(UUID observatoryId, ConstellationForm constellationForm) {
@@ -34,6 +39,7 @@ public class ConstellationService {
 				id,
 				observatoryId,
 				Phase.FORMING,
+				Step.WRITE_CONCEPTS,
 				constellationForm.name(),
 				0,
 				0,
@@ -46,6 +52,7 @@ public class ConstellationService {
 				id,
 				observatoryId,
 				constellationEntity.phase().display(),
+				constellationEntity.step().getDisplay(),
 				constellationForm.name(),
 				formatter.format(created),
 				0,
@@ -54,25 +61,25 @@ public class ConstellationService {
 	}
 
 	public Optional<List<Constellation>> retrieveAllConstellations() {
-		return Optional.of(constellationRepository.readAll().stream()
-				.map(entity ->
-						new Constellation(
-								entity.id(),
-								entity.observatoryId(),
-								entity.phase().display(),
-								entity.name(),
-								formatter.format(entity.created()),
-								entity.total(),
-								formatDuration(entity.getDuration()),
-								entity.isCompleted()))
-				.toList());
+		// Delegate to the specific method with a null ID to fetch all constellations.
+		return retrieveAllConstellations(null);
 	}
 
 	public Optional<List<Constellation>> retrieveAllConstellations(UUID observatoryId) {
-		Optional<List<Constellation>> optionalConstellations = retrieveAllConstellations();
-		return optionalConstellations.map(constellations -> constellations.stream()
-				.filter(constellation -> constellation.observatoryId().equals(observatoryId))
-				.toList());
+		List<ConstellationEntity> entities;
+		if (observatoryId == null) {
+			entities = constellationRepository.readAll();
+		} else {
+			// This assumes you will add a `readAllByObservatory(UUID observatoryId)` method
+			// to your repository to filter at the database level.
+			entities = constellationRepository.readAll(observatoryId);
+		}
+		return Optional.of(entities.stream().map(this::mapEntityToDto).toList());
+	}
+
+	public Optional<Constellation> retrieveConstellation(UUID id) {
+		ConstellationEntity constellationEntity = constellationRepository.readConstellation(id);
+		return Optional.of(mapEntityToDto(constellationEntity));
 	}
 
 	public void removeConstellation(UUID id) {
@@ -81,23 +88,25 @@ public class ConstellationService {
 
 	public Optional<Constellation> getConstellationStatus(UUID id) {
 		ConstellationEntity constellationEntity = constellationRepository.readConstellation(id);
-		Duration processDuration = constellationEntity.getDuration();
-		return Optional.of(new Constellation(
-				id,
-				constellationEntity.observatoryId(),
-				constellationEntity.phase().display(),
-				constellationEntity.name(),
-				formatter.format(constellationEntity.created()),
-				constellationEntity.total(),
-				formatDuration(processDuration),
-				constellationEntity.isCompleted()));
+		return Optional.of(mapEntityToDto(constellationEntity));
 	}
 
 	public Optional<Constellation> startCharting(UUID id) {
 		// Synchronously update the phase to give the user immediate feedback.
 		constellationRepository.updatePhase(id, Phase.QUEUED);
-		chartingService.submitChartingJob(id);
+		UUID observatoryId = calculatorService.getObservatoryId();
+		Observatory observatory = observatoryService.retrieveObservatory(observatoryId).orElseThrow();
+		Chart chart = new Chart(id,observatoryId, observatory.includedScopes());
+		chartingService.submitChartingJob(chart);
 		return getConstellationStatus(id);
+	}
+
+	public void changeConstellationPhase(UUID id, Phase phase) {
+		constellationRepository.updatePhase(id, phase);
+	}
+
+	public void addToConceptCount(UUID id, int count) {
+		constellationRepository.updateConceptCount(id, count);
 	}
 
 	private String formatDuration(Duration duration) {
@@ -108,6 +117,19 @@ public class ConstellationService {
 		int minutes = duration.toMinutesPart();
 		int seconds = duration.toSecondsPart();
 		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+	}
+
+	private Constellation mapEntityToDto(ConstellationEntity entity) {
+		return new Constellation(
+				entity.id(),
+				entity.observatoryId(),
+				entity.phase().display(),
+				entity.step().getDisplay(),
+				entity.name(),
+				formatter.format(entity.created()),
+				entity.total(),
+				formatDuration(entity.getDuration()),
+				entity.isCompleted());
 	}
 
 }

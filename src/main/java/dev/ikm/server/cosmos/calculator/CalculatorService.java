@@ -4,6 +4,7 @@ import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.server.cosmos.ike.Type;
+import dev.ikm.server.cosmos.observatory.Observatory;
 import dev.ikm.server.cosmos.observatory.ObservatoryEntity;
 import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
 import dev.ikm.tinkar.common.id.IntIdSet;

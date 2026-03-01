@@ -25,6 +25,12 @@ public class ConstellationRepository {
 		return constellationDatabaseConfig.getConstellationDB().get(id);
 	}
 
+	public List<ConstellationEntity> readAll(UUID observatoryId) {
+		return constellationDatabaseConfig.getConstellationDB().values().stream()
+				.filter(constellationEntity -> constellationEntity.observatoryId().equals(observatoryId))
+				.toList();
+	}
+
 	public List<ConstellationEntity> readAll() {
 		return constellationDatabaseConfig.getConstellationDB().values().stream().toList();
 	}

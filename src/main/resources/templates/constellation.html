@@ -46,9 +46,10 @@
                     </div>
                     <div class="card-body">
                         <table class="table table-striped table-hover">
-                            <thead class="text-center">
+                            <thead>
                             <tr>
                                 <th>Phase</th>
+                                <th>Step</th>
                                 <th>Name</th>
                                 <th>Created</th>
                                 <th>Processed</th>
@@ -58,7 +59,6 @@
                             </thead>
                             <tbody id="constellation-table-body" th:fragment="constellation-table-body">
                             <th:block th:each="individualConstellation : ${constellations}">
-                                <!-- This row will only be rendered if the constellation is observable by the active observatory, or if no observatory is active -->
                                 <tr th:replace="~{fragments/constellation/constellation-table-row :: constellation-row(constellation=${individualConstellation})}"></tr>
                             </th:block>
                             </tbody>
