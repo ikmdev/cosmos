@@ -44,7 +44,9 @@ public class ChartingService {
 		this.constellationRepository = constellationRepository;
 		this.ikeRepository = ikeRepository;
 		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
-		this.chartProcessors = List.of(new ConceptChartProcessor());
+		this.chartProcessors = List.of(
+				new ConceptChartProcessor(),
+				new HierarchyCharProcessor());
 	}
 
 	/**
