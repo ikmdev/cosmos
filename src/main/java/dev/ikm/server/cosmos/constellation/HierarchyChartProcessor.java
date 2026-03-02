@@ -1,7 +1,6 @@
 package dev.ikm.server.cosmos.constellation;
 
 import dev.ikm.server.cosmos.ike.Facade;
-import dev.ikm.server.cosmos.ike.Id;
 import dev.ikm.tinkar.coordinate.navigation.calculator.NavigationCalculator;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
@@ -11,22 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class HierarchyCharProcessor implements ChartProcessor {
-
-//	private final String cypherQuery = """
-//			 UNWIND $batch AS row
-//			 // 1. Find the child (required)
-//			 MATCH (child:$(row.childLabel) {id: row.childId, constellationId: row.constellationId})
-//			 // 2. Try to find the parent
-//			 OPTIONAL MATCH (parent:$(row.parentLabel) {id: row.parentId, constellationId: row.constellationId})
-//			 // 3. Find or Create the "Generic" fallback node
-//			 MERGE (generic:Concept {id: "GENERIC_FALLBACK", constellationId: row.constellationId})
-//			 SET generic.name = row.conceptName
-//			 // 4. Determine which node to use as the target
-//			 WITH child, row, coalesce(parent, generic) AS targetNode
-//			 // 5. Create the relationship
-//			 MERGE (child)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(targetNode)
-//			""";
+public class HierarchyChartProcessor implements ChartProcessor {
 
 	private final String cypherQuery = """
 		  UNWIND $batch AS row
@@ -75,8 +59,6 @@ public class HierarchyCharProcessor implements ChartProcessor {
 					navigationCalculator.parentsOf(childNid).forEach(parentNid -> {
 
 						if (!isScope(parentNid, scopeFacades)) {
-
-
 							Map<String, Object> row = new HashMap<>();
 							String parentLabel = findLabel(parentNid, chartContext.getScopedConcepts());
 							String childLabel = findLabel(childNid, chartContext.getScopedConcepts());

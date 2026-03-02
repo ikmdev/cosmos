@@ -46,7 +46,8 @@ public class ChartingService {
 		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
 		this.chartProcessors = List.of(
 				new ConceptChartProcessor(),
-				new HierarchyCharProcessor());
+				new HierarchyChartProcessor(),
+				new LogicalDefinitionChartProcessor());
 	}
 
 	/**
