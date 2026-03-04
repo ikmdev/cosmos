@@ -63,7 +63,7 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				});
 		batchWrite(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateBatch(), chartingContext, batchSize);
 		batchWrite(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateBatch(), chartingContext, batchSize);
-		batchWrite(roleQuery, clutch.roleBatch(), chartingContext, batchSize);
+		batchWrite(roleRelationshipQuery, clutch.roleBatch(), chartingContext, batchSize);
 	}
 
 	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, LogicalDefinition logicalDefinition, Clutch clutch) {
@@ -108,15 +108,15 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		});
 	}
 
-	private final String roleQuery = """
+	private final String roleRelationshipQuery = """
 		  UNWIND $batch AS row
 		  MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
 
 		  OPTIONAL MATCH (destination:$(row.destinationLabel) {id: row.destinationId, constellationId: row.constellationId})
 
 		  // Find or create the generic node
-		  MERGE (generic:Concept {id: row.genericId, constellationId: row.constellationId})
-			ON CREATE SET generic.name = coalesce(row.conceptName, row.genericName)
+		  MERGE (generic:Concept {id: row.destinationId, constellationId: row.constellationId})
+			ON CREATE SET generic.name = coalesce(row.genericName, "ROLE: Default Name")
 
 		  WITH origin, row, coalesce(destination, generic) AS destinationNode
 
@@ -152,8 +152,7 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 			row.put("relType", relationshipText);
 
 			if (destinationLabel.equals("Concept")) {
-				row.put("conceptName", chart.languageCalculator().getDescriptionTextOrNid(Integer.parseInt(destinationId)));
-				row.put("genericId", destinationId);
+				row.put("genericName", chart.languageCalculator().getDescriptionTextOrNid(Integer.parseInt(destinationId)));
 			}
 
 			clutch.roleBatch().add(row);

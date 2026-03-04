@@ -2,30 +2,27 @@ package dev.ikm.server.cosmos.constellation;
 
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.navigation.calculator.NavigationCalculator;
-import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Gatherers;
 
 public class HierarchyChartProcessor implements ChartProcessor {
 
-	private final String cypherQuery = """
-		  UNWIND $batch AS row
-		  MATCH (child:$(row.childLabel) {id: row.childId, constellationId: row.constellationId})
+	private final String hierarchyQuery = """
+			UNWIND $batch AS row
+			MATCH (child:$(row.childLabel) {id: row.childId, constellationId: row.constellationId})
+			MATCH (parent:$(row.parentLabel) {id: row.parentId, constellationId: row.constellationId})
+			MERGE (child)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(parent)""";
 
-		  OPTIONAL MATCH (parent:$(row.parentLabel) {id: row.parentId, constellationId: row.constellationId})
-
-		  // Find or create the generic node
-		  MERGE (generic:Concept {id: "GENERIC_FALLBACK", constellationId: row.constellationId})
-			ON CREATE SET generic.name = coalesce(row.conceptName, "Default Concept Name")
-
-		  WITH child, row, coalesce(parent, generic) AS targetNode
-
-		  MERGE (child)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(targetNode)
-		  """;
+	private final String conceptCreateQuery = """
+			UNWIND $batch AS row
+			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
+			SET n.name = row.name
+			""";
 
 	@Override
 	public Step getStep() {
@@ -38,30 +35,22 @@ public class HierarchyChartProcessor implements ChartProcessor {
 	}
 
 	@Override
-	public void process(ChartingContext chartContext, int batchSize) {
-		Chart chart = chartContext.getChart();
-		Neo4jClient neo4jClient = chartContext.getNeo4jClient();
-		NavigationCalculator navigationCalculator = chartContext.getChart().navigationCalculator();
-		Set<Facade> scopeFacades = chartContext.getScopedConcepts().keySet();
-		/*
-			Need to be able to handle a single parent and multiple parents. Multiple parents may result
-				A) Both in scope
-				B) Both out of scope
-				C) Some in and some out
+	public void process(ChartingContext chartingContext, int batchSize) {
+		Chart chart = chartingContext.getChart();
+		NavigationCalculator navigationCalculator = chartingContext.getChart().navigationCalculator();
+		Set<Facade> scopeFacades = chartingContext.getScopedConcepts().keySet();
+		List<Map<String, Object>> hierarchyData = new ArrayList<>();
+		List<Map<String, Object>> oosData = new ArrayList<>();
 
-			If not in-scope, we should return a label of "Concept" to not lose representation and create a node for it
-		 */
-		chartContext.getScopedConcepts().values()
+		chartingContext.getScopedConcepts().values()
 				.stream()
 				.flatMap(List::stream)
 				.forEach(childNid -> {
-					List<Map<String, Object>> batch = new ArrayList<>();
 					navigationCalculator.parentsOf(childNid).forEach(parentNid -> {
-
 						if (!isScope(parentNid, scopeFacades)) {
 							Map<String, Object> row = new HashMap<>();
-							String parentLabel = findLabel(parentNid, chartContext.getScopedConcepts());
-							String childLabel = findLabel(childNid, chartContext.getScopedConcepts());
+							String parentLabel = findLabel(parentNid, chartingContext.getScopedConcepts());
+							String childLabel = findLabel(childNid, chartingContext.getScopedConcepts());
 
 							row.put("childId", String.valueOf(childNid));
 							row.put("parentId", String.valueOf(parentNid));
@@ -72,28 +61,19 @@ public class HierarchyChartProcessor implements ChartProcessor {
 							row.put("relType", "Is-a");
 
 							if (parentLabel.equals("Concept")) {
-								row.put("conceptName", chart.languageCalculator().getDescriptionTextOrNid(parentNid));
+								Map<String, Object> oosRow = new HashMap<>();
+								oosRow.put("id", String.valueOf(parentNid));
+								oosRow.put("label", "Concept");
+								oosRow.put("name", chart.languageCalculator().getDescriptionTextOrNid(parentNid));
+								oosRow.put("constellationId", chart.constellationId().toString());
+								oosData.add(oosRow);
 							}
-
-							batch.add(row);
-							if (batch.size() == batchSize) {
-								neo4jClient.query(cypherQuery)
-										.bind(batch)
-										.to("batch")
-										.run();
-								chartContext.reportProgress(getStep(), batch.size());
-								batch.clear();
-							}
-							if (!batch.isEmpty()) {
-								neo4jClient.query(cypherQuery)
-										.bind(batch)
-										.to("batch")
-										.run();
-								chartContext.reportProgress(getStep(), batch.size());
-							}
+							hierarchyData.add(row);
 						}
 					});
 				});
+		writeQueries(conceptCreateQuery, oosData, chartingContext, batchSize);
+		writeQueries(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 
 	private boolean isScope(int nid, Set<Facade> scopeFacades) {
@@ -108,5 +88,17 @@ public class HierarchyChartProcessor implements ChartProcessor {
 			}
 		}
 		return "Concept";
+	}
+
+	private void writeQueries(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
+		data.stream()
+				.gather(Gatherers.windowFixed(batchSize))
+				.forEach(batch -> {
+					chartingContext.getNeo4jClient().query(query)
+							.bind(batch)
+							.to("batch")
+							.run();
+					chartingContext.reportProgress(getStep(), batch.size());
+				});
 	}
 }
