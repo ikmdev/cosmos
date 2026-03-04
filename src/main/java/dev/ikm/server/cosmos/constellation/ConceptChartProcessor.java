@@ -33,7 +33,7 @@ public class ConceptChartProcessor implements ChartProcessor {
 			List<Map<String, Object>> batch = new ArrayList<>();
 			for (Integer conceptNid : descendants) {
 				Map<String, Object> row = new HashMap<>();
-				row.put("id", conceptNid);
+				row.put("id", String.valueOf(conceptNid));
 				row.put("label", scope.name().replaceAll("[^a-zA-Z0-9]", ""));
 				row.put("name", chart.languageCalculator().getDescriptionTextOrNid(conceptNid));
 				row.put("constellationId", chart.constellationId().toString());

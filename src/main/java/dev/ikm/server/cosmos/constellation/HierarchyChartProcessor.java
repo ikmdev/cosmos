@@ -63,8 +63,8 @@ public class HierarchyChartProcessor implements ChartProcessor {
 							String parentLabel = findLabel(parentNid, chartContext.getScopedConcepts());
 							String childLabel = findLabel(childNid, chartContext.getScopedConcepts());
 
-							row.put("childId", childNid);
-							row.put("parentId", parentNid);
+							row.put("childId", String.valueOf(childNid));
+							row.put("parentId", String.valueOf(parentNid));
 							row.put("childLabel", childLabel);
 							row.put("parentLabel", parentLabel);
 							row.put("constellationId", chart.constellationId().toString());
