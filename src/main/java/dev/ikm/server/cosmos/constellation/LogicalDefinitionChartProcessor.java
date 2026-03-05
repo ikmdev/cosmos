@@ -8,13 +8,13 @@ import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
-import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Gatherers;
 
 /***
  * Core Principles
@@ -26,9 +26,13 @@ import java.util.UUID;
 public class LogicalDefinitionChartProcessor implements ChartProcessor {
 
 	private record Clutch(
-			List<Map<String, Object>> roleBatch,
-			List<Map<String, Object>> roleGroupIntermediateBatch,
-			List<Map<String, Object>> sufficientIntermediateBatch) {}
+			List<Map<String, Object>> roleNodeBatch,
+			List<Map<String, Object>> roleRelationshipBatch,
+			List<Map<String, Object>> roleGroupIntermediateNodeBatch,
+			List<Map<String, Object>> roleGroupIntermediateRelationshipBatch,
+			List<Map<String, Object>> sufficientIntermediateNodeBatch,
+			List<Map<String, Object>> sufficientIntermediateRelationshipBatch) {
+	}
 
 	@Override
 	public Step getStep() {
@@ -42,7 +46,7 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 
 	@Override
 	public void process(ChartingContext chartingContext, int batchSize) {
-		Clutch clutch = new Clutch(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+		Clutch clutch = new Clutch(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		StampCalculator stampCalculator = chartingContext.getChart().stampCalculator();
 
 		chartingContext.getScopedConcepts().values()
@@ -61,9 +65,16 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 								});
 							});
 				});
-		batchWrite(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateBatch(), chartingContext, batchSize);
-		batchWrite(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateBatch(), chartingContext, batchSize);
-		batchWrite(roleRelationshipQuery, clutch.roleBatch(), chartingContext, batchSize);
+
+		//Write node data first
+		writeQueries(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize);
+		writeQueries(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize);
+		writeQueries(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize);
+
+		//Write relationships second
+		writeQueries(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeQueries(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeQueries(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
 	}
 
 	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, LogicalDefinition logicalDefinition, Clutch clutch) {
@@ -71,7 +82,8 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		logicalDefinition.definitions().forEach(definition -> {
 			switch (definition.type()) {
 				case NECESSARY -> processNecessaryDefinition(parentId, definition, chartingContext, clutch);
-				case SUFFICIENT -> processSufficientDefinition(parentId, definition, logicalDefinition.sufficientCount(), chartingContext, clutch);
+				case SUFFICIENT ->
+						processSufficientDefinition(parentId, definition, logicalDefinition.sufficientCount(), chartingContext, clutch);
 				default -> throw new IllegalStateException("Unknown definition type");
 			}
 		});
@@ -109,19 +121,17 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 	}
 
 	private final String roleRelationshipQuery = """
-		  UNWIND $batch AS row
-		  MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
+			UNWIND $batch AS row
+			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
+			MATCH (destination:$(row.destinationLabel) {id: row.destinationId, constellationId: row.constellationId})
+			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(destination)
+			""";
 
-		  OPTIONAL MATCH (destination:$(row.destinationLabel) {id: row.destinationId, constellationId: row.constellationId})
-
-		  // Find or create the generic node
-		  MERGE (generic:Concept {id: row.destinationId, constellationId: row.constellationId})
-			ON CREATE SET generic.name = coalesce(row.genericName, "ROLE: Default Name")
-
-		  WITH origin, row, coalesce(destination, generic) AS destinationNode
-
-		  MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(destinationNode)
-		  """;
+	private final String roleNodeQuery = """
+			UNWIND $batch AS row
+			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
+			SET n.name = row.name
+			""";
 
 	private void writeRoles(String originId, List<Role> roles, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
@@ -152,88 +162,100 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 			row.put("relType", relationshipText);
 
 			if (destinationLabel.equals("Concept")) {
-				row.put("genericName", chart.languageCalculator().getDescriptionTextOrNid(Integer.parseInt(destinationId)));
+				Map<String, Object> outOfScopeRow = new HashMap<>();
+				outOfScopeRow.put("id", destinationId);
+				outOfScopeRow.put("label", "Concept");
+				outOfScopeRow.put("name", chart.languageCalculator().getDescriptionTextOrNid(Integer.parseInt(destinationId)));
+				outOfScopeRow.put("constellationId", chart.constellationId().toString());
+				clutch.roleNodeBatch.add(outOfScopeRow);
 			}
 
-			clutch.roleBatch().add(row);
+			clutch.roleRelationshipBatch().add(row);
 		});
 	}
 
+	private final String sufficientIntermediateRelationshipQuery = """
+			UNWIND $batch AS row
+			MATCH (suffIntermediate:$(row.label) {id: row.id, constellationId: row.constellationId})
+			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
+			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(suffIntermediate)
+			SET r += { r.logicalRole = row.logicalRole, r.sufficientWhen = row.sufficientWhen }
+			""";
+
 	private final String sufficientIntermediateNodeQuery = """
-		  UNWIND $batch AS row
-		  MERGE (sin:$(row.label) {id: row.id, constellationId: row.constellationId})
-		  SET sin += row.properties
-		  
-		  // Bridge the SET and MATCH clauses
-		  WITH row, sin
-		  
-		  MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-		  MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(sin)
-		  """;
+			UNWIND $batch AS row
+			MERGE (suffIntermediate:$(row.label) {id: row.id, constellationId: row.constellationId})
+			SET suffIntermediate += { definitionType: row.definitionType, logicalOperator: row.logicalOperator, completeness: row.completeness }""";
 
 	private void writeSufficientIntermediateNode(String intermediateNodeId, String originId, Definition definition, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
-		Map<String, Object> row = new HashMap<>();
 
 		//Sufficient Set Node
-		row.put("label", "SufficientDefinition");
-		row.put("id", intermediateNodeId);
-		row.put("constellationId", chart.constellationId().toString());
-//		row.put("definitionIndex", definitionIndex); //TODO - do we need this
-		row.put("definitionType", "Sufficient condition");
-		row.put("logicalOperator", "And within definition");
-		row.put("completeness", "Complete sufficient set");
-//		row.put("roleGroupCount", roleGroups.size());
-//		row.put("roleGroupSignature", buildRoleGroupSignature(diTreeEntity, roleGroups));
+		Map<String, Object> sufficientIntermediateNodeRow = new HashMap<>();
+		sufficientIntermediateNodeRow.put("label", "SufficientDefinition");
+		sufficientIntermediateNodeRow.put("id", intermediateNodeId);
+		sufficientIntermediateNodeRow.put("constellationId", chart.constellationId().toString());
+		sufficientIntermediateNodeRow.put("definitionType", "Sufficient condition");
+		sufficientIntermediateNodeRow.put("logicalOperator", "And within definition");
+		sufficientIntermediateNodeRow.put("completeness", "Complete sufficient set");
+		clutch.sufficientIntermediateNodeBatch().add(sufficientIntermediateNodeRow);
 
 		//Relationship Between Concept and Sufficient Set Node
+		Map<String, Object> sufficientIntermediateRelationshipRow = new HashMap<>();
 		String originLabel = findLabel(originId, chartingContext.getScopedConcepts());
-		row.put("originId", originId);
-		row.put("originLabel", originLabel);
-		row.put("relLabel", "HAS_SUFFICIENT_DEFINITION");
-		row.put("relType", "Has Sufficient Definition");
-//		row.put("alternativeNumber", totalDefinitions); //TODO - do we need this
-		row.put("logicalRole", "Or alternative");
-		row.put("sufficientWhen", "All contained conditions met");
+		sufficientIntermediateRelationshipRow.put("label", "SufficientDefinition");
+		sufficientIntermediateNodeRow.put("id", intermediateNodeId);
+		sufficientIntermediateNodeRow.put("constellationId", chart.constellationId().toString());
+		sufficientIntermediateRelationshipRow.put("originId", originId);
+		sufficientIntermediateRelationshipRow.put("originLabel", originLabel);
+		sufficientIntermediateRelationshipRow.put("relLabel", "HAS_SUFFICIENT_DEFINITION");
+		sufficientIntermediateRelationshipRow.put("relType", "Has Sufficient Definition");
+		sufficientIntermediateRelationshipRow.put("logicalRole", "Or alternative");
+		sufficientIntermediateRelationshipRow.put("sufficientWhen", "All contained conditions met");
 
-		clutch.sufficientIntermediateBatch().add(row);
+		clutch.sufficientIntermediateRelationshipBatch().add(sufficientIntermediateRelationshipRow);
 	}
+
+	private final String roleGroupIntermediateRelationshipQuery = """
+			UNWIND $batch AS row
+			MATCH (roleGroup:$(row.label) {id: row.id, constellationId: row.constellationId})
+			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
+			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(roleGroup)""";
 
 	private final String roleGroupIntermediateNodeQuery = """
 			UNWIND $batch AS row
-			MERGE (rgin:$(row.label) {id: row.id, constellationId: row.constellationId})
+			MERGE (roleGroup:$(row.label) {id: row.id, constellationId: row.constellationId})
+			SET roleGroup += { groupNumber: row.groupNumber, logicalOperator: row.logicalOperator }""";
 
-			// Explicitly set only the 'data' properties
-			SET rgin += { groupNumber: row.groupNumber, logicalOperator: row.logicalOperator }
-
-			WITH row, rgin
-			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(rgin)
-		  """;
 	private void writeRoleGroupIntermediateNode(String nodeId, String originId, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
-		Map<String, Object> row = new HashMap<>();
-
 		String originLabel;
 		//Origin maybe a valid node (i.e., nid) but could also be to a role group (i.e., UUID)
-		if (isNid(originId)){
+		if (isNid(originId)) {
 			originLabel = findLabel(originId, chartingContext.getScopedConcepts());
 		} else {
 			originLabel = "SufficientDefinition";
 		}
 
-		//Relationship Properties between Sufficient Intermediate Node
-		row.put("label", "RoleGroupQualifier");
-		row.put("id", nodeId);
-		row.put("constellationId", chart.constellationId().toString());
-		row.put("groupNumber", 0); //TODO - do we need this?
-		row.put("logicalOperator", "And");
-		row.put("originId", originId);
-		row.put("originLabel", originLabel);
-		row.put("relLabel", "CONTAINS_QUALIFIER_GROUP");
-		row.put("relType", "Contains Qualifier Group");
+		//Role Group Intermediate Node
+		Map<String, Object> roleGroupIntermediateNodeRow = new HashMap<>();
+		roleGroupIntermediateNodeRow.put("id", nodeId);
+		roleGroupIntermediateNodeRow.put("label", "RoleGroupQualifier");
+		roleGroupIntermediateNodeRow.put("constellationId", chart.constellationId().toString());
+		roleGroupIntermediateNodeRow.put("logicalOperator", "And");
+		roleGroupIntermediateNodeRow.put("groupNumber", 0); //TODO - do we need this?
+		clutch.roleNodeBatch.add(roleGroupIntermediateNodeRow);
 
-		clutch.roleGroupIntermediateBatch().add(row);
+		//Relationship Properties between Sufficient Intermediate Node
+		Map<String, Object> roleGroupIntermediateRelationshipRow = new HashMap<>();
+		roleGroupIntermediateRelationshipRow.put("label", "RoleGroupQualifier");
+		roleGroupIntermediateRelationshipRow.put("id", nodeId);
+		roleGroupIntermediateRelationshipRow.put("constellationId", chart.constellationId().toString());
+		roleGroupIntermediateRelationshipRow.put("originId", originId);
+		roleGroupIntermediateRelationshipRow.put("originLabel", originLabel);
+		roleGroupIntermediateRelationshipRow.put("relLabel", "CONTAINS_QUALIFIER_GROUP");
+		roleGroupIntermediateRelationshipRow.put("relType", "Contains Qualifier Group");
+		clutch.roleGroupIntermediateRelationshipBatch().add(roleGroupIntermediateRelationshipRow);
 	}
 
 	private String findLabel(String nid, Map<Facade, List<Integer>> scopedConcepts) {
@@ -258,30 +280,15 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		}
 	}
 
-	private void batchWrite(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
-		List<Map<String, Object>> batch = new ArrayList<>();
-		Neo4jClient neo4jClient = chartingContext.getNeo4jClient();
-		if (data.isEmpty()) {
-			return;
-		}
-
-		for (Map<String, Object> datum : data) {
-			batch.add(datum);
-			if (batch.size() == batchSize) {
-				neo4jClient.query(query)
-						.bind(batch)
-						.to("batch")
-						.run();
-				chartingContext.reportProgress(getStep(), batch.size());
-				batch.clear();
-			}
-		}
-		if (!batch.isEmpty()) {
-			neo4jClient.query(query)
-					.bind(batch)
-					.to("batch")
-					.run();
-			chartingContext.reportProgress(getStep(), batch.size());
-		}
+	private void writeQueries(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
+		data.stream()
+				.gather(Gatherers.windowFixed(batchSize))
+				.forEach(batch -> {
+					chartingContext.getNeo4jClient().query(query)
+							.bind(batch)
+							.to("batch")
+							.run();
+					chartingContext.reportProgress(getStep(), batch.size());
+				});
 	}
 }

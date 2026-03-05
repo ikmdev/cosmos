@@ -40,7 +40,7 @@ public class HierarchyChartProcessor implements ChartProcessor {
 		NavigationCalculator navigationCalculator = chartingContext.getChart().navigationCalculator();
 		Set<Facade> scopeFacades = chartingContext.getScopedConcepts().keySet();
 		List<Map<String, Object>> hierarchyData = new ArrayList<>();
-		List<Map<String, Object>> oosData = new ArrayList<>();
+		List<Map<String, Object>> outOfScopeData = new ArrayList<>();
 
 		chartingContext.getScopedConcepts().values()
 				.stream()
@@ -66,13 +66,13 @@ public class HierarchyChartProcessor implements ChartProcessor {
 								oosRow.put("label", "Concept");
 								oosRow.put("name", chart.languageCalculator().getDescriptionTextOrNid(parentNid));
 								oosRow.put("constellationId", chart.constellationId().toString());
-								oosData.add(oosRow);
+								outOfScopeData.add(oosRow);
 							}
 							hierarchyData.add(row);
 						}
 					});
 				});
-		writeQueries(conceptCreateQuery, oosData, chartingContext, batchSize);
+		writeQueries(conceptCreateQuery, outOfScopeData, chartingContext, batchSize);
 		writeQueries(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 

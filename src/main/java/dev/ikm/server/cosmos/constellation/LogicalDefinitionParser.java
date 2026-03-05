@@ -150,7 +150,7 @@ public class LogicalDefinitionParser {
 		int roleReferenceIndex = diTreeEntity.successorMap().get(index).get(0);
 		EntityVertex roleReferenceVertex = diTreeEntity.vertexMap().get(roleReferenceIndex);
 		if (roleReferenceVertex.getMeaningNid() != TinkarTermV2.CONCEPT_REFERENCE.nid()) {
-			throw new IllegalStateException("Expected Concept Reference in role group in sufficient definition");
+			throw new IllegalStateException("Expected Concept Reference in role group in sufficient definition for " + roleReferenceVertex.getMeaningNid());
 		}
 		return roleReferenceIndex;
 	}
