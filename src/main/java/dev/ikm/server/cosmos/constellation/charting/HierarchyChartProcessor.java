@@ -1,5 +1,7 @@
-package dev.ikm.server.cosmos.constellation;
+package dev.ikm.server.cosmos.constellation.charting;
 
+import dev.ikm.server.cosmos.constellation.Chart;
+import dev.ikm.server.cosmos.constellation.Step;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.navigation.calculator.NavigationCalculator;
 
@@ -8,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Gatherers;
 
 public class HierarchyChartProcessor implements ChartProcessor {
 
@@ -72,8 +73,8 @@ public class HierarchyChartProcessor implements ChartProcessor {
 						}
 					});
 				});
-		writeQueries(conceptCreateQuery, outOfScopeData, chartingContext, batchSize);
-		writeQueries(hierarchyQuery, hierarchyData, chartingContext, batchSize);
+		writeData(conceptCreateQuery, outOfScopeData, chartingContext, batchSize);
+		writeData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 
 	private boolean isScope(int nid, Set<Facade> scopeFacades) {
@@ -88,17 +89,5 @@ public class HierarchyChartProcessor implements ChartProcessor {
 			}
 		}
 		return "Concept";
-	}
-
-	private void writeQueries(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
-		data.stream()
-				.gather(Gatherers.windowFixed(batchSize))
-				.forEach(batch -> {
-					chartingContext.getNeo4jClient().query(query)
-							.bind(batch)
-							.to("batch")
-							.run();
-					chartingContext.reportProgress(getStep(), batch.size());
-				});
 	}
 }

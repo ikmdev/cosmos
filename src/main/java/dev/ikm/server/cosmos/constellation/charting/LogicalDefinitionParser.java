@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.constellation;
+package dev.ikm.server.cosmos.constellation.charting;
 
 import dev.ikm.server.cosmos.constellation.definition.Clause;
 import dev.ikm.server.cosmos.constellation.definition.Definition;

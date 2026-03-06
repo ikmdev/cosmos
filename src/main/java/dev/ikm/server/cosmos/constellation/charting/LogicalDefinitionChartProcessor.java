@@ -1,9 +1,11 @@
-package dev.ikm.server.cosmos.constellation;
+package dev.ikm.server.cosmos.constellation.charting;
 
+import dev.ikm.server.cosmos.constellation.Chart;
+import dev.ikm.server.cosmos.constellation.Step;
+import dev.ikm.server.cosmos.constellation.definition.Clause;
 import dev.ikm.server.cosmos.constellation.definition.Definition;
 import dev.ikm.server.cosmos.constellation.definition.Role;
 import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
-import dev.ikm.server.cosmos.constellation.definition.Clause;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
@@ -14,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Gatherers;
 
 /***
  * Core Principles
@@ -67,14 +68,14 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				});
 
 		//Write node data first
-		writeQueries(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize);
-		writeQueries(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize);
-		writeQueries(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize);
+		writeData(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize);
+		writeData(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize);
+		writeData(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize);
 
 		//Write relationships second
-		writeQueries(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeQueries(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeQueries(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
+		writeData(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeData(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeData(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
 	}
 
 	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, Definition definition, Clutch clutch) {
@@ -278,17 +279,5 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-	}
-
-	private void writeQueries(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
-		data.stream()
-				.gather(Gatherers.windowFixed(batchSize))
-				.forEach(batch -> {
-					chartingContext.getNeo4jClient().query(query)
-							.bind(batch)
-							.to("batch")
-							.run();
-					chartingContext.reportProgress(getStep(), batch.size());
-				});
 	}
 }

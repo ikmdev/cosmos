@@ -1,6 +1,7 @@
 package dev.ikm.server.cosmos.constellation;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.constellation.charting.ChartingService;
 import dev.ikm.server.cosmos.observatory.Observatory;
 import dev.ikm.server.cosmos.observatory.ObservatoryService;
 import org.springframework.beans.factory.annotation.Autowired;
