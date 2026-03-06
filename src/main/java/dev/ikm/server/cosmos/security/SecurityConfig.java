@@ -16,7 +16,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                         .anyRequest().permitAll())
-                .formLogin(formLogin -> formLogin.disable());
+                .formLogin(AbstractHttpConfigurer::disable);
         return http.build();
     }
 }

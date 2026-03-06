@@ -1,5 +1,11 @@
 package dev.ikm.server.cosmos.constellation;
 
+import dev.ikm.server.cosmos.constellation.definition.Clause;
+import dev.ikm.server.cosmos.constellation.definition.Definition;
+import dev.ikm.server.cosmos.constellation.definition.Reference;
+import dev.ikm.server.cosmos.constellation.definition.Role;
+import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
+import dev.ikm.server.cosmos.constellation.definition.Type;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.entity.graph.EntityVertex;
 import dev.ikm.tinkar.terms.EntityProxy.Concept;
@@ -7,37 +13,8 @@ import dev.ikm.tinkar.terms.TinkarTermV2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class LogicalDefinitionParser {
-
-	public record LogicalDefinition(long sufficientCount, long necessaryCount, List<Definition> definitions) {
-
-	}
-
-	public record Definition(UUID id, Type type, List<RoleGroup> roleGroups, List<Role> roles,
-							 List<Reference> references) {
-	}
-
-	public record RoleGroup(UUID id, List<Role> roles) {
-	}
-
-	public record Role(Concept predicate, Concept object) {
-	}
-
-	public record Reference(Concept concept) {
-	}
-
-	public enum SubType {
-		ROLE_GROUP,
-		ROLE,
-		Reference
-	}
-
-	public enum Type {
-		NECESSARY,
-		SUFFICIENT
-	}
 
 	private final DiTreeEntity diTreeEntity;
 
@@ -45,57 +22,56 @@ public class LogicalDefinitionParser {
 		this.diTreeEntity = diTreeEntity;
 	}
 
-	public LogicalDefinition parse() {
-		List<Definition> definitions = processDiTree();
-		long sufficientDefinitions = definitions.stream().filter(definition -> definition.type == Type.SUFFICIENT).count();
-		long necessaryDefinitions = definitions.stream().filter(definition -> definition.type == Type.NECESSARY).count();
-		return new LogicalDefinition(sufficientDefinitions, necessaryDefinitions, definitions);
+	public Definition parse() {
+		Definition definition = new Definition();
+		definition.sets(processDiTree());
+		return definition;
 	}
 
-	private List<Definition> processDiTree() {
-		List<Definition> definitions = new ArrayList<>();
+
+	private List<Clause> processDiTree() {
+		List<Clause> clauses = new ArrayList<>();
 		int[] definitionIndices = diTreeEntity.successorMap().get(diTreeEntity.root().vertexIndex()).toArray();
 		for (int definitionIdx : definitionIndices) {
-			Definition definition = buildDefinition(definitionIdx);
-			definitions.add(definition);
+			Clause clause = buildClause(definitionIdx);
+			clauses.add(clause);
 		}
-		return definitions;
+		return clauses;
 	}
 
-	private Definition buildDefinition(int definitionIdx) {
-		Type type = determineDefinitionType(diTreeEntity.vertexMap().get(definitionIdx));
-		List<RoleGroup> roleGroups = new ArrayList<>();
-		List<Role> roles = new ArrayList<>();
-		List<Reference> references = new ArrayList<>();
+	private Clause buildClause(int definitionIdx) {
+		Type type = determineClauseType(diTreeEntity.vertexMap().get(definitionIdx));
+		Clause clause = new Clause(type);
 
 		int[] successors = parseSuccessors(definitionIdx);
 		for (int successorIdx : successors) {
-			SubType subType = determineSubType(successorIdx);
+			Type subType = determineSubType(successorIdx);
 			switch (subType) {
-				case ROLE_GROUP -> roleGroups.add(buildRoleGroup(successorIdx));
-				case ROLE -> roles.add(buildRole(successorIdx));
-				case Reference -> references.add(buildReference(successorIdx));
+				case ROLE_GROUP -> clause.addRoleGroup(buildRoleGroup(successorIdx));
+				case ROLE -> clause.addRole(buildRole(successorIdx));
+				case REFERENCE -> clause.addReference(buildReference(successorIdx));
 				case null, default -> throw new IllegalStateException("Unknown sub type");
 			}
 		}
 
-		return new Definition(UUID.randomUUID(), type, roleGroups, roles, references); //TODO - figure out index
+		return clause;
 	}
 
 	private RoleGroup buildRoleGroup(int roleGroupIdx) {
-		List<Role> roles = new ArrayList<>();
+		RoleGroup roleGroup = new RoleGroup();
 		int[] successors = parseSuccessors(roleGroupIdx);
 		for (int roleIdx : successors) {
-			roles.add(buildRole(roleIdx));
+			roleGroup.addRole(buildRole(roleIdx));
 		}
-		return new RoleGroup(UUID.randomUUID(), roles);
+		return roleGroup;
 	}
 
 	private Role buildRole(int roleIdx) {
-		Concept role = parseRoleProperty(roleIdx);
+		Concept roleType = parseRoleTypeProperty(roleIdx);
 		int referenceIdx = parseRoleReferenceIndex(roleIdx);
 		Concept filler = parseConceptReference(referenceIdx);
-		return new Role(role, filler);
+		Reference reference = new Reference(filler);
+		return new Role(roleType, reference);
 	}
 
 	private Reference buildReference(int referenceIdx) {
@@ -103,19 +79,18 @@ public class LogicalDefinitionParser {
 		return new Reference(reference);
 	}
 
-
-	private SubType determineSubType(int successorIdx) {
+	private Type determineSubType(int successorIdx) {
 		EntityVertex andSuccessorVertex = diTreeEntity.vertexMap().get(successorIdx);
 		//Check if the meaning is Concept Reference (aka Is-A)
 		if (andSuccessorVertex.getMeaningNid() == TinkarTermV2.CONCEPT_REFERENCE.nid()) {
-			return SubType.Reference;
+			return Type.REFERENCE;
 		} else if (andSuccessorVertex.getMeaningNid() == TinkarTermV2.ROLE.nid()) {
 			//Need to see if the Role Type property is Role Group or a Role constraint
-			Concept role = parseRoleProperty(successorIdx);
-			if (role.nid() == TinkarTermV2.ROLE_GROUP.nid()) {
-				return SubType.ROLE_GROUP;
+			Concept roleType = parseRoleTypeProperty(successorIdx);
+			if (roleType.nid() == TinkarTermV2.ROLE_GROUP.nid()) {
+				return Type.ROLE_GROUP;
 			} else {
-				return SubType.ROLE;
+				return Type.ROLE;
 			}
 		}
 		return null;
@@ -133,17 +108,18 @@ public class LogicalDefinitionParser {
 	private Concept parseConceptReference(int index) {
 		Concept[] roleProperties = diTreeEntity.vertexMap().get(index).properties().values().toArray(new Concept[0]);
 		if (roleProperties.length != 1) {
-			throw new IllegalStateException("Expected 2 properties for Role");
+			throw new IllegalStateException("Expected 1 property for Concept Reference");
 		}
 		return roleProperties[0];
 	}
 
-	private Concept parseRoleProperty(int index) {
-		Concept[] roleProperties = diTreeEntity.vertexMap().get(index).properties().values().toArray(new Concept[0]);
-		if (roleProperties.length != 2) {
-			throw new IllegalStateException("Expected 2 properties for Role");
+	private Concept parseRoleTypeProperty(int index) {
+		EntityVertex vertex = diTreeEntity.vertexMap().get(index);
+		Object roleType = vertex.properties().get(TinkarTermV2.ROLE_TYPE.nid());
+		if (roleType instanceof Concept) {
+			return (Concept) roleType;
 		}
-		return roleProperties[0];
+		throw new IllegalStateException("Expected ROLE_TYPE property for Role vertex " + index);
 	}
 
 	private int parseRoleReferenceIndex(int index) {
@@ -155,11 +131,11 @@ public class LogicalDefinitionParser {
 		return roleReferenceIndex;
 	}
 
-	private Type determineDefinitionType(EntityVertex entityVertex) {
+	private Type determineClauseType(EntityVertex entityVertex) {
 		if (entityVertex.getMeaningNid() == TinkarTermV2.NECESSARY_SET.nid()) {
-			return Type.NECESSARY;
+			return Type.NECESSARY_SET;
 		} else if (entityVertex.getMeaningNid() == TinkarTermV2.SUFFICIENT_SET.nid()) {
-			return Type.SUFFICIENT;
+			return Type.SUFFICIENT_SET;
 		} else {
 			throw new IllegalStateException("Unknown definition type");
 		}

@@ -1,9 +1,9 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.constellation.LogicalDefinitionParser.Definition;
-import dev.ikm.server.cosmos.constellation.LogicalDefinitionParser.LogicalDefinition;
-import dev.ikm.server.cosmos.constellation.LogicalDefinitionParser.Role;
-import dev.ikm.server.cosmos.constellation.LogicalDefinitionParser.RoleGroup;
+import dev.ikm.server.cosmos.constellation.definition.Definition;
+import dev.ikm.server.cosmos.constellation.definition.Role;
+import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
+import dev.ikm.server.cosmos.constellation.definition.Clause;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
@@ -53,15 +53,15 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				.stream()
 				.flatMap(List::stream)
 				.forEach(nid -> {
-					List<Map<String, Object>> batch = new ArrayList<>();
+					System.out.println("LOGICAL_DEFINITION_PROCESSOR: processing Concept - " + nid);
 					stampCalculator.forEachSemanticVersionForComponentOfPattern(nid, TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
 							(semanticEntityVersion, entityVersion, patternEntityVersion) -> {
 								stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion,
 										TinkarTermV2.EL_PLUS_PLUS_INFERRED_TERMINOLOGICAL_AXIOMS).ifPresent(field -> {
 									final DiTreeEntity diTreeEntity = (DiTreeEntity) field.value();
 									LogicalDefinitionParser ldp = new LogicalDefinitionParser(diTreeEntity);
-									LogicalDefinition logicalDefinition = ldp.parse();
-									writeDefinitions(nid, chartingContext, logicalDefinition, clutch);
+									Definition definition = ldp.parse();
+									writeDefinitions(nid, chartingContext, definition, clutch);
 								});
 							});
 				});
@@ -77,36 +77,36 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		writeQueries(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
 	}
 
-	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, LogicalDefinition logicalDefinition, Clutch clutch) {
+	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, Definition definition, Clutch clutch) {
 		String parentId = String.valueOf(conceptNid);
-		logicalDefinition.definitions().forEach(definition -> {
-			switch (definition.type()) {
-				case NECESSARY -> processNecessaryDefinition(parentId, definition, chartingContext, clutch);
-				case SUFFICIENT ->
-						processSufficientDefinition(parentId, definition, logicalDefinition.sufficientCount(), chartingContext, clutch);
+		definition.sets().forEach(clause -> {
+			switch (clause.element()) {
+				case NECESSARY_SET -> processNecessaryDefinition(parentId, clause, chartingContext, clutch);
+				case SUFFICIENT_SET ->
+						processSufficientDefinition(parentId, clause, definition.sufficientSetCount(), chartingContext, clutch);
 				default -> throw new IllegalStateException("Unknown definition type");
 			}
 		});
 	}
 
-	private void processNecessaryDefinition(String originId, Definition definition, ChartingContext chartingContext, Clutch clutch) {
-		writeRoles(originId, definition.roles(), chartingContext, clutch);
-		processRoleGroups(originId, definition.roleGroups(), chartingContext, clutch);
+	private void processNecessaryDefinition(String originId, Clause clause, ChartingContext chartingContext, Clutch clutch) {
+		writeRoles(originId, clause.roles(), chartingContext, clutch);
+		processRoleGroups(originId, clause.roleGroups(), chartingContext, clutch);
 		//Skip Reference Concepts. Those are handled in the Hiearchy Chart Processor
 	}
 
-	private void processSufficientDefinition(String originId, Definition definition, long sufficientCount, ChartingContext chartingContext, Clutch clutch) {
+	private void processSufficientDefinition(String originId, Clause clause, long sufficientCount, ChartingContext chartingContext, Clutch clutch) {
 		if (sufficientCount == 1) {
-			writeRoles(originId, definition.roles(), chartingContext, clutch);
-			processRoleGroups(originId, definition.roleGroups(), chartingContext, clutch);
+			writeRoles(originId, clause.roles(), chartingContext, clutch);
+			processRoleGroups(originId, clause.roleGroups(), chartingContext, clutch);
 		} else {
 			//Write Sufficient Intermediate Node
 			String intermediateId = UUID.randomUUID().toString();
-			writeSufficientIntermediateNode(originId, intermediateId, definition, chartingContext, clutch);
+			writeSufficientIntermediateNode(originId, intermediateId, clause, chartingContext, clutch);
 			//Write Roles
-			writeRoles(intermediateId, definition.roles(), chartingContext, clutch);
+			writeRoles(intermediateId, clause.roles(), chartingContext, clutch);
 			//Write Role Group Nodes
-			processRoleGroups(intermediateId, definition.roleGroups(), chartingContext, clutch);
+			processRoleGroups(intermediateId, clause.roleGroups(), chartingContext, clutch);
 		}
 	}
 
@@ -146,7 +146,7 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				originLabel = "RoleGroupQualifier";
 			}
 
-			String destinationId = String.valueOf(role.object().nid());
+			String destinationId = String.valueOf(role.reference().concept().nid());
 			String destinationLabel = findLabel(destinationId, chartingContext.getScopedConcepts());
 
 			row.put("originId", originId);
@@ -187,7 +187,7 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 			MERGE (suffIntermediate:$(row.label) {id: row.id, constellationId: row.constellationId})
 			SET suffIntermediate += { definitionType: row.definitionType, logicalOperator: row.logicalOperator, completeness: row.completeness }""";
 
-	private void writeSufficientIntermediateNode(String intermediateNodeId, String originId, Definition definition, ChartingContext chartingContext, Clutch clutch) {
+	private void writeSufficientIntermediateNode(String intermediateNodeId, String originId, Clause clause, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
 
 		//Sufficient Set Node
