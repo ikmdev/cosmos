@@ -106,11 +106,16 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 
 	private void processRoleGroups(String originId, List<RoleGroup> roleGroups, ChartingContext chartingContext, Clutch clutch) {
 		roleGroups.forEach(roleGroup -> {
-			//Write Role Group Intermediate Node (via parent)
-			String intermediateNodeId = UUID.randomUUID().toString();
-			writeRoleGroupIntermediateNode(intermediateNodeId, originId, chartingContext, clutch);
-			//Write roles to intermediate node
-			writeRoles(intermediateNodeId, roleGroup.roles(), chartingContext, clutch);
+			if (roleGroup.roles().size() > 1) {
+				//Write Role Group Intermediate Node (via parent)
+				String intermediateNodeId = UUID.randomUUID().toString();
+				writeRoleGroupIntermediateNode(intermediateNodeId, originId, chartingContext, clutch);
+				//Write roles to intermediate node
+				writeRoles(intermediateNodeId, roleGroup.roles(), chartingContext, clutch);
+			} else {
+				//Write roles to origin node
+				writeRoles(originId, roleGroup.roles(), chartingContext, clutch);
+			}
 		});
 	}
 

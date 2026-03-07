@@ -61,7 +61,7 @@ public class HierarchyChartProcessor implements ChartProcessor {
 				});
 			});
 		});
-		
+
 		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize);
 		writeData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
