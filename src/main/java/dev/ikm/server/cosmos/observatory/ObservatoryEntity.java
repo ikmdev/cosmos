@@ -7,7 +7,7 @@ import dev.ikm.server.cosmos.ike.Facade;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public record ObservatoryEntity(
@@ -17,7 +17,7 @@ public record ObservatoryEntity(
 		StampCoordinate stampCoordinate,
 		LanguageCoordinate languageCoordinate,
 		NavigationCoordinate navigationCoordinate,
-		List<Facade> includedModules,
-		List<Facade> excludedModules,
-		List<Facade> includedScopes) implements Serializable {
+		Set<Facade> includedModules,
+		Set<Facade> excludedModules,
+		Set<Facade> includedScopes) implements Serializable {
 }

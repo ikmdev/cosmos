@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Controller
@@ -42,9 +43,9 @@ public class ObservatoryController {
 				null,
 				null,
 				null,
-				List.of(),
-				List.of(),
-				List.of()));
+				Set.of(),
+				Set.of(),
+				Set.of()));
 
 		// Add data needed to render the form's select options
 		observatoryService.retrieveStamps().ifPresent(stampCoordinates -> model.addAttribute("stampCoordinates", stampCoordinates));

@@ -7,6 +7,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class ChartingContext {
@@ -14,12 +15,12 @@ public class ChartingContext {
 	public record ProgressUpdate(Step step, long processedCount) {}
 
 	private final Chart chart;
-	private final Map<Facade, List<Integer>> scopedConcepts;
+	private final Map<Facade, Set<Integer>> scopedConcepts;
 	private final Neo4jClient neo4jClient;
 	private final Consumer<ProgressUpdate> progressConsumer;
 	private long processCount;
 
-	public ChartingContext(Chart chart, Map<Facade, List<Integer>> scopedConcepts, Neo4jClient neo4jClient, Consumer<ProgressUpdate> progressConsumer) {
+	public ChartingContext(Chart chart, Map<Facade, Set<Integer>> scopedConcepts, Neo4jClient neo4jClient, Consumer<ProgressUpdate> progressConsumer) {
 		this.chart = chart;
 		this.scopedConcepts = scopedConcepts;
 		this.neo4jClient = neo4jClient;
@@ -31,7 +32,7 @@ public class ChartingContext {
 		return chart;
 	}
 
-	public Map<Facade, List<Integer>> getScopedConcepts() {
+	public Map<Facade, Set<Integer>> getScopedConcepts() {
 		return scopedConcepts;
 	}
 

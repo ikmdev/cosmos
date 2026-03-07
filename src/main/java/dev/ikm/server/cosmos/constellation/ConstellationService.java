@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -87,7 +88,7 @@ public class ConstellationService {
 	}
 
 	public void removeConstellation(UUID id) {
-		chartingService.submitChartingJob(new Chart(Action.DELETE, id, null, List.of(), null, null, null));
+		chartingService.submitChartingJob(new Chart(Action.DELETE, id, null, Set.of(), null, null, null));
 		constellationRepository.deleteConstellation(id);
 	}
 

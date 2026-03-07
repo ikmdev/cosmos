@@ -31,6 +31,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
@@ -63,15 +64,15 @@ public class CalculatorService {
 					StampCoordinate.DEV_LATEST,
 					LanguageCoordinate.US_ENG_REG,
 					NavigationCoordinate.INFERRED,
-					List.of(),
-					List.of(),
-					List.of());
+					Set.of(),
+					Set.of(),
+					Set.of());
 			observatoryRepository.createObservatory(observatoryEntity);
 		}
 		setObservatory(observatoryEntity.stampCoordinate(), observatoryEntity.languageCoordinate(), observatoryEntity.navigationCoordinate(), observatoryEntity.includedModules(), observatoryEntity.excludedModules());
 	}
 
-	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, List<Facade> includedModules, List<Facade> excludedModules) {
+	public void setObservatory(StampCoordinate stampCoordinate, LanguageCoordinate languageCoordinate, NavigationCoordinate navigationCoordinate, Set<Facade> includedModules, Set<Facade> excludedModules) {
 		/*
 		 Need further testing to see implications for exclude and include of modules in STAMP Coordinate
 		 when being used in conjunction with the calculators. Currently to do the Constellation transforms,

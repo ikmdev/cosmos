@@ -7,21 +7,61 @@
         <!-- "Go up" links to parents -->
         <th:block th:if="${parents != null}">
             <li th:each="parent : ${parents}"
-                class="list-group-item list-group-item-action"
-                style="cursor: pointer;"
-                th:data-nid="${parent.facade.id.nid}"
-                hx-get="/observatory/scope/traverse"
-                hx-vals="js:{nid: this.dataset.nid}"
-                hx-target="#scope-tree-container"
-                hx-swap="innerHTML"
-                hx-indicator="#scope-activity-indicator">
-                <i class="bi bi-list-nested"></i>
-                <span class="ms-2" th:text="${parent.facade.name}">.. (Parent Name)</span>
+                class="list-group-item d-flex justify-content-between align-items-center">
+                <!-- Clickable area for navigation -->
+                <div class="flex-grow-1 text-primary" style="cursor: pointer;"
+                     th:data-nid="${parent.facade.id.nid}"
+                     hx-get="/observatory/scope/traverse"
+                     hx-vals="js:{nid: this.dataset.nid}"
+                     hx-target="#scope-tree-container"
+                     hx-swap="innerHTML"
+                     hx-indicator="#scope-activity-indicator">
+                    <i class="bi bi-list-nested"></i>
+                    <span class="ms-2" th:text="${parent.facade.name}">.. (Parent Name)</span>
+                </div>
+                <!-- Dropdown for actions -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            aria-label="Actions">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button class="dropdown-item"
+                                    th:attr="hx-post=@{/observatory/scope/add(nid=${parent.facade.id.nid})}"
+                                    hx-target="#includedScopeContainer"
+                                    hx-swap="beforeend">
+                                <i class="bi bi-plus-circle me-2"></i>Add Scope
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </li>
         </th:block>
-        <li class="list-group-item" th:classappend="${!scope.isLeaf ? 'text-primary' : 'text-secondary'}">
-            <i class="bi-caret-down"></i>
-            <span th:text="${scope.facade.name}" class="ms-2">Root Scope</span>
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div th:classappend="${!scope.isLeaf ? 'text-primary' : 'text-secondary'}">
+                    <i class="bi-caret-down"></i>
+                    <span th:text="${scope.facade.name}" class="ms-2">Root Scope</span>
+                </div>
+                <!-- Dropdown for actions -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            aria-label="Actions">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button class="dropdown-item"
+                                    th:attr="hx-post=@{/observatory/scope/add(nid=${scope.facade.id.nid})}"
+                                    hx-target="#includedScopeContainer"
+                                    hx-swap="beforeend">
+                                <i class="bi bi-plus-circle me-2"></i>Add Scope
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <ul th:if="${not #lists.isEmpty(children)}" class="list-group mt-2">
                 <li th:each="child : ${children}" class="list-group-item border-0 ms-3 d-flex justify-content-between align-items-center">
                     <!-- Clickable area for navigation -->

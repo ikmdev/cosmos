@@ -19,7 +19,7 @@ public class HierarchyChartProcessor implements ChartProcessor {
 			MATCH (parent:$(row.parentLabel) {id: row.parentId, constellationId: row.constellationId})
 			MERGE (child)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(parent)""";
 
-	private final String conceptCreateQuery = """
+	private final String outOfScopeCreateConceptQuery = """
 			UNWIND $batch AS row
 			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
 			SET n.name = row.name
@@ -43,51 +43,47 @@ public class HierarchyChartProcessor implements ChartProcessor {
 		List<Map<String, Object>> hierarchyData = new ArrayList<>();
 		List<Map<String, Object>> outOfScopeData = new ArrayList<>();
 
-		chartingContext.getScopedConcepts().values()
-				.stream()
-				.flatMap(List::stream)
-				.forEach(childNid -> {
-					navigationCalculator.parentsOf(childNid).forEach(parentNid -> {
-						if (!isScope(parentNid, scopeFacades)) {
-							Map<String, Object> row = new HashMap<>();
-							String parentLabel = findLabel(parentNid, chartingContext.getScopedConcepts());
-							String childLabel = findLabel(childNid, chartingContext.getScopedConcepts());
+		chartingContext.getScopedConcepts().forEach((facade, descendants) -> {
+			descendants.forEach(childNid -> {
+				navigationCalculator.parentsOf(childNid).forEach(parentNid -> {
+					String childId = String.valueOf(childNid);
+					String parentId = String.valueOf(parentNid);
+					String parentLabel = findLabel(String.valueOf(parentNid), chartingContext.getScopedConcepts());
+					String childLabel = findLabel(String.valueOf(childNid), chartingContext.getScopedConcepts());
+					String constellationId = chart.constellationId().toString();
+					collectHierarchyRows(childId, parentId, childLabel, parentLabel, constellationId, hierarchyData);
 
-							row.put("childId", String.valueOf(childNid));
-							row.put("parentId", String.valueOf(parentNid));
-							row.put("childLabel", childLabel);
-							row.put("parentLabel", parentLabel);
-							row.put("constellationId", chart.constellationId().toString());
-							row.put("relLabel", "IS_A");
-							row.put("relType", "Is-a");
-
-							if (parentLabel.equals("Concept")) {
-								Map<String, Object> oosRow = new HashMap<>();
-								oosRow.put("id", String.valueOf(parentNid));
-								oosRow.put("label", "Concept");
-								oosRow.put("name", chart.languageCalculator().getDescriptionTextOrNid(parentNid));
-								oosRow.put("constellationId", chart.constellationId().toString());
-								outOfScopeData.add(oosRow);
-							}
-							hierarchyData.add(row);
-						}
-					});
+					if (parentLabel.equals("Concept")) {
+						String conceptId = String.valueOf(parentNid);
+						String name = chart.languageCalculator().getDescriptionTextOrNid(parentNid);
+						collectOutOfScopeConceptRows(conceptId, "Concept", name, constellationId, outOfScopeData);
+					}
 				});
-		writeData(conceptCreateQuery, outOfScopeData, chartingContext, batchSize);
+			});
+		});
+		
+		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize);
 		writeData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 
-	private boolean isScope(int nid, Set<Facade> scopeFacades) {
-		return scopeFacades.stream()
-				.anyMatch(scopeFacade -> scopeFacade.id().nid() == nid);
+	private void collectHierarchyRows(String childId, String parentId, String childLabel, String parentLabel, String constellationId, List<Map<String, Object>> data) {
+		Map<String, Object> row = new HashMap<>();
+		row.put("childId", childId);
+		row.put("parentId", parentId);
+		row.put("childLabel", childLabel);
+		row.put("parentLabel", parentLabel);
+		row.put("constellationId", constellationId);
+		row.put("relLabel", "IS_A");
+		row.put("relType", "Is-a");
+		data.add(row);
 	}
 
-	private String findLabel(int nid, Map<Facade, List<Integer>> scopedConcepts) {
-		for (Map.Entry<Facade, List<Integer>> entry : scopedConcepts.entrySet()) {
-			if (entry.getValue().contains(nid)) {
-				return entry.getKey().name().replaceAll("[^a-zA-Z0-9]", "");
-			}
-		}
-		return "Concept";
+	private void collectOutOfScopeConceptRows(String id, String label, String name, String constellationId, List<Map<String, Object>> data) {
+		Map<String, Object> row = new HashMap<>();
+		row.put("id", id);
+		row.put("label", label);
+		row.put("name", name);
+		row.put("constellationId", constellationId);
+		data.add(row);
 	}
 }

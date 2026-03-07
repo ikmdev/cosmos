@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -129,7 +130,7 @@ public class ChartingService {
 		LOG.info("Starting to chart constellation: {}", chart.constellationId());
 
 		//Map Facades to their descendants or concepts within "scope" of the knowledge graph
-		Map<Facade, List<Integer>> scopedConcepts = extractConcepts(chart, chart.scopes());
+		Map<Facade, Set<Integer>> scopedConcepts = extractConcepts(chart, chart.scopes());
 
 		//Create ChartContext and fire off ChartProcessors
 		ChartingContext chartContext = new ChartingContext(
@@ -154,10 +155,10 @@ public class ChartingService {
 		LOG.info("Finished charting constellation: {}", chart.constellationId());
 	}
 
-	private Map<Facade, List<Integer>> extractConcepts(Chart chart, List<Facade> scopes) {
-		Map<Facade, List<Integer>> scopedConcepts = new HashMap<>();
+	private Map<Facade, Set<Integer>> extractConcepts(Chart chart, Set<Facade> scopes) {
+		Map<Facade, Set<Integer>> scopedConcepts = new HashMap<>();
 		for (Facade scope : scopes) {
-			scopedConcepts.put(scope, chart.navigationCalculator().descendentsOf(scope.id().nid()).mapToList(nid -> nid));
+			scopedConcepts.put(scope, chart.navigationCalculator().descendentsOf(scope.id().nid()).mapToSet(nid -> nid));
 		}
 		return scopedConcepts;
 	}

@@ -30,21 +30,33 @@ public class ConceptChartProcessor implements ChartProcessor {
 	@Override
 	public void process(ChartingContext chartContext, int batchSize) {
 		Chart chart = chartContext.getChart();
-		Neo4jClient neo4jClient = chartContext.getNeo4jClient();
 		List<Map<String, Object>> data = new ArrayList<>();
 
 		chartContext.getScopedConcepts().forEach((scope, descendants) -> {
+			String scopeId = String.valueOf(scope.id().nid());
+			String scopeLabel = findLabel(scopeId, chartContext.getScopedConcepts());
+			String scopeName = chart.languageCalculator().getDescriptionTextOrNid(scope.id().nid());
+			String constellationId = chart.constellationId().toString();
+			collectRows(scopeId, scopeLabel, scopeName, constellationId, data);
+
 			for (Integer conceptNid : descendants) {
 				Map<String, Object> row = new HashMap<>();
-				row.put("id", String.valueOf(conceptNid));
-				row.put("label", scope.name().replaceAll("[^a-zA-Z0-9]", ""));
-				row.put("name", chart.languageCalculator().getDescriptionTextOrNid(conceptNid));
-				row.put("constellationId", chart.constellationId().toString());
-				data.add(row);
-
+				String id = String.valueOf(conceptNid);
+				String label = scope.name().replaceAll("[^a-zA-Z0-9]", "");
+				String name = chart.languageCalculator().getDescriptionTextOrNid(conceptNid);
+				collectRows(id, label, name, constellationId, data);
 			}
 		});
 
 		writeData(cypherQuery, data, chartContext, batchSize);
+	}
+
+	private void collectRows(String id, String label, String name, String constellationId, List<Map<String, Object>> data) {
+		Map<String, Object> row = new HashMap<>();
+		row.put("id", id);
+		row.put("label", label);
+		row.put("name", name);
+		row.put("constellationId", constellationId);
+		data.add(row);
 	}
 }

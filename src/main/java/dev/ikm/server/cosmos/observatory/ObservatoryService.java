@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
@@ -76,9 +77,9 @@ public class ObservatoryService {
 				StampCoordinate.DEV_LATEST,
 				LanguageCoordinate.US_ENG_REG,
 				NavigationCoordinate.INFERRED,
-				List.of(),
-				List.of(),
-				List.of());
+				Set.of(),
+				Set.of(),
+				Set.of());
 		observatoryRepository.createObservatory(defaultObservatory);
 	}
 

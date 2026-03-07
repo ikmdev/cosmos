@@ -15,15 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-/***
- * Core Principles
- * 	1) Necessary conditions → Attach directly to Concept (they always apply)
- * 	2) Multiple sufficient sets → Create intermediate nodes (they're alternatives)
- * 	3) Single sufficient set → Flatten to Concept (no alternatives = no need for container)
- * 	4) Role groups → Always create RoleGroupQualifier nodes (preserve grouping)
- * */
 public class LogicalDefinitionChartProcessor implements ChartProcessor {
 
 	private record Clutch(
@@ -52,9 +46,8 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 
 		chartingContext.getScopedConcepts().values()
 				.stream()
-				.flatMap(List::stream)
+				.flatMap(Set::stream)
 				.forEach(nid -> {
-					System.out.println("LOGICAL_DEFINITION_PROCESSOR: processing Concept - " + nid);
 					stampCalculator.forEachSemanticVersionForComponentOfPattern(nid, TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
 							(semanticEntityVersion, entityVersion, patternEntityVersion) -> {
 								stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion,
@@ -257,16 +250,6 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 		roleGroupIntermediateRelationshipRow.put("relLabel", "CONTAINS_QUALIFIER_GROUP");
 		roleGroupIntermediateRelationshipRow.put("relType", "Contains Qualifier Group");
 		clutch.roleGroupIntermediateRelationshipBatch().add(roleGroupIntermediateRelationshipRow);
-	}
-
-	private String findLabel(String nid, Map<Facade, List<Integer>> scopedConcepts) {
-		int conceptNid = Integer.parseInt(nid);
-		for (Map.Entry<Facade, List<Integer>> entry : scopedConcepts.entrySet()) {
-			if (entry.getValue().contains(conceptNid)) {
-				return entry.getKey().name().replaceAll("[^a-zA-Z0-9]", "");
-			}
-		}
-		return "Concept";
 	}
 
 	private boolean isNid(String id) {
