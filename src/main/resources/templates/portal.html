@@ -80,11 +80,20 @@
 
                 <!-- Input Form Area -->
                 <div class="chat-input-area p-3 bg-light">
+                    <!-- File Preview Area -->
+                    <div id="file-preview-area" class="d-none mb-2">
+                        <span class="badge text-bg-secondary p-2">
+                            <i class="bi bi-file-earmark-text me-1"></i>
+                            <span id="file-preview-name" class="align-middle"></span>
+                            <button type="button" class="btn-close btn-close-white ms-2" aria-label="Clear file" id="clear-file-button" style="font-size: 0.65em;"></button>
+                        </span>
+                    </div>
                     <form id="chat-form"
                           hx-post="/portal/chat"
                           hx-target="#chat-indicator"
                           hx-swap="outerHTML"
-                          hx-indicator="#chat-indicator">
+                          hx-indicator="#chat-indicator"
+                          hx-encoding="multipart/form-data">
                         <div class="input-group">
                             <input id="chat-input" name="message" type="text" class="form-control form-control-lg"
                                    placeholder="Type your message here..." aria-label="Chat message input" autofocus>
@@ -92,7 +101,7 @@
                                    title="Upload a file" data-bs-toggle="tooltip">
                                 <i class="bi bi-paperclip"></i>
                             </label>
-                            <input type="file" class="d-none" id="file-upload">
+                            <input type="file" class="d-none" id="file-upload" name="file">
                             <button class="btn btn-primary btn-lg" type="submit" id="send-button">Send</button>
                         </div>
                     </form>
@@ -105,6 +114,10 @@
                 const chatForm = document.getElementById('chat-form');
                 const chatInput = document.getElementById('chat-input');
                 const chatMessages = document.getElementById('chat-messages');
+                const fileInput = document.getElementById('file-upload');
+                const filePreviewArea = document.getElementById('file-preview-area');
+                const filePreviewName = document.getElementById('file-preview-name');
+                const clearFileButton = document.getElementById('clear-file-button');
 
                 function scrollChatToBottom() {
                     // A small delay ensures the new content is rendered before scrolling
@@ -121,26 +134,54 @@
                     });
                 }
 
+                // Handle file selection to show the preview
+                fileInput.addEventListener('change', function() {
+                    if (fileInput.files.length > 0) {
+                        filePreviewName.textContent = fileInput.files[0].name;
+                        filePreviewArea.classList.remove('d-none');
+                    } else {
+                        filePreviewArea.classList.add('d-none');
+                    }
+                });
+
+                // Handle clearing the selected file
+                clearFileButton.addEventListener('click', function() {
+                    fileInput.value = ''; // This clears the file selection
+                    filePreviewArea.classList.add('d-none');
+                    chatInput.focus();
+                });
+
                 // Optimistically display the user's message before the request is sent
                 chatForm.addEventListener('htmx:configRequest', function (evt) {
                     const messageText = chatInput.value.trim();
-                    if (messageText) {
+                    const file = fileInput.files[0];
+
+                    if (messageText || file) {
                         const indicator = document.getElementById('chat-indicator');
+                        let userMessageContent = '';
+
+                        if (file) {
+                            userMessageContent += `<p class="mb-1"><i class="bi bi-file-earmark-arrow-up me-1"></i><em>${escapeHTML(file.name)}</em></p>`;
+                        }
+                        if (messageText) {
+                            userMessageContent += `<p class="mb-0">${escapeHTML(messageText)}</p>`;
+                        }
+
                         const userMessageHTML = `
                             <div class="d-flex mb-3 message-user">
                                 <div class="p-3 message-content">
-                                    <p class="mb-0">${escapeHTML(messageText)}</p>
+                                    ${userMessageContent}
                                 </div>
                             </div>
                         `;
 
                         // Insert the user's message right before the indicator
-                        if (indicator) {
-                            indicator.insertAdjacentHTML('beforebegin', userMessageHTML);
-                        }
+                        indicator?.insertAdjacentHTML('beforebegin', userMessageHTML);
 
                         scrollChatToBottom();
                         chatInput.value = ''; // Clear the input field immediately
+                        fileInput.value = ''; // Clear the file input
+                        filePreviewArea.classList.add('d-none'); // Hide the preview
                     } else {
                         evt.preventDefault(); // Prevent sending an empty message
                     }

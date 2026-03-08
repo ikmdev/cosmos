@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
 @Controller
@@ -40,9 +41,14 @@ public class PortalController {
 	}
 
 	@PostMapping("/portal/chat")
-	public String postChatMessage(@RequestParam("message") String message, Model model) {
+	public String postChatMessage(@RequestParam(name = "message", required = false) String message,
+	                              @RequestParam(name = "file", required = false) MultipartFile file,
+	                              Model model) {
+		boolean hasMessage = message != null && !message.isBlank();
+		boolean hasFile = file != null && !file.isEmpty();
+
 		// The client-side script should prevent empty submissions, but we validate again.
-		if (message == null || message.isBlank()) {
+		if (!hasMessage && !hasFile) {
 			// If a blank message gets through, return the indicator to be swapped with itself,
 			// resulting in no visual change for the user.
 			return "fragments/portal/chat :: indicator-only";
@@ -56,8 +62,20 @@ public class PortalController {
 			LOG.warn("Chat response delay interrupted", e);
 			Thread.currentThread().interrupt();
 		}
-		String responseMessage = "I received your message: \"" + message + "\". I am a simple echo bot for now.";
-		model.addAttribute("responseMessage", responseMessage);
+
+		StringBuilder responseText = new StringBuilder("I received ");
+		if (hasMessage) {
+			responseText.append("your message: \"").append(message).append("\"");
+		}
+		if (hasFile) {
+			if (hasMessage) {
+				responseText.append(" and ");
+			}
+			responseText.append("your file: '").append(file.getOriginalFilename()).append("' (size: ").append(file.getSize()).append(" bytes)");
+		}
+		responseText.append(". I am a simple echo bot for now.");
+
+		model.addAttribute("responseMessage", responseText.toString());
 
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
