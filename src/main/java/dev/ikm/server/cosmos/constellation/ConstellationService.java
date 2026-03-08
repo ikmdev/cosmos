@@ -88,7 +88,7 @@ public class ConstellationService {
 	}
 
 	public void removeConstellation(UUID id) {
-		chartingService.submitChartingJob(new Chart(Action.DELETE, id, null, Set.of(), null, null, null));
+		chartingService.submitChartingJob(new Chart(Action.DELETE, id, null, Set.of(), Set.of(), Set.of(), null, null, null));
 		constellationRepository.deleteConstellation(id);
 	}
 
@@ -102,7 +102,7 @@ public class ConstellationService {
 		constellationRepository.updatePhase(constellationId, Phase.QUEUED);
 		UUID observatoryId = calculatorService.getObservatoryId();
 		Observatory observatory = observatoryService.retrieveObservatory(observatoryId).orElseThrow();
-		Chart chart = new Chart(Action.CREATE, constellationId, observatoryId, observatory.includedScopes(),
+		Chart chart = new Chart(Action.CREATE, constellationId, observatoryId, observatory.includedScopes(), observatory.includedModules(), observatory.excludedModules(),
 				calculatorService.getStampCalculator(), calculatorService.getLanguageCalculator(), calculatorService.getNavigationCalculator());
 		chartingService.submitChartingJob(chart);
 	}

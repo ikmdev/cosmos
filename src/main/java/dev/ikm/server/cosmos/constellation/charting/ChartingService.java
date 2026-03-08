@@ -52,7 +52,8 @@ public class ChartingService {
 		this.chartProcessors = List.of(
 				new ConceptChartProcessor(),
 				new HierarchyChartProcessor(),
-				new LogicalDefinitionChartProcessor());
+				new LogicalDefinitionChartProcessor(),
+				new SemanticChartProcessor());
 	}
 
 	/**

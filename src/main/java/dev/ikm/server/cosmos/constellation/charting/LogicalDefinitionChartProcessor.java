@@ -7,7 +7,11 @@ import dev.ikm.server.cosmos.constellation.definition.Definition;
 import dev.ikm.server.cosmos.constellation.definition.Role;
 import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
 import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.tinkar.common.service.PrimitiveData;
+import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
+import dev.ikm.tinkar.entity.EntityVersion;
+import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 
@@ -48,16 +52,19 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				.stream()
 				.flatMap(Set::stream)
 				.forEach(nid -> {
-					stampCalculator.forEachSemanticVersionForComponentOfPattern(nid, TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
-							(semanticEntityVersion, entityVersion, patternEntityVersion) -> {
-								stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion,
-										TinkarTermV2.EL_PLUS_PLUS_INFERRED_TERMINOLOGICAL_AXIOMS).ifPresent(field -> {
-									final DiTreeEntity diTreeEntity = (DiTreeEntity) field.value();
-									LogicalDefinitionParser ldp = new LogicalDefinitionParser(diTreeEntity);
-									Definition definition = ldp.parse();
-									writeDefinitions(nid, chartingContext, definition, clutch);
-								});
+					PrimitiveData.get().forEachSemanticNidForComponentOfPattern(nid, TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(), semanticNid -> {
+						Latest<EntityVersion> latest = stampCalculator.latest(semanticNid);
+						if (latest.isPresent()) {
+							SemanticEntityVersion semanticEntityVersion = (SemanticEntityVersion) latest.get();
+							stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion,
+									TinkarTermV2.EL_PLUS_PLUS_INFERRED_TERMINOLOGICAL_AXIOMS).ifPresent(field -> {
+								final DiTreeEntity diTreeEntity = (DiTreeEntity) field.value();
+								LogicalDefinitionParser ldp = new LogicalDefinitionParser(diTreeEntity);
+								Definition definition = ldp.parse();
+								writeDefinitions(nid, chartingContext, definition, clutch);
 							});
+						}
+					});
 				});
 
 		//Write node data first
