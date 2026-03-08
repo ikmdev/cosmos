@@ -96,7 +96,8 @@ public class SemanticChartProcessor implements ChartProcessor {
 			descendants.forEach(nid -> {
 				PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
 					Latest<EntityVersion> latest = stampCalculator.latest(semanticNid);
-					processSemanticVersion(latest, nid, includedModules, excludedModules, chartingContext,
+					String refLabel = findLabel(String.valueOf(nid), chartingContext.getScopedConcepts());
+					processSemanticVersion(latest, nid, refLabel, includedModules, excludedModules, chartingContext,
 							stampCalculator, languageCalculator, semanticNodeData, outOfScopeData,
 							semanticRelationshipsData, semanticFieldRelationshipsData);
 				});
@@ -110,7 +111,8 @@ public class SemanticChartProcessor implements ChartProcessor {
 	}
 
 	private void processSemanticVersion(Latest<EntityVersion> latest,
-										int refNid,
+										int originNid,
+										String originLabel,
 										Set<Integer> includedModules,
 										Set<Integer> excludedModules,
 										ChartingContext chartingContext,
@@ -177,9 +179,17 @@ public class SemanticChartProcessor implements ChartProcessor {
 					collectSemanticNodeRows(semanticId, semanticLabel, chartingContext.getChart().constellationId().toString(), semanticNodeProps, semanticNodeData);
 
 					//Connect Node to Semantic Node
-					String originId = String.valueOf(refNid);
-					String originLabel = findLabel(originId, chartingContext.getScopedConcepts());
+					String originId = String.valueOf(originNid);
 					collectSemanticRelationshipRows(originId, originLabel, semanticId, semanticLabel, chartingContext.getChart().constellationId().toString(), semanticRelationshipsData);
+
+					//Recursively Process Semantics of semantics
+					PrimitiveData.get().forEachSemanticNidForComponent(semanticEntityVersion.nid(), nextSemantic -> {
+						Latest<EntityVersion> semanticLatest = stampCalculator.latest(nextSemantic);
+						String newOriginLabel = createSemanticLabel(languageCalculator.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid()));
+						processSemanticVersion(semanticLatest, semanticEntityVersion.nid(), newOriginLabel, includedModules, excludedModules, chartingContext,
+								stampCalculator, languageCalculator, semanticNodeData, outOfScopeData,
+								semanticRelationshipsData, semanticFieldRelationshipsData);
+					});
 				}
 			}
 		}
