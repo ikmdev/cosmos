@@ -78,95 +78,111 @@ public class SemanticChartProcessor implements ChartProcessor {
 	}
 
 	@Override
-	public void process(ChartingContext chartContext, int batchSize) {
+	public void process(ChartingContext chartingContext, int batchSize) {
 		List<Map<String, Object>> semanticNodeData = new ArrayList<>();
 		List<Map<String, Object>> outOfScopeData = new ArrayList<>();
 		List<Map<String, Object>> semanticRelationshipsData = new ArrayList<>();
 		List<Map<String, Object>> semanticFieldRelationshipsData = new ArrayList<>();
 
 
-		StampCalculator stampCalculator = chartContext.getChart().stampCalculator();
-		LanguageCalculator languageCalculator = chartContext.getChart().languageCalculator();
-		Set<Integer> includedModules = chartContext.getChart().includedModules()
+		StampCalculator stampCalculator = chartingContext.getChart().stampCalculator();
+		LanguageCalculator languageCalculator = chartingContext.getChart().languageCalculator();
+		Set<Integer> includedModules = chartingContext.getChart().includedModules()
 				.stream().map(facade -> facade.id().nid()).collect(Collectors.toSet());
-		Set<Integer> excludedModules = chartContext.getChart().excludedModules()
+		Set<Integer> excludedModules = chartingContext.getChart().excludedModules()
 				.stream().map(facade -> facade.id().nid()).collect(Collectors.toSet());
 
-		chartContext.getScopedConcepts().forEach((facade, descendants) -> {
+		chartingContext.getScopedConcepts().forEach((facade, descendants) -> {
 			descendants.forEach(nid -> {
 				PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
 					Latest<EntityVersion> latest = stampCalculator.latest(semanticNid);
-					if (latest.isPresent()) {
-						SemanticEntityVersion semanticEntityVersion = (SemanticEntityVersion) latest.get();
-						int stampModuleNid = semanticEntityVersion.moduleNid();
-
-						if (includedModules.contains(stampModuleNid) &&
-								!excludedModules.contains(stampModuleNid) &&
-								!excludedPatternNids().contains(semanticEntityVersion.pattern().nid())) {
-
-							//This Semantic is within the allowed modules to be charted
-							String semanticId = String.valueOf(semanticEntityVersion.nid());
-							int patternNid = semanticEntityVersion.pattern().nid();
-							Latest<PatternEntityVersion> latestPattern = stampCalculator.latest(patternNid);
-							if (latestPattern.isPresent()) {
-								Map<String, Object> semanticNodeProps = new HashMap<>();
-								PatternEntityVersion patternEntityVersion = latestPattern.get();
-
-								//Get label for Semantic Node
-								String semanticMeaningDescription = languageCalculator.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
-								String semanticLabel = createSemanticLabel(semanticMeaningDescription);
-								if (semanticLabel.isEmpty()) {
-									semanticLabel = "Semantic";
-								}
-
-								for (int idx = 0; idx < semanticEntityVersion.fieldValues().size(); idx++) {
-									Object value = semanticEntityVersion.fieldValues().get(idx);
-									//Process for new Semantic Node
-									int fieldMeaningNid = patternEntityVersion.fieldDefinitions().get(semanticEntityVersion.fieldValues().indexOf(value)).meaningNid();
-									String fieldLabel = "ERROR";
-									if (semanticEntityVersion.patternNid() == TinkarTermV2.IDENTIFIER_PATTERN.nid()) {
-										Latest<Field<Object>> latestField = stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion, TinkarTermV2.IDENTIFIER_SOURCE);
-										if (latestField.isPresent()) {
-											EntityProxy sourceConcept = (EntityProxy) latestField.get().value();
-											fieldLabel = languageCalculator.getDescriptionTextOrNid(sourceConcept);
-										}
-									} else {
-										fieldLabel = languageCalculator.getDescriptionTextOrNid(fieldMeaningNid);
-									}
-									processFieldForProps(semanticNodeProps, fieldLabel, value);
-
-									//Process for relationships to other nodes for Semantic Node
-									Set<Integer> destinationIds = processFieldForRelationships(value);
-									for (int destinationNid : destinationIds) {
-										String destinationId = String.valueOf(destinationNid);
-										String destinationLabel = findLabel(destinationId, chartContext.getScopedConcepts());
-										if (destinationLabel.equals("Concept")) {
-											String name = chartContext.getChart().languageCalculator().getDescriptionTextOrNid(destinationNid);
-											collectOutOfScopeConceptRows(destinationId, "Concept", name, chartContext.getChart().constellationId().toString(), outOfScopeData);
-										}
-										String relType = languageCalculator.getDescriptionTextOrNid(fieldMeaningNid);
-										String relLabel = relType.replaceAll("[^a-zA-Z0-9]", "_");
-										collectSemanticFieldRelationshipRows(semanticId, semanticLabel, destinationId, destinationLabel, relLabel, relType, chartContext.getChart().constellationId().toString(), semanticFieldRelationshipsData);
-									}
-								}
-
-								collectSemanticNodeRows(semanticId, semanticLabel, chartContext.getChart().constellationId().toString(), semanticNodeProps, semanticNodeData);
-
-								//Connect Node to Semantic Node
-								String originId = String.valueOf(nid);
-								String originLabel = findLabel(originId, chartContext.getScopedConcepts());
-								collectSemanticRelationshipRows(originId, originLabel, semanticId, semanticLabel, chartContext.getChart().constellationId().toString(), semanticRelationshipsData);
-							}
-						}
-					}
+					processSemanticVersion(latest, nid, includedModules, excludedModules, chartingContext,
+							stampCalculator, languageCalculator, semanticNodeData, outOfScopeData,
+							semanticRelationshipsData, semanticFieldRelationshipsData);
 				});
 			});
 		});
 
-		writeData(semanticNodeQuery, semanticNodeData, chartContext, batchSize);
-		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartContext, batchSize);
-		writeData(semanticRelationshipQuery, semanticRelationshipsData, chartContext, batchSize);
-		writeData(semanticFieldRelationships, semanticFieldRelationshipsData, chartContext, batchSize);
+		writeData(semanticNodeQuery, semanticNodeData, chartingContext, batchSize);
+		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize);
+		writeData(semanticRelationshipQuery, semanticRelationshipsData, chartingContext, batchSize);
+		writeData(semanticFieldRelationships, semanticFieldRelationshipsData, chartingContext, batchSize);
+	}
+
+	private void processSemanticVersion(Latest<EntityVersion> latest,
+										int refNid,
+										Set<Integer> includedModules,
+										Set<Integer> excludedModules,
+										ChartingContext chartingContext,
+										StampCalculator stampCalculator,
+										LanguageCalculator languageCalculator,
+										List<Map<String, Object>> semanticNodeData,
+										List<Map<String, Object>> outOfScopeData,
+										List<Map<String, Object>> semanticRelationshipsData,
+										List<Map<String, Object>> semanticFieldRelationshipsData) {
+		if (latest.isPresent()) {
+			SemanticEntityVersion semanticEntityVersion = (SemanticEntityVersion) latest.get();
+			int stampModuleNid = semanticEntityVersion.moduleNid();
+
+			if (includedModules.contains(stampModuleNid) &&
+					!excludedModules.contains(stampModuleNid) &&
+					!excludedPatternNids().contains(semanticEntityVersion.pattern().nid())) {
+
+				//This Semantic is within the allowed modules to be charted
+				String semanticId = String.valueOf(semanticEntityVersion.nid());
+				int patternNid = semanticEntityVersion.pattern().nid();
+				Latest<PatternEntityVersion> latestPattern = stampCalculator.latest(patternNid);
+				if (latestPattern.isPresent()) {
+					Map<String, Object> semanticNodeProps = new HashMap<>();
+					PatternEntityVersion patternEntityVersion = latestPattern.get();
+
+					//Get label for Semantic Node
+					String semanticMeaningDescription = languageCalculator.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+					String semanticLabel = createSemanticLabel(semanticMeaningDescription);
+					if (semanticLabel.isEmpty()) {
+						semanticLabel = "Semantic";
+					}
+
+					for (int idx = 0; idx < semanticEntityVersion.fieldValues().size(); idx++) {
+						Object value = semanticEntityVersion.fieldValues().get(idx);
+						//Process for new Semantic Node
+						int fieldMeaningNid = patternEntityVersion.fieldDefinitions().get(semanticEntityVersion.fieldValues().indexOf(value)).meaningNid();
+						String fieldLabel = "ERROR";
+						if (semanticEntityVersion.patternNid() == TinkarTermV2.IDENTIFIER_PATTERN.nid()) {
+							Latest<Field<Object>> latestField = stampCalculator.getFieldForSemanticWithMeaning(semanticEntityVersion, TinkarTermV2.IDENTIFIER_SOURCE);
+							if (latestField.isPresent()) {
+								EntityProxy sourceConcept = (EntityProxy) latestField.get().value();
+								fieldLabel = languageCalculator.getDescriptionTextOrNid(sourceConcept);
+							}
+						} else {
+							fieldLabel = languageCalculator.getDescriptionTextOrNid(fieldMeaningNid);
+						}
+						processFieldForProps(semanticNodeProps, fieldLabel, value);
+
+						//Process for relationships to other nodes for Semantic Node
+						Set<Integer> destinationIds = processFieldForRelationships(value);
+						for (int destinationNid : destinationIds) {
+							String destinationId = String.valueOf(destinationNid);
+							String destinationLabel = findLabel(destinationId, chartingContext.getScopedConcepts());
+							if (destinationLabel.equals("Concept")) {
+								String name = chartingContext.getChart().languageCalculator().getDescriptionTextOrNid(destinationNid);
+								collectOutOfScopeConceptRows(destinationId, "Concept", name, chartingContext.getChart().constellationId().toString(), outOfScopeData);
+							}
+							String relType = languageCalculator.getDescriptionTextOrNid(fieldMeaningNid);
+							String relLabel = relType.replaceAll("[^a-zA-Z0-9]", "_");
+							collectSemanticFieldRelationshipRows(semanticId, semanticLabel, destinationId, destinationLabel, relLabel, relType, chartingContext.getChart().constellationId().toString(), semanticFieldRelationshipsData);
+						}
+					}
+
+					collectSemanticNodeRows(semanticId, semanticLabel, chartingContext.getChart().constellationId().toString(), semanticNodeProps, semanticNodeData);
+
+					//Connect Node to Semantic Node
+					String originId = String.valueOf(refNid);
+					String originLabel = findLabel(originId, chartingContext.getScopedConcepts());
+					collectSemanticRelationshipRows(originId, originLabel, semanticId, semanticLabel, chartingContext.getChart().constellationId().toString(), semanticRelationshipsData);
+				}
+			}
+		}
 	}
 
 	private String createSemanticLabel(String semanticDescription) {
