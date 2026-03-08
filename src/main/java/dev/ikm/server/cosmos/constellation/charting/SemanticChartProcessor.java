@@ -22,6 +22,7 @@ import dev.ikm.tinkar.terms.TinkarTermV2;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,8 @@ public class SemanticChartProcessor implements ChartProcessor {
 								PatternEntityVersion patternEntityVersion = latestPattern.get();
 
 								//Get label for Semantic Node
-								String semanticLabel = languageCalculator.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid()).replaceAll("[^a-zA-Z0-9]", "");
+								String semanticMeaningDescription = languageCalculator.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+								String semanticLabel = createSemanticLabel(semanticMeaningDescription);
 								if (semanticLabel.isEmpty()) {
 									semanticLabel = "Semantic";
 								}
@@ -162,9 +164,16 @@ public class SemanticChartProcessor implements ChartProcessor {
 		});
 
 		writeData(semanticNodeQuery, semanticNodeData, chartContext, batchSize);
-//		writeData(semanticRelationshipQuery, semanticRelationshipsData, chartContext, batchSize);
 		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartContext, batchSize);
+		writeData(semanticRelationshipQuery, semanticRelationshipsData, chartContext, batchSize);
 		writeData(semanticFieldRelationships, semanticFieldRelationshipsData, chartContext, batchSize);
+	}
+
+	private String createSemanticLabel(String semanticDescription) {
+		return  Arrays.stream(semanticDescription.split("\\s+"))
+				.filter(word -> !word.isEmpty())
+				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+				.collect(Collectors.joining(""));
 	}
 
 	private Set<Integer> processFieldForRelationships(Object value) {
@@ -183,7 +192,7 @@ public class SemanticChartProcessor implements ChartProcessor {
 		} else if (value instanceof Component component) {
 			return Set.of(Entity.nid(component.publicId()));
 		} else {
-			System.out.println("ERROR: Unknown field value type: " + value.getClass().getName());
+			System.out.println("ERROR: Unknown field value type: " + value.toString());
 			return Set.of();
 		}
 	}
@@ -205,11 +214,14 @@ public class SemanticChartProcessor implements ChartProcessor {
 
 	private void collectSemanticRelationshipRows(String originId, String originLabel, String destinationId,
 												 String destinationLabel, String constellationId, List<Map<String, Object>> data) {
+		if (originId == null || originLabel == null || destinationId == null || destinationLabel == null) {
+			System.out.println("break");
+		}
 		Map<String, Object> row = new HashMap<>();
 		row.put("originId", originId);
 		row.put("originLabel", originLabel);
-		row.put("destinationId", destinationId);
-		row.put("destinationLabel", destinationLabel);
+		row.put("semanticId", destinationId);
+		row.put("semanticLabel", destinationLabel);
 		row.put("relLabel", "HAS_SEMANTIC");
 		row.put("relType", "Has Semantic");
 		row.put("constellationId", constellationId);
