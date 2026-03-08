@@ -67,21 +67,106 @@
                             <p class="mb-0">Hello! How can I assist you today? You can ask me questions or upload a file for analysis.</p>
                         </div>
                     </div>
+                    <!-- HTMX indicator for chat response, will be shown during request -->
+                    <div id="chat-indicator" class="htmx-indicator d-flex mb-3 message-bot">
+                        <div class="p-3 message-content">
+                            <p class="mb-0">
+                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                Thinking...
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Input Form Area -->
                 <div class="chat-input-area p-3 bg-light">
-                    <div class="input-group">
-                        <input type="text" class="form-control form-control-lg" placeholder="Type your message here..." aria-label="Chat message input">
-                        <label class="btn btn-outline-secondary btn-lg mb-0 d-flex align-items-center" for="file-upload" title="Upload a file" data-bs-toggle="tooltip">
-                            <i class="bi bi-paperclip"></i>
-                        </label>
-                        <input type="file" class="d-none" id="file-upload">
-                        <button class="btn btn-primary btn-lg" type="button" id="send-button">Send</button>
-                    </div>
+                    <form id="chat-form"
+                          hx-post="/portal/chat"
+                          hx-target="#chat-indicator"
+                          hx-swap="outerHTML"
+                          hx-indicator="#chat-indicator">
+                        <div class="input-group">
+                            <input id="chat-input" name="message" type="text" class="form-control form-control-lg"
+                                   placeholder="Type your message here..." aria-label="Chat message input" autofocus>
+                            <label class="btn btn-outline-secondary btn-lg mb-0 d-flex align-items-center" for="file-upload"
+                                   title="Upload a file" data-bs-toggle="tooltip">
+                                <i class="bi bi-paperclip"></i>
+                            </label>
+                            <input type="file" class="d-none" id="file-upload">
+                            <button class="btn btn-primary btn-lg" type="submit" id="send-button">Send</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+        <script>
+            // Ensure htmx.js is loaded before this script runs (e.g., in your layout.html)
+            (function() {
+                const chatForm = document.getElementById('chat-form');
+                const chatInput = document.getElementById('chat-input');
+                const chatMessages = document.getElementById('chat-messages');
+
+                function scrollChatToBottom() {
+                    // A small delay ensures the new content is rendered before scrolling
+                    setTimeout(() => {
+                        if (chatMessages) {
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }
+                    }, 50);
+                }
+
+                function escapeHTML(str) {
+                    return str.replace(/[&<>"']/g, function(match) {
+                        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match];
+                    });
+                }
+
+                // Optimistically display the user's message before the request is sent
+                chatForm.addEventListener('htmx:configRequest', function (evt) {
+                    const messageText = chatInput.value.trim();
+                    if (messageText) {
+                        const indicator = document.getElementById('chat-indicator');
+                        const userMessageHTML = `
+                            <div class="d-flex mb-3 message-user">
+                                <div class="p-3 message-content">
+                                    <p class="mb-0">${escapeHTML(messageText)}</p>
+                                </div>
+                            </div>
+                        `;
+
+                        // Insert the user's message right before the indicator
+                        if (indicator) {
+                            indicator.insertAdjacentHTML('beforebegin', userMessageHTML);
+                        }
+
+                        scrollChatToBottom();
+                        chatInput.value = ''; // Clear the input field immediately
+                    } else {
+                        evt.preventDefault(); // Prevent sending an empty message
+                    }
+                });
+
+                // After the bot response is swapped in, scroll and focus
+                document.body.addEventListener('htmx:afterSwap', function (evt) {
+                    // Check if the swap occurred within our chat container
+                    if (chatMessages.contains(evt.detail.elt)) {
+                         scrollChatToBottom();
+                         chatInput.focus();
+                    }
+                });
+
+                // Handle enter key to submit form
+                chatInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        htmx.trigger('#chat-form', 'submit');
+                    }
+                });
+
+                // Initial scroll to bottom
+                scrollChatToBottom();
+            })();
+        </script>
     </div>
 </main>
 <footer>
