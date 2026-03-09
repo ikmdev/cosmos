@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
+import java.io.IOException;
+
 @Controller
 public class PortalController {
 
@@ -63,9 +65,14 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		String responseText = assistant.chat(message);
-
-		model.addAttribute("responseMessage", responseText);
+		try {
+			String responseHtml = assistant.chat(message, file);
+			model.addAttribute("responseMessage", responseHtml);
+		} catch (IOException e) {
+			LOG.error("Error processing chat request with file.", e);
+			// Let the user know something went wrong with the file
+			model.addAttribute("responseMessage", "<p>Sorry, there was an error processing the uploaded file.</p>");
+		}
 
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}

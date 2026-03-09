@@ -271,6 +271,12 @@
 			<version>1.12.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.commonmark</groupId>
+			<artifactId>commonmark</artifactId>
+			<version>0.21.0</version>
+		</dependency>
+
 		<!-- Misc. -->
 		<dependency>
 			<groupId>org.jboss.threads</groupId>

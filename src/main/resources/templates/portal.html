@@ -43,6 +43,31 @@
                 border-radius: .5rem;
                 max-width: 80%;
             }
+            /* Styles for rendered markdown inside bot messages */
+            .message-bot .message-content p:last-child {
+                margin-bottom: 0;
+            }
+            .message-bot .message-content ul,
+            .message-bot .message-content ol {
+                padding-left: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+            .message-bot .message-content code {
+                font-size: 0.875em;
+                color: #d63384;
+                word-wrap: break-word;
+            }
+            .message-bot .message-content pre {
+                background-color: #e9ecef;
+                padding: 0.75rem;
+                border-radius: 0.25rem;
+                font-size: 0.875em;
+            }
+            .message-bot .message-content pre code {
+                color: inherit;
+                background-color: transparent;
+                padding: 0;
+            }
         </style>
 
         <div class="container-fluid py-4">

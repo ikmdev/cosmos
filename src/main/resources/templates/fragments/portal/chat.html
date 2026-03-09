@@ -9,9 +9,7 @@
 <div th:fragment="bot-response-and-indicator">
     <!-- Bot Message -->
     <div class="d-flex mb-3 message-bot">
-        <div class="p-3 message-content">
-            <p class="mb-0" th:text="${responseMessage}"></p>
-        </div>
+        <div class="p-3 message-content" th:utext="${responseMessage}"></div>
     </div>
 
     <!-- New Indicator to replace the old one for the next request -->
