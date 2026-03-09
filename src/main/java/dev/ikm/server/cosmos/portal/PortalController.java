@@ -3,6 +3,7 @@ package dev.ikm.server.cosmos.portal;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,14 @@ import org.springframework.web.servlet.view.FragmentsRendering;
 public class PortalController {
 
 	Logger LOG = LoggerFactory.getLogger(PortalController.class);
+
+	private final Assistant assistant;
+
+	@Autowired
+	public PortalController(Assistant assistant) {
+		this.assistant = assistant;
+	}
+
 
 	private void addSharedModelAttributes(Model model) {
 		model.addAttribute("activePage", "portal");
@@ -54,28 +63,9 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		// Simulate processing and generating a response
-		try {
-			// Simulate network/processing delay to show indicator
-			Thread.sleep(1500);
-		} catch (InterruptedException e) {
-			LOG.warn("Chat response delay interrupted", e);
-			Thread.currentThread().interrupt();
-		}
+		String responseText = assistant.chat(message);
 
-		StringBuilder responseText = new StringBuilder("I received ");
-		if (hasMessage) {
-			responseText.append("your message: \"").append(message).append("\"");
-		}
-		if (hasFile) {
-			if (hasMessage) {
-				responseText.append(" and ");
-			}
-			responseText.append("your file: '").append(file.getOriginalFilename()).append("' (size: ").append(file.getSize()).append(" bytes)");
-		}
-		responseText.append(". I am a simple echo bot for now.");
-
-		model.addAttribute("responseMessage", responseText.toString());
+		model.addAttribute("responseMessage", responseText);
 
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
