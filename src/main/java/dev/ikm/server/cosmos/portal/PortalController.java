@@ -66,7 +66,7 @@ public class PortalController {
 		}
 
 		try {
-			String responseHtml = assistant.chat(message, file);
+			String responseHtml = assistant.informedChat(message, file);
 			model.addAttribute("responseMessage", responseHtml);
 		} catch (IOException e) {
 			LOG.error("Error processing chat request with file.", e);

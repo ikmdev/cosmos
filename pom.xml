@@ -247,34 +247,30 @@
 		</dependency>
 
 		<!-- Langchain4j  -->
-<!--		<dependency>-->
-<!--			<groupId>dev.langchain4j</groupId>-->
-<!--			<artifactId>langchain4j-spring-boot-starter</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>dev.langchain4j</groupId>-->
-<!--			<artifactId>langchain4j-bedrock</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>dev.langchain4j</groupId>-->
-<!--			<artifactId>langchain4j-neo4j</artifactId>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-google-ai-gemini</artifactId>
+			<artifactId>langchain4j-ollama</artifactId>
 			<version>1.12.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-community-neo4j-retriever</artifactId>
+			<version>1.12.1-beta21</version>
+		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j</artifactId>
 			<version>1.12.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-document-parser-markdown</artifactId>
+			<version>1.12.2-beta22</version>
+		</dependency>
 		<dependency>
 			<groupId>org.commonmark</groupId>
 			<artifactId>commonmark</artifactId>
-			<version>0.21.0</version>
+			<version>0.27.1</version>
 		</dependency>
 
 		<!-- Misc. -->
