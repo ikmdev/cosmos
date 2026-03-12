@@ -4,6 +4,7 @@ import dev.ikm.server.cosmos.constellation.Chart;
 import dev.ikm.server.cosmos.constellation.Step;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.coordinate.navigation.calculator.NavigationCalculator;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class HierarchyChartProcessor implements ChartProcessor {
+@Component
+public class HierarchyChartProcessor extends BaseChartProcessor {
 
 	private final String hierarchyQuery = """
 			UNWIND $batch AS row
@@ -62,8 +64,8 @@ public class HierarchyChartProcessor implements ChartProcessor {
 			});
 		});
 
-		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize);
-		writeData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
+		writeNodeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize, true);
+		writeRelationshipData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 
 	private void collectHierarchyRows(String childId, String parentId, String childLabel, String parentLabel, String constellationId, List<Map<String, Object>> data) {

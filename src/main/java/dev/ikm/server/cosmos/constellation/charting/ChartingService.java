@@ -43,17 +43,17 @@ public class ChartingService {
 
 
 	@Autowired
-	public ChartingService(Neo4jClient neo4jClient, ConstellationRepository constellationRepository, ObservatoryRepository observatoryRepository, IkeRepository ikeRepository) {
+	public ChartingService(Neo4jClient neo4jClient,
+						   ConstellationRepository constellationRepository,
+						   ObservatoryRepository observatoryRepository,
+						   IkeRepository ikeRepository,
+						   List<ChartProcessor> chartProcessors) {
 		this.neo4jClient = neo4jClient;
 		this.observatoryRepository = observatoryRepository;
 		this.constellationRepository = constellationRepository;
 		this.ikeRepository = ikeRepository;
 		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
-		this.chartProcessors = List.of(
-				new ConceptChartProcessor(),
-				new HierarchyChartProcessor(),
-				new LogicalDefinitionChartProcessor(),
-				new SemanticChartProcessor());
+		this.chartProcessors = chartProcessors;
 	}
 
 	/**

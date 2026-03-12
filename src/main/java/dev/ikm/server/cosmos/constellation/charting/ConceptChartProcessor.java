@@ -3,13 +3,15 @@ package dev.ikm.server.cosmos.constellation.charting;
 import dev.ikm.server.cosmos.constellation.Chart;
 import dev.ikm.server.cosmos.constellation.Step;
 import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ConceptChartProcessor implements ChartProcessor {
+@Component
+public class ConceptChartProcessor extends BaseChartProcessor {
 
 	private final String cypherQuery = """
 			UNWIND $batch AS row
@@ -48,7 +50,7 @@ public class ConceptChartProcessor implements ChartProcessor {
 			}
 		});
 
-		writeData(cypherQuery, data, chartContext, batchSize);
+		writeNodeData(cypherQuery, data, chartContext, batchSize, true);
 	}
 
 	private void collectRows(String id, String label, String name, String constellationId, List<Map<String, Object>> data) {

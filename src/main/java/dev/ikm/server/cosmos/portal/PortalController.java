@@ -12,18 +12,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
-import java.io.IOException;
-
 @Controller
 public class PortalController {
 
 	Logger LOG = LoggerFactory.getLogger(PortalController.class);
 
-	private final Assistant assistant;
+	private final AssistantService assistantService;
 
 	@Autowired
-	public PortalController(Assistant assistant) {
-		this.assistant = assistant;
+	public PortalController(AssistantService assistantService) {
+		this.assistantService = assistantService;
 	}
 
 
@@ -54,6 +52,7 @@ public class PortalController {
 	@PostMapping("/portal/chat")
 	public String postChatMessage(@RequestParam(name = "message", required = false) String message,
 	                              @RequestParam(name = "file", required = false) MultipartFile file,
+								  @RequestParam(name = "constellationIntegrationToggle", required = false) boolean constellationIntegrated,
 	                              Model model) {
 		boolean hasMessage = message != null && !message.isBlank();
 		boolean hasFile = file != null && !file.isEmpty();
@@ -65,15 +64,8 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		try {
-			String responseHtml = assistant.informedChat(message, file);
-			model.addAttribute("responseMessage", responseHtml);
-		} catch (IOException e) {
-			LOG.error("Error processing chat request with file.", e);
-			// Let the user know something went wrong with the file
-			model.addAttribute("responseMessage", "<p>Sorry, there was an error processing the uploaded file.</p>");
-		}
-
+		String responseHtml = assistantService.chat(message, file, constellationIntegrated);
+		model.addAttribute("responseMessage", responseHtml);
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
 }

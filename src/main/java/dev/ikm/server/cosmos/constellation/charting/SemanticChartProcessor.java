@@ -29,7 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SemanticChartProcessor implements ChartProcessor {
+@org.springframework.stereotype.Component
+public class SemanticChartProcessor extends BaseChartProcessor {
 
 
 	private record relationship(String relLabel, String relType, int destination) {
@@ -104,10 +105,10 @@ public class SemanticChartProcessor implements ChartProcessor {
 			});
 		});
 
-		writeData(semanticNodeQuery, semanticNodeData, chartingContext, batchSize);
-		writeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize);
-		writeData(semanticRelationshipQuery, semanticRelationshipsData, chartingContext, batchSize);
-		writeData(semanticFieldRelationships, semanticFieldRelationshipsData, chartingContext, batchSize);
+		writeNodeData(semanticNodeQuery, semanticNodeData, chartingContext, batchSize, true);
+		writeNodeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize, true);
+		writeRelationshipData(semanticRelationshipQuery, semanticRelationshipsData, chartingContext, batchSize);
+		writeRelationshipData(semanticFieldRelationships, semanticFieldRelationshipsData, chartingContext, batchSize);
 	}
 
 	private void processSemanticVersion(Latest<EntityVersion> latest,

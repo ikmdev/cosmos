@@ -14,6 +14,7 @@ import dev.ikm.tinkar.entity.EntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class LogicalDefinitionChartProcessor implements ChartProcessor {
+@Component
+public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 
 	private record Clutch(
 			List<Map<String, Object>> roleNodeBatch,
@@ -68,14 +70,14 @@ public class LogicalDefinitionChartProcessor implements ChartProcessor {
 				});
 
 		//Write node data first
-		writeData(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize);
-		writeData(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize);
-		writeData(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize);
+		writeNodeData(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize, false);
+		writeNodeData(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize, false);
+		writeNodeData(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize, true);
 
 		//Write relationships second
-		writeData(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeData(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeData(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
+		writeRelationshipData(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeRelationshipData(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
+		writeRelationshipData(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
 	}
 
 	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, Definition definition, Clutch clutch) {
