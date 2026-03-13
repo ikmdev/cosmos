@@ -1,7 +1,7 @@
 package dev.ikm.server.cosmos.global;
 
+import dev.ikm.server.cosmos.database.CosmosDatabaseConfig;
 import dev.ikm.server.cosmos.observatory.Observatory;
-import dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig;
 import dev.ikm.server.cosmos.observatory.ObservatoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,7 +21,7 @@ public class GlobalControllerAdvice {
 
 	@ModelAttribute("defaultObservatory")
 	public UUID addDefaultObservatoryToModel() {
-		return ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
+		return CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
 	}
 
 	@ModelAttribute("observatories")

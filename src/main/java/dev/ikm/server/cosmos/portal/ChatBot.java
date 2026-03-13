@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,7 +40,6 @@ public class ChatBot {
 	private final ChatModel chatModel;
 	private final EmbeddingModel embeddingModel;
 	private final EmbeddingStore embeddingStore;
-	private final Neo4jClient neo4jClient;
 
 	private final MarkdownDocumentParser markdownDocumentParser;
 	private final Parser markdownParser;
@@ -51,11 +49,10 @@ public class ChatBot {
 	private static final Deque<AiMessage> previousAIMessage = new ArrayDeque<>();
 	private final List<ChatMessage> currentChatMessages;
 
-	public ChatBot(ChatModel chatModel, EmbeddingModel embeddingModel, EmbeddingStore embeddingStore, Neo4jClient neo4jClient) {
+	public ChatBot(ChatModel chatModel, EmbeddingModel embeddingModel, EmbeddingStore embeddingStore) {
 		this.chatModel = chatModel;
 		this.embeddingModel = embeddingModel;
 		this.embeddingStore = embeddingStore;
-		this.neo4jClient = neo4jClient;
 		this.currentChatMessages = new ArrayList<>();
 		this.markdownDocumentParser = new MarkdownDocumentParser();
 		this.markdownParser = Parser.builder().build();
@@ -137,54 +134,26 @@ public class ChatBot {
 				.map(m -> m.embedded().metadata().getString("id"))
 				.toList();
 
-		// Step 2: Graph Expansion (2-Hop)
-		Neo4jClient.RecordFetchSpec<Map<String, Object>> results = neo4jClient.query("""
-				// 1. Accepts IDs from your side-car vector DB
-				UNWIND $targetIds AS targetId
-				
-				// 2. Locate entry point (label-agnostic)
-				MATCH (start {id: targetId})
-				
-				// 3. Traverse 1 to 2 hops (label-agnostic)
-				MATCH (start)-[*1..2]-(connected)
-				
-				// 4. Return as a list of maps containing ALL dynamic properties and labels
-				WITH start, collect(DISTINCT connected) AS neighbors
-				RETURN {
-				    seed_node: {
-				        labels: labels(start),
-				        data: properties(start)
-				    },
-				    connections: [n IN neighbors | {
-				        labels: labels(n),
-				        data: properties(n)
-				    }]
-				} AS graphContext""").bind(targetIds).to("targetIds").fetch();
-
-				//TODO: Will overhaul the code to focus on a tool-based RAG approach. Will use Description Semantics and general natural language of other semantics (based on pattern meaning and purpose) to embedd. Then when vector identifies the concepts we dive deep into each value of the semantic when augmenting the AI prompt
-				
-
-
 
 		// Convert your Neo4j Map result into a Markdown string for the LLM
-		String markdownContext = results.all().stream()
-				.map(result -> (Map<String, Object>) result.get("graphContext"))
-				.map(record -> {
-					StringBuilder sb = new StringBuilder();
-					sb.append("### Source Node\n");
-//					((Map<String, Object>) record.get("seed_node"))
-					//TODO - figure out this parsing
-					sb.append("- Labels: ").append(record.get("labels")).append("\n");
-					sb.append("- Data: ").append(record.get("data")).append("\n\n");
-					sb.append("### 2-Hop Connections\n");
-					// Iterate through dynamic neighbors
-					List<Map<String, Object>> neighbors = (List<Map<String, Object>>) record.get("connections");
-					for (Map<String, Object> n : neighbors) {
-						sb.append("- ").append(n.get("labels")).append(": ").append(n.get("data")).append("\n");
-					}
-					return sb.toString();
-				})
-				.collect(Collectors.joining("\n---\n"));
+// 		String markdownContext = results.all().stream()
+// 				.map(result -> (Map<String, Object>) result.get("graphContext"))
+// 				.map(record -> {
+// 					StringBuilder sb = new StringBuilder();
+// 					sb.append("### Source Node\n");
+// //					((Map<String, Object>) record.get("seed_node"))
+// 					//TODO - figure out this parsing
+// 					sb.append("- Labels: ").append(record.get("labels")).append("\n");
+// 					sb.append("- Data: ").append(record.get("data")).append("\n\n");
+// 					sb.append("### 2-Hop Connections\n");
+// 					// Iterate through dynamic neighbors
+// 					List<Map<String, Object>> neighbors = (List<Map<String, Object>>) record.get("connections");
+// 					for (Map<String, Object> n : neighbors) {
+// 						sb.append("- ").append(n.get("labels")).append(": ").append(n.get("data")).append("\n");
+// 					}
+// 					return sb.toString();
+// 				})
+// 				.collect(Collectors.joining("\n---\n"));
 
 		UserMessage userMessage = UserMessage.from(userPrompt);
 		currentChatMessages.add(userMessage);

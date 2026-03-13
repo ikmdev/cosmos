@@ -1,12 +1,20 @@
 package dev.ikm.server.cosmos.constellation.charting;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
 import dev.ikm.server.cosmos.constellation.Chart;
 import dev.ikm.server.cosmos.constellation.Step;
 import dev.ikm.server.cosmos.constellation.definition.Clause;
 import dev.ikm.server.cosmos.constellation.definition.Definition;
 import dev.ikm.server.cosmos.constellation.definition.Role;
 import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
-import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.coordinate.stamp.calculator.StampCalculator;
@@ -14,14 +22,6 @@ import dev.ikm.tinkar.entity.EntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 @Component
 public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
@@ -68,16 +68,6 @@ public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 						}
 					});
 				});
-
-		//Write node data first
-		writeNodeData(sufficientIntermediateNodeQuery, clutch.sufficientIntermediateNodeBatch(), chartingContext, batchSize, false);
-		writeNodeData(roleGroupIntermediateNodeQuery, clutch.roleGroupIntermediateNodeBatch(), chartingContext, batchSize, false);
-		writeNodeData(roleNodeQuery, clutch.roleNodeBatch(), chartingContext, batchSize, true);
-
-		//Write relationships second
-		writeRelationshipData(sufficientIntermediateRelationshipQuery, clutch.sufficientIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeRelationshipData(roleGroupIntermediateRelationshipQuery, clutch.roleGroupIntermediateRelationshipBatch(), chartingContext, batchSize);
-		writeRelationshipData(roleRelationshipQuery, clutch.roleRelationshipBatch(), chartingContext, batchSize);
 	}
 
 	private void writeDefinitions(int conceptNid, ChartingContext chartingContext, Definition definition, Clutch clutch) {
@@ -128,19 +118,6 @@ public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 		});
 	}
 
-	private final String roleRelationshipQuery = """
-			UNWIND $batch AS row
-			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-			MATCH (destination:$(row.destinationLabel) {id: row.destinationId, constellationId: row.constellationId})
-			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(destination)
-			""";
-
-	private final String roleNodeQuery = """
-			UNWIND $batch AS row
-			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET n.name = row.name
-			""";
-
 	private void writeRoles(String originId, List<Role> roles, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
 		roles.forEach(role -> {
@@ -182,19 +159,6 @@ public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 		});
 	}
 
-	private final String sufficientIntermediateRelationshipQuery = """
-			UNWIND $batch AS row
-			MATCH (suffIntermediate:$(row.label) {id: row.id, constellationId: row.constellationId})
-			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(suffIntermediate)
-			SET r += { r.logicalRole = row.logicalRole, r.sufficientWhen = row.sufficientWhen }
-			""";
-
-	private final String sufficientIntermediateNodeQuery = """
-			UNWIND $batch AS row
-			MERGE (suffIntermediate:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET suffIntermediate += { definitionType: row.definitionType, logicalOperator: row.logicalOperator, completeness: row.completeness }""";
-
 	private void writeSufficientIntermediateNode(String intermediateNodeId, String originId, Clause clause, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();
 
@@ -223,17 +187,6 @@ public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 
 		clutch.sufficientIntermediateRelationshipBatch().add(sufficientIntermediateRelationshipRow);
 	}
-
-	private final String roleGroupIntermediateRelationshipQuery = """
-			UNWIND $batch AS row
-			MATCH (roleGroup:$(row.label) {id: row.id, constellationId: row.constellationId})
-			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(roleGroup)""";
-
-	private final String roleGroupIntermediateNodeQuery = """
-			UNWIND $batch AS row
-			MERGE (roleGroup:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET roleGroup += { groupNumber: row.groupNumber, logicalOperator: row.logicalOperator }""";
 
 	private void writeRoleGroupIntermediateNode(String nodeId, String originId, ChartingContext chartingContext, Clutch clutch) {
 		Chart chart = chartingContext.getChart();

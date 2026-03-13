@@ -1,7 +1,7 @@
 package dev.ikm.server.cosmos.global;
 
 import dev.ikm.server.cosmos.calculator.CalculatorService;
-import dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig;
+import dev.ikm.server.cosmos.database.CosmosDatabaseConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,12 +33,12 @@ public class CalculatorServiceInterceptor implements HandlerInterceptor {
         UUID activeObservatoryId;
 
         if (cookie == null || cookie.getValue().isBlank()) {
-            activeObservatoryId = ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
+            activeObservatoryId = CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
         } else {
             try {
                 activeObservatoryId = UUID.fromString(cookie.getValue());
             } catch (IllegalArgumentException e) {
-                activeObservatoryId = ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
+                activeObservatoryId = CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
                 LOG.warn("Invalid UUID in 'cosmos-observatory-id' cookie: '{}'. Falling back to default.", cookie.getValue());
             }
         }

@@ -29,12 +29,12 @@ import org.eclipse.collections.impl.factory.Lists;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
+import static dev.ikm.server.cosmos.database.CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static dev.ikm.server.cosmos.observatory.ObservatoryDatabaseConfig.DEFAULT_OBSERVATORY_ID;
 
 @Service
 @RequestScope

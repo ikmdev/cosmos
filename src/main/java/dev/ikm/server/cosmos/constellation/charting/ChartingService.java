@@ -1,5 +1,18 @@
 package dev.ikm.server.cosmos.constellation.charting;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
 import dev.ikm.server.cosmos.constellation.Action;
 import dev.ikm.server.cosmos.constellation.Chart;
 import dev.ikm.server.cosmos.constellation.ConstellationRepository;
@@ -9,20 +22,6 @@ import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * A dedicated service for running long-running, asynchronous charting tasks.
@@ -32,7 +31,6 @@ public class ChartingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChartingService.class);
 
-	private final Neo4jClient neo4jClient;
 	private final ConstellationRepository constellationRepository;
 	private final ObservatoryRepository observatoryRepository;
 	private final IkeRepository ikeRepository;
@@ -41,14 +39,10 @@ public class ChartingService {
 
 	private Thread consumerThread;
 
-
-	@Autowired
-	public ChartingService(Neo4jClient neo4jClient,
-						   ConstellationRepository constellationRepository,
+	public ChartingService(ConstellationRepository constellationRepository,
 						   ObservatoryRepository observatoryRepository,
 						   IkeRepository ikeRepository,
 						   List<ChartProcessor> chartProcessors) {
-		this.neo4jClient = neo4jClient;
 		this.observatoryRepository = observatoryRepository;
 		this.constellationRepository = constellationRepository;
 		this.ikeRepository = ikeRepository;
@@ -113,14 +107,7 @@ public class ChartingService {
 	}
 
 	private void performChartDelete(Chart chart) {
-		String cypherQuery = """
-				MATCH (n {constellationId: $constellationId})
-				DETACH DELETE n
-				""";
-		neo4jClient.query(cypherQuery)
-				.bind(chart.constellationId().toString())
-				.to("constellationId")
-				.run();
+		
 	}
 
 	/**
@@ -137,7 +124,6 @@ public class ChartingService {
 		ChartingContext chartContext = new ChartingContext(
 				chart,
 				scopedConcepts,
-				neo4jClient,
 				progressUpdate -> {
 					switch (progressUpdate.step()) {
 						case PROCESS_CONCEPTS -> constellationRepository.updateConceptCount(chart.constellationId(), progressUpdate.processedCount());

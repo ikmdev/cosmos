@@ -29,33 +29,6 @@ public abstract class BaseChartProcessor implements ChartProcessor {
 		this.embeddingModel = embeddingModel;
 	}
 
-	void writeNodeData(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize, boolean embed) {
-		if (embed) {
-			writeEmbedding(data, batchSize);
-		}
-		data.stream()
-				.gather(Gatherers.windowFixed(batchSize))
-				.forEach(batch -> {
-					chartingContext.getNeo4jClient().query(query)
-							.bind(batch)
-							.to("batch")
-							.run();
-					chartingContext.reportProgress(getStep(), batch.size());
-				});
-	}
-
-	void writeRelationshipData(String query, List<Map<String, Object>> data, ChartingContext chartingContext, int batchSize) {
-		data.stream()
-				.gather(Gatherers.windowFixed(batchSize))
-				.forEach(batch -> {
-					chartingContext.getNeo4jClient().query(query)
-							.bind(batch)
-							.to("batch")
-							.run();
-					chartingContext.reportProgress(getStep(), batch.size());
-				});
-	}
-
 	private void writeEmbedding(List<Map<String, Object>> data, int batchSize) {
 		data.stream()
 				.gather(Gatherers.windowFixed(batchSize))

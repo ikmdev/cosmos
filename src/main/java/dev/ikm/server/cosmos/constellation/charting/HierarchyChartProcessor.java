@@ -15,18 +15,6 @@ import java.util.Set;
 @Component
 public class HierarchyChartProcessor extends BaseChartProcessor {
 
-	private final String hierarchyQuery = """
-			UNWIND $batch AS row
-			MATCH (child:$(row.childLabel) {id: row.childId, constellationId: row.constellationId})
-			MATCH (parent:$(row.parentLabel) {id: row.parentId, constellationId: row.constellationId})
-			MERGE (child)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(parent)""";
-
-	private final String outOfScopeCreateConceptQuery = """
-			UNWIND $batch AS row
-			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET n.name = row.name
-			""";
-
 	@Override
 	public Step getStep() {
 		return Step.PROCESS_HIERARCHY;
@@ -63,9 +51,6 @@ public class HierarchyChartProcessor extends BaseChartProcessor {
 				});
 			});
 		});
-
-		writeNodeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize, true);
-		writeRelationshipData(hierarchyQuery, hierarchyData, chartingContext, batchSize);
 	}
 
 	private void collectHierarchyRows(String childId, String parentId, String childLabel, String parentLabel, String constellationId, List<Map<String, Object>> data) {

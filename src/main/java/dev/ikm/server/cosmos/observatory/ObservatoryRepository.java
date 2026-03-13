@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import dev.ikm.server.cosmos.database.CosmosDatabaseConfig;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -13,10 +15,10 @@ public class ObservatoryRepository {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ObservatoryRepository.class);
 
-	private final ObservatoryDatabaseConfig observatoryDatabaseConfig;
+	private final CosmosDatabaseConfig observatoryDatabaseConfig;
 
 	@Autowired
-	public ObservatoryRepository(ObservatoryDatabaseConfig observatoryDatabaseConfig) {
+	public ObservatoryRepository(CosmosDatabaseConfig observatoryDatabaseConfig) {
 		this.observatoryDatabaseConfig = observatoryDatabaseConfig;
 	}
 

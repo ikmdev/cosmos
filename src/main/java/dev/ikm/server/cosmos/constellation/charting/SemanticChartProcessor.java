@@ -36,30 +36,6 @@ public class SemanticChartProcessor extends BaseChartProcessor {
 	private record relationship(String relLabel, String relType, int destination) {
 	}
 
-	private final String semanticRelationshipQuery = """
-			UNWIND $batch AS row
-			MATCH (origin:$(row.originLabel) {id: row.originId, constellationId: row.constellationId})
-			MATCH (semantic:$(row.semanticLabel) {id: row.semanticId, constellationId: row.constellationId})
-			MERGE (origin)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(semantic)""";
-
-	private final String semanticFieldRelationships = """
-			UNWIND $batch AS row
-			MATCH (semantic:$(row.semanticLabel) {id: row.semanticId, constellationId: row.constellationId})
-			MERGE (destination:$(row.destinationLabel) {id: row.destinationId, constellationId: row.constellationId})
-			MERGE (semantic)-[r:$(row.relLabel) {type: row.relType, constellationId: row.constellationId}]->(destination)""";
-
-	private final String semanticNodeQuery = """
-			UNWIND $batch AS row
-			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET n += row.props
-			""";
-
-	private final String outOfScopeCreateConceptQuery = """
-			UNWIND $batch AS row
-			MERGE (n:$(row.label) {id: row.id, constellationId: row.constellationId})
-			SET n.name = row.name
-			""";
-
 	private List<Integer> excludedPatternNids() {
 		return List.of(
 				TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
@@ -104,11 +80,6 @@ public class SemanticChartProcessor extends BaseChartProcessor {
 				});
 			});
 		});
-
-		writeNodeData(semanticNodeQuery, semanticNodeData, chartingContext, batchSize, true);
-		writeNodeData(outOfScopeCreateConceptQuery, outOfScopeData, chartingContext, batchSize, true);
-		writeRelationshipData(semanticRelationshipQuery, semanticRelationshipsData, chartingContext, batchSize);
-		writeRelationshipData(semanticFieldRelationships, semanticFieldRelationshipsData, chartingContext, batchSize);
 	}
 
 	private void processSemanticVersion(Latest<EntityVersion> latest,
@@ -229,12 +200,12 @@ public class SemanticChartProcessor extends BaseChartProcessor {
 			props.put(label, DateTimeUtil.format(instant));
 		} else if (value instanceof BigDecimal bigDecimal) {
 			props.put(label, bigDecimal.toPlainString());
-		} else if (value instanceof Integer integerValue ||
-				value instanceof Long longValue ||
-				value instanceof Float floatValue ||
-				value instanceof Double doubleValue ||
-				value instanceof String string ||
-				value instanceof Boolean booleanValue) {
+		} else if (value instanceof Integer _ ||
+				value instanceof Long _ ||
+				value instanceof Float _ ||
+				value instanceof Double _ ||
+				value instanceof String _ ||
+				value instanceof Boolean _) {
 			props.put(label, value);
 		}
 	}
