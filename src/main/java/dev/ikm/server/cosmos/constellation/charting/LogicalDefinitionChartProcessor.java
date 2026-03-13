@@ -251,7 +251,6 @@ public class LogicalDefinitionChartProcessor extends BaseChartProcessor {
 		roleGroupIntermediateNodeRow.put("label", "RoleGroupQualifier");
 		roleGroupIntermediateNodeRow.put("constellationId", chart.constellationId().toString());
 		roleGroupIntermediateNodeRow.put("logicalOperator", "And");
-		roleGroupIntermediateNodeRow.put("groupNumber", 0); //TODO - do we need this?
 		clutch.roleNodeBatch.add(roleGroupIntermediateNodeRow);
 
 		//Relationship Properties between Sufficient Intermediate Node

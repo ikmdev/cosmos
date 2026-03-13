@@ -1,5 +1,20 @@
 package dev.ikm.server.cosmos.ike;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import org.eclipse.collections.api.block.procedure.primitive.IntProcedure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.common.id.PublicIds;
@@ -20,20 +35,6 @@ import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
 import dev.ikm.tinkar.terms.State;
 import dev.ikm.tinkar.terms.TinkarTermV2;
-import org.eclipse.collections.api.block.procedure.primitive.IntProcedure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 @Repository
 public class IkeRepository {
@@ -88,7 +89,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof ConceptEntity<? extends ConceptEntityVersion>)
+				.filter(entity -> (ConceptEntity<? extends ConceptEntityVersion>) entity instanceof ConceptEntity<? extends ConceptEntityVersion>)
 				.map(entity -> (ConceptEntity<? extends ConceptEntityVersion>) entity);
 	}
 
@@ -97,7 +98,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof ConceptEntity<? extends ConceptEntityVersion>)
+				.filter(entity -> (ConceptEntity<? extends ConceptEntityVersion>) entity instanceof ConceptEntity<? extends ConceptEntityVersion>)
 				.map(entity -> (ConceptEntity<? extends ConceptEntityVersion>) entity);
 	}
 
@@ -116,7 +117,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof SemanticEntity<? extends SemanticEntityVersion>)
+				.filter(entity -> (SemanticEntity<? extends SemanticEntityVersion>) entity instanceof SemanticEntity<? extends SemanticEntityVersion>)
 				.map(entity -> (SemanticEntity<? extends SemanticEntityVersion>) entity);
 	}
 
@@ -125,7 +126,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof SemanticEntity<? extends SemanticEntityVersion>)
+				.filter(entity -> (SemanticEntity<? extends SemanticEntityVersion>) entity instanceof SemanticEntity<? extends SemanticEntityVersion>)
 				.map(entity -> (SemanticEntity<? extends SemanticEntityVersion>) entity);
 	}
 
@@ -144,7 +145,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof PatternEntity<? extends PatternEntityVersion>)
+				.filter(entity -> (PatternEntity<? extends PatternEntityVersion>) entity instanceof PatternEntity<? extends PatternEntityVersion>)
 				.map(entity -> (PatternEntity<? extends PatternEntityVersion>) entity);
 	}
 
@@ -153,7 +154,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof PatternEntity<? extends PatternEntityVersion>)
+				.filter(entity -> (PatternEntity<? extends PatternEntityVersion>) entity instanceof PatternEntity<? extends PatternEntityVersion>)
 				.map(entity -> (PatternEntity<? extends PatternEntityVersion>) entity);
 	}
 
@@ -172,7 +173,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof StampEntity<? extends StampEntityVersion>)
+				.filter(entity -> (StampEntity<? extends StampEntityVersion>) entity instanceof StampEntity<? extends StampEntityVersion>)
 				.map(entity -> (StampEntity<? extends StampEntityVersion>) entity);
 	}
 
@@ -181,7 +182,7 @@ public class IkeRepository {
 		Optional<Entity<EntityVersion>> optionalEntity = Entity.get(Entity.nid(publicId));
 		return optionalEntity
 				.map(entity -> (Entity<? extends EntityVersion>) entity)
-				.filter(entity -> entity instanceof StampEntity<? extends StampEntityVersion>)
+				.filter(entity -> (StampEntity<? extends StampEntityVersion>) entity instanceof StampEntity<? extends StampEntityVersion>)
 				.map(entity -> (StampEntity<? extends StampEntityVersion>) entity);
 	}
 

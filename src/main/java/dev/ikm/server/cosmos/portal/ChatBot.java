@@ -161,6 +161,11 @@ public class ChatBot {
 				    }]
 				} AS graphContext""").bind(targetIds).to("targetIds").fetch();
 
+				//TODO: Will overhaul the code to focus on a tool-based RAG approach. Will use Description Semantics and general natural language of other semantics (based on pattern meaning and purpose) to embedd. Then when vector identifies the concepts we dive deep into each value of the semantic when augmenting the AI prompt
+				
+
+
+
 		// Convert your Neo4j Map result into a Markdown string for the LLM
 		String markdownContext = results.all().stream()
 				.map(result -> (Map<String, Object>) result.get("graphContext"))
