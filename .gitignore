@@ -228,3 +228,4 @@ Temporary Items
 ###################
 **.zip
 htmlReport
+.vscode/launch.json
