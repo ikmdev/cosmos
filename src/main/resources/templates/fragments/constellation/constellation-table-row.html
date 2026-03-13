@@ -15,6 +15,12 @@
             <td th:text="${constellation.phase}"></td>
             <td th:text="${constellation.step}"></td>
             <td th:text="${constellation.name}"></td>
+             <td>
+                <th:block th:each="scope : ${constellation.includedScopes()}">
+                    <span class="badge bg-info-subtle text-info-emphasis me-1 mb-1" th:text="${scope.name()}"></span>
+                </th:block>
+            </td>
+            <td th:text="${constellation.portalPrompt}"></td>
             <td th:text="${constellation.created}"></td>
             <td th:text="${constellation.processed}"></td>
             <td th:text="${constellation.duration}"></td>

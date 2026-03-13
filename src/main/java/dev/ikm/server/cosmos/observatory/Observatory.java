@@ -1,10 +1,9 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.ike.Facade;
-
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import dev.ikm.server.cosmos.ike.Facade;
 
 public record Observatory(
 		UUID id,
@@ -13,6 +12,5 @@ public record Observatory(
 		@StringToFacade Facade languageCoordinate,
 		@StringToFacade Facade navigationCoordinate,
 		@StringToFacade Set<Facade> includedModules,
-		@StringToFacade Set<Facade> excludedModules,
-		@StringToFacade Set<Facade> includedScopes) {
+		@StringToFacade Set<Facade> excludedModules) {
 }

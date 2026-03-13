@@ -1,6 +1,21 @@
 
 package dev.ikm.server.cosmos.observatory;
 
+import static dev.ikm.server.cosmos.database.CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.calculator.LanguageCoordinate;
 import dev.ikm.server.cosmos.calculator.NavigationCoordinate;
@@ -13,20 +28,6 @@ import dev.ikm.server.cosmos.search.SearchService;
 import dev.ikm.tinkar.common.id.PublicId;
 import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.terms.TinkarTermV2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import static dev.ikm.server.cosmos.database.CosmosDatabaseConfig.DEFAULT_OBSERVATORY_ID;
-
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class ObservatoryService {
@@ -36,7 +37,6 @@ public class ObservatoryService {
 	private final IkeRepository ikeRepository;
 	private final SearchService searchService;
 
-	@Autowired
 	public ObservatoryService(ObservatoryRepository observatoryRepository, CalculatorService calculatorService, IkeRepository ikeRepository, SearchService searchService) {
 		this.observatoryRepository = observatoryRepository;
 		this.calculatorService = calculatorService;
@@ -52,8 +52,7 @@ public class ObservatoryService {
 				observatoryEntity.languageCoordinate().getConcept(),
 				observatoryEntity.navigationCoordinate().getConcept(),
 				observatoryEntity.includedModules(),
-				observatoryEntity.excludedModules(),
-				observatoryEntity.includedScopes());
+				observatoryEntity.excludedModules());
 	}
 
 	private ObservatoryEntity buildObservatoryEntity(Observatory observatory) {
@@ -65,8 +64,7 @@ public class ObservatoryService {
 				languageCoordinate,
 				navigationCoordinate,
 				observatory.includedModules(),
-				observatory.excludedModules(),
-				observatory.includedScopes());
+				observatory.excludedModules());
 	}
 
 	public void bootstrapDefaultObservatory() {
@@ -77,7 +75,6 @@ public class ObservatoryService {
 				StampCoordinate.DEV_LATEST,
 				LanguageCoordinate.US_ENG_REG,
 				NavigationCoordinate.INFERRED,
-				Set.of(),
 				Set.of(),
 				Set.of());
 		observatoryRepository.createObservatory(defaultObservatory);
@@ -92,8 +89,7 @@ public class ObservatoryService {
 				observatoryForm.selectedLanguageCoordinate(),
 				observatoryForm.selectedNavigationCoordinate(),
 				observatoryForm.selectedIncludedModules(),
-				observatoryForm.selectedExcludedModules(),
-				observatoryForm.selectedIncludedScopes());
+				observatoryForm.selectedExcludedModules());
 		ObservatoryEntity entity = buildObservatoryEntity(observatory);
 		observatoryRepository.createObservatory(entity);
 		return observatory;
@@ -137,51 +133,6 @@ public class ObservatoryService {
 
 	public Optional<List<Facade>> retrieveNavigations() {
 		return Optional.of(NavigationCoordinate.navigationConcepts());
-	}
-
-	public Optional<Page<Facade>> searchForConceptsWithDescendants(String query, Pageable pageable) {
-		return Optional.of(searchService.search(
-				query,
-				pageable,
-				SearchService.SortType.SEMANTIC_SCORE,
-				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty()));
-	}
-
-	public Optional<Page<Facade>> search(String query, Pageable pageable) {
-		return Optional.of(searchService.search(
-				query,
-				pageable,
-				SearchService.SortType.SEMANTIC_SCORE));
-	}
-
-	public Optional<ScopeNode> retrieveRootScope() {
-		Facade rootFacade = new Facade(
-				new Id(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid(), TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId().asUuidList().castToList()),
-				Type.CONCEPT,
-				calculatorService.calculateText(TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.publicId()));
-		boolean isLeaf = calculatorService.calculateChildren(rootFacade).isEmpty();
-		return Optional.of(new ScopeNode(rootFacade, isLeaf));
-	}
-
-	public Optional<ScopeNode> buildScopeNode(Facade facade) {
-		boolean isLeaf = calculatorService.calculateChildren(facade).isEmpty();
-		return Optional.of(new ScopeNode(facade, isLeaf));
-	}
-
-	public Optional<List<ScopeNode>> retrieveChildren(Facade facade) {
-		return Optional.of(calculatorService.calculateChildren(facade).stream()
-				.map(fac -> new ScopeNode(fac, calculatorService.calculateChildren(fac).isEmpty()))
-				.toList());
-	}
-
-	public Optional<List<ScopeNode>> retrieveParents(Facade facade) {
-		return Optional.of(calculatorService.calculateParents(facade).stream()
-				.map(fac -> new ScopeNode(fac, calculatorService.calculateChildren(fac).isEmpty()))
-				.toList());
-	}
-
-	public Optional<Integer> retrieveDescendantCount(Facade facade) {
-		return Optional.of(calculatorService.calculateDescendants(facade).size());
 	}
 
 }

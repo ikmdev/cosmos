@@ -3,7 +3,10 @@ package dev.ikm.server.cosmos.constellation;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
+
+import dev.ikm.server.cosmos.ike.Facade;
 
 public record ConstellationEntity(
 		UUID id,
@@ -11,6 +14,8 @@ public record ConstellationEntity(
 		Phase phase,
 		Step step,
 		String name,
+		Set<Facade> scopes,
+		String portalPrompt,
 		long concepts,
 		long semantics,
 		long patterns,
@@ -18,15 +23,19 @@ public record ConstellationEntity(
 		Instant completed) implements Serializable {
 
 	public ConstellationEntity with(Phase phase) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, step, name, scopes, portalPrompt, concepts, semantics, patterns, created, completed);
+	}
+
+	public ConstellationEntity with(Step step) {
+		return new ConstellationEntity(id, observatoryId, phase, step, name, scopes, portalPrompt, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(Instant completed) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, step, name, scopes, portalPrompt, concepts, semantics, patterns, created, completed);
 	}
 
 	public ConstellationEntity with(long concepts, long semantics, long patterns) {
-		return new ConstellationEntity(id, observatoryId, phase, step, name, concepts, semantics, patterns, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, step, name, scopes, portalPrompt, concepts, semantics, patterns, created, completed);
 	}
 
 	public boolean isCompleted() {

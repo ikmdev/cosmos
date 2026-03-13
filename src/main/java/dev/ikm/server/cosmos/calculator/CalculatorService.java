@@ -65,7 +65,6 @@ public class CalculatorService {
 					LanguageCoordinate.US_ENG_REG,
 					NavigationCoordinate.INFERRED,
 					Set.of(),
-					Set.of(),
 					Set.of());
 			observatoryRepository.createObservatory(observatoryEntity);
 		}

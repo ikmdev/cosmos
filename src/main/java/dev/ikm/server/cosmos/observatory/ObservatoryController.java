@@ -1,14 +1,11 @@
 package dev.ikm.server.cosmos.observatory;
 
-import dev.ikm.server.cosmos.ike.Facade;
-import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.Set;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,9 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ObservatoryController {
@@ -30,8 +27,6 @@ public class ObservatoryController {
 
 	private final ObservatoryService observatoryService;
 
-
-	@Autowired
 	public ObservatoryController(ObservatoryService observatoryService) {
 		this.observatoryService = observatoryService;
 	}
@@ -44,7 +39,6 @@ public class ObservatoryController {
 				null,
 				null,
 				Set.of(),
-				Set.of(),
 				Set.of()));
 
 		// Add data needed to render the form's select options
@@ -52,12 +46,6 @@ public class ObservatoryController {
 		observatoryService.retrieveLanguages().ifPresent(languageCoordinates -> model.addAttribute("languageCoordinates", languageCoordinates));
 		observatoryService.retrieveNavigations().ifPresent(navigationCoordinates -> model.addAttribute("navigationCoordinates", navigationCoordinates));
 		observatoryService.retrieveModules().ifPresent(modules -> model.addAttribute("modules", modules));
-
-		// Add data for the initial scope tree view
-		observatoryService.retrieveRootScope().ifPresent(scope -> {
-			model.addAttribute("scope", scope);
-			observatoryService.retrieveChildren(scope.facade()).ifPresent(children -> model.addAttribute("children", children));
-		});
 	}
 
 	@HxRequest
@@ -117,39 +105,6 @@ public class ObservatoryController {
 		return FragmentsRendering
 				.with("fragments/layout/navigation :: observatorySelector")
 				.build();
-	}
-
-
-	@HxRequest
-	@GetMapping("/observatory/scope/search")
-	public FragmentsRendering getSearchResults(
-			@RequestParam(value = "query", required = false, defaultValue = "") String query,
-			@PageableDefault(size = 10, page = 0) Pageable pageable,
-			Model model) {
-		observatoryService.search(query, pageable).ifPresent(searchResults -> model.addAttribute("scopeSearchResultsPage", searchResults));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
-	}
-
-
-	@HxRequest
-	@GetMapping("/observatory/scope/traverse")
-	public FragmentsRendering getTraverse(
-			@RequestParam("nid") @StringToFacade Facade scope,
-			Model model) {
-		observatoryService.buildScopeNode(scope).ifPresent(scopeNode -> model.addAttribute("scope", scopeNode));
-		observatoryService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
-		observatoryService.retrieveParents(scope).ifPresent(parents -> model.addAttribute("parents", parents));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
-	}
-
-	@HxRequest
-	@PostMapping("/observatory/scope/add")
-	public FragmentsRendering addScope(
-			@RequestParam("nid") @StringToFacade Facade scope,
-			Model model) {
-		model.addAttribute("item", scope);
-		observatoryService.retrieveDescendantCount(scope).ifPresent(count -> model.addAttribute("descendantCount", count));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-list-item :: scope-list-item").build();
 	}
 
 }
