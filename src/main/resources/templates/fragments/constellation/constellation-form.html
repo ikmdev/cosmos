@@ -6,7 +6,7 @@
 </head>
 
 <body>
-	<form th:fragment="constellation-form" x-data @htmx:after-request="if($event.detail.successful) $el.reset()"
+	<form th:fragment="constellation-form" x-data="{ easymde: null }" @htmx:after-request="if($event.detail.successful) { $el.reset(); if (easymde) easymde.value(''); }"
 		action="#" th:action="@{/constellation}" th:object="${constellationForm}" method="post" hx-post="/constellation"
 		hx-target="#constellation-table-body" hx-swap="afterbegin" hx-trigger="submit">
 		<div class="mb-3">
@@ -16,8 +16,8 @@
 		</div>
 		<div class="mb-3">
 			<label for="portalPromptInput">Portal Prompt</label>
-			<input th:field="*{portalPrompt}" type="text" class="form-control" id="portalPromptInput"
-				placeholder="Optional prompt for the constellation's portal" autocomplete="off">
+			<textarea th:field="*{portalPrompt}" class="form-control" id="portalPromptInput" x-init="easymde = new EasyMDE({ element: $el, forceSync: true, spellChecker: false, minHeight: '100px' })"
+				placeholder="Optional prompt for the constellation's portal" rows="3"></textarea>
 		</div>
 		<div class="mb-3">
 			<label for="includedScopesSelect">Included Scopes</label>
@@ -48,7 +48,7 @@
 				<div class="col-md-4">
 					<div id="scope-tree-container">
 						<th:block
-							th:replace="~{fragments/observatory/observatory-scope-tree :: scope-tree(scope=${scope}, children=${children})}">
+							th:replace="~{fragments/constellation/constellation-scope-tree :: scope-tree(scope=${scope}, children=${children})}">
 						</th:block>
 					</div>
 				</div>

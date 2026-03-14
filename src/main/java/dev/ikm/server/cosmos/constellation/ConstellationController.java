@@ -98,7 +98,7 @@ public class ConstellationController {
 			Model model) {
 		constellationService.search(query, pageable)
 				.ifPresent(searchResults -> model.addAttribute("scopeSearchResultsPage", searchResults));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-search :: search-results-list").build();
+		return FragmentsRendering.with("fragments/constellation/constellation-scope-search :: search-results-list").build();
 	}
 
 	@HxRequest
@@ -109,7 +109,7 @@ public class ConstellationController {
 		constellationService.buildScopeNode(scope).ifPresent(scopeNode -> model.addAttribute("scope", scopeNode));
 		constellationService.retrieveChildren(scope).ifPresent(children -> model.addAttribute("children", children));
 		constellationService.retrieveParents(scope).ifPresent(parents -> model.addAttribute("parents", parents));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-tree :: scope-tree").build();
+		return FragmentsRendering.with("fragments/constellation/constellation-scope-tree :: scope-tree").build();
 	}
 
 	@HxRequest
@@ -120,7 +120,7 @@ public class ConstellationController {
 		model.addAttribute("item", scope);
 		constellationService.retrieveDescendantCount(scope)
 				.ifPresent(count -> model.addAttribute("descendantCount", count));
-		return FragmentsRendering.with("fragments/observatory/observatory-scope-list-item :: scope-list-item").build();
+		return FragmentsRendering.with("fragments/constellation/constellation-scope-list-item :: scope-list-item").build();
 	}
 
 	@HxRequest
