@@ -27,10 +27,11 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <button class="dropdown-item"
+                            <button type="button" class="dropdown-item"
                                     th:attr="hx-post=@{/constellation/scope/add(nid=${parent.facade.id.nid})}"
                                     hx-target="#includedScopeContainer"
-                                    hx-swap="beforeend">
+                                    hx-swap="beforeend"
+                                    hx-indicator="#scope-activity-indicator">
                                 <i class="bi bi-plus-circle me-2"></i>Add Scope
                             </button>
                         </li>
@@ -52,10 +53,11 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <button class="dropdown-item"
+                            <button type="button" class="dropdown-item"
                                     th:attr="hx-post=@{/constellation/scope/add(nid=${scope.facade.id.nid})}"
                                     hx-target="#includedScopeContainer"
-                                    hx-swap="beforeend">
+                                    hx-swap="beforeend"
+                                    hx-indicator="#scope-activity-indicator">
                                 <i class="bi bi-plus-circle me-2"></i>Add Scope
                             </button>
                         </li>
@@ -83,10 +85,11 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="dropdown-item"
+                                <button type="button" class="dropdown-item"
                                         th:attr="hx-post=@{/constellation/scope/add(nid=${child.facade.id.nid})}"
                                         hx-target="#includedScopeContainer"
-                                        hx-swap="beforeend">
+                                        hx-swap="beforeend"
+                                        hx-indicator="#scope-activity-indicator">
                                     <i class="bi bi-plus-circle me-2"></i>Add Scope
                                 </button>
                             </li>
