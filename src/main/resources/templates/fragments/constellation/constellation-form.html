@@ -6,7 +6,17 @@
 </head>
 
 <body>
-	<form th:fragment="constellation-form" id="constellation-form" x-data="{ easymde: null }" @htmx:after-request="if($event.detail.successful && $event.detail.elt.id === 'constellation-form') { $el.reset(); if (easymde) easymde.value(''); }"
+	<form th:fragment="constellation-form" id="constellation-form" th:data-root-id="${rootId}" x-data="{ easymde: null }" @htmx:after-request="if($event.detail.successful && $event.detail.elt.id === 'constellation-form') { 
+			$el.reset(); 
+			if (easymde) easymde.value(''); 
+			document.querySelectorAll('#includedScopeContainer li:not(.scope-list-placeholder)').forEach(e => e.remove());
+			document.querySelectorAll('#scope-search-results li:not(.search-placeholder)').forEach(e => e.remove());
+			htmx.ajax('GET', '/constellation/scope/traverse?nid=' + $el.dataset.rootId, '#scope-tree-container');
+			const collapseEl = document.getElementById('createConstellationCollapse');
+			if (collapseEl) {
+				bootstrap.Collapse.getOrCreateInstance(collapseEl).hide();
+			}
+		}"
 		action="#" th:action="@{/constellation}" th:object="${constellationForm}" method="post" hx-post="/constellation"
 		hx-target="#constellation-table-body" hx-swap="afterbegin" hx-trigger="submit">
 		<style>

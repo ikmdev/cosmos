@@ -3,6 +3,7 @@ package dev.ikm.server.cosmos.constellation;
 import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.observatory.StringToFacade;
+import dev.ikm.tinkar.terms.TinkarTermV2;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,6 @@ public class ConstellationController {
 	private final ConstellationService constellationService;
 	private final CalculatorService calculatorService;
 
-	@Autowired
 	public ConstellationController(ConstellationService constellationService, CalculatorService calculatorService) {
 		this.constellationService = constellationService;
 		this.calculatorService = calculatorService;
@@ -50,6 +50,7 @@ public class ConstellationController {
 			model.addAttribute("scope", scope);
 			constellationService.retrieveChildren(scope.facade()).ifPresent(children -> model.addAttribute("children", children));
 		});
+		model.addAttribute("rootId", TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid());
 	}
 
 	@GetMapping("/constellation")
