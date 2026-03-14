@@ -10,7 +10,6 @@ public record Constellation(
 		UUID id,
 		UUID observatoryId,
 		String phase,
-		String step,
 		String name,
 		@StringToFacade Set<Facade> scopes,
 		String portalPrompt,

@@ -35,7 +35,6 @@ public class ConstellationService {
 	private final ObservatoryService observatoryService;
 	private final SearchService searchService;
 
-	
 	public ConstellationService(ConstellationRepository constellationRepository, ChartingService chartingService,
 			CalculatorService calculatorService,
 			ObservatoryService observatoryService, SearchService searchService) {
@@ -54,25 +53,21 @@ public class ConstellationService {
 				id,
 				observatoryId,
 				Phase.QUEUED,
-				Step.PROCESS_CONCEPTS,
 				constellationForm.name(),
 				constellationForm.selectedIncludedScopes(),
 				constellationForm.portalPrompt(),
-				0,
-				0,
 				0,
 				created,
 				null);
 		constellationRepository.createConstellation(constellationEntity);
 
 		// Start the charting process
-		startCharting(id);
+		startCharting(id, constellationForm.selectedIncludedScopes());
 
 		return Optional.of(new Constellation(
 				id,
 				observatoryId,
 				constellationEntity.phase().display(),
-				constellationEntity.step().getDisplay(),
 				constellationForm.name(),
 				constellationForm.selectedIncludedScopes(),
 				constellationForm.portalPrompt(),
@@ -106,7 +101,7 @@ public class ConstellationService {
 
 	public void removeConstellation(UUID id) {
 		chartingService
-				.submitChartingJob(new Chart(Action.DELETE, id, null, Set.of(), Set.of(), Set.of(), null, null, null));
+				.submitChartingJob(new Chart(Action.DELETE, id, Set.of(), Set.of(), Set.of(), null, null, null));
 		constellationRepository.deleteConstellation(id);
 	}
 
@@ -115,12 +110,12 @@ public class ConstellationService {
 		return Optional.of(mapEntityToDto(constellationEntity));
 	}
 
-	private void startCharting(UUID constellationId) {
+	private void startCharting(UUID constellationId, Set<Facade> includedScopes) {
 		// Synchronously update the phase to give the user immediate feedback.
 		constellationRepository.updatePhase(constellationId, Phase.QUEUED);
 		UUID observatoryId = calculatorService.getObservatoryId();
 		Observatory observatory = observatoryService.retrieveObservatory(observatoryId).orElseThrow();
-		Chart chart = new Chart(Action.CREATE, constellationId, observatoryId, Set.of(), //TODO - fix me
+		Chart chart = new Chart(Action.CREATE, constellationId, includedScopes,
 				observatory.includedModules(), observatory.excludedModules(),
 				calculatorService.getStampCalculator(), calculatorService.getLanguageCalculator(),
 				calculatorService.getNavigationCalculator());
@@ -129,10 +124,6 @@ public class ConstellationService {
 
 	public void changeConstellationPhase(UUID id, Phase phase) {
 		constellationRepository.updatePhase(id, phase);
-	}
-
-	public void addToConceptCount(UUID id, int count) {
-		constellationRepository.updateConceptCount(id, count);
 	}
 
 	private String formatDuration(Duration duration) {
@@ -150,12 +141,11 @@ public class ConstellationService {
 				entity.id(),
 				entity.observatoryId(),
 				entity.phase().display(),
-				entity.step().getDisplay(),
 				entity.name(),
 				entity.scopes(),
 				entity.portalPrompt(),
 				formatter.format(entity.created()),
-				entity.total(),
+				entity.processed(),
 				formatDuration(entity.getDuration()),
 				entity.isCompleted());
 	}
@@ -168,7 +158,8 @@ public class ConstellationService {
 				facade -> facade.type() == Type.CONCEPT && !calculatorService.calculateDescendants(facade).isEmpty()));
 	}
 
-	public Optional<org.springframework.data.domain.Page<Facade>> search(String query, org.springframework.data.domain.Pageable pageable) {
+	public Optional<org.springframework.data.domain.Page<Facade>> search(String query,
+			org.springframework.data.domain.Pageable pageable) {
 		return Optional.of(searchService.search(
 				query,
 				pageable,

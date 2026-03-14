@@ -13,7 +13,6 @@
 
         <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id}">
             <td th:text="${constellation.phase}"></td>
-            <td th:text="${constellation.step}"></td>
             <td th:text="${constellation.name}"></td>
              <td>
                 <th:block th:each="scope : ${constellation.scopes}">

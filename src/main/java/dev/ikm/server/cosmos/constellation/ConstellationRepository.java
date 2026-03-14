@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import dev.ikm.server.cosmos.database.CosmosDatabaseConfig;
@@ -14,7 +13,6 @@ public class ConstellationRepository {
 
 	private final CosmosDatabaseConfig cosmosDatabaseConfig;
 
-	@Autowired
 	public ConstellationRepository(CosmosDatabaseConfig cosmosDatabaseConfig) {
 		this.cosmosDatabaseConfig = cosmosDatabaseConfig;
 	}
@@ -50,21 +48,12 @@ public class ConstellationRepository {
 		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(phase));
 	}
 
-	public void updateConceptCount(UUID id, long count) {
+	public void updateProgress(UUID id, int progress) {
 		ConstellationEntity constellationEntity = readConstellation(id);
-		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(count, 0, 0));
+		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(progress));
 	}
 
-	public void updateSemanticCount(UUID id, long count) {
-		ConstellationEntity constellationEntity = readConstellation(id);
-		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(0, count, 0));
-	}
-
-	public void updatePatternCount(UUID id, long count) {
-		ConstellationEntity constellationEntity = readConstellation(id);
-		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(0, 0, count));
-	}
-
+	
 	public void updateCompleted(UUID id, Instant instant) {
 		ConstellationEntity constellationEntity = readConstellation(id);
 		cosmosDatabaseConfig.getConstellationDB().put(id, constellationEntity.with(instant));
