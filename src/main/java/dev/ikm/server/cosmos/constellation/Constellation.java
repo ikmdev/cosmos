@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.observatory.StringToFacade;
 
 public record Constellation(
 		UUID id,
@@ -11,7 +12,7 @@ public record Constellation(
 		String phase,
 		String step,
 		String name,
-		Set<Facade> scopes,
+		@StringToFacade Set<Facade> scopes,
 		String portalPrompt,
 		String created,
 		long processed,
