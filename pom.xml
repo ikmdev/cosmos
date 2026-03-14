@@ -64,7 +64,7 @@
 		<protobuf-java.version>4.30.2-r2</protobuf-java.version>
 
 		<!-- Spring -->
-		<spring-boot.version>3.5.5</spring-boot.version>
+		<spring-boot.version>3.5.11</spring-boot.version>
 		<spring-data-bom.version>2024.1.5</spring-data-bom.version>
 		<thymeleaf-layout-dialect.version>3.4.0</thymeleaf-layout-dialect.version>
 		<htmx-spring-boot-thymeleaf.version>4.0.1</htmx-spring-boot-thymeleaf.version>

@@ -1,13 +1,10 @@
 package dev.ikm.server.cosmos.constellation;
 
-import dev.ikm.server.cosmos.calculator.CalculatorService;
-import dev.ikm.server.cosmos.ike.Facade;
-import dev.ikm.server.cosmos.observatory.StringToFacade;
-import dev.ikm.tinkar.terms.TinkarTermV2;
-import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
+import java.util.Set;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -21,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.FragmentsRendering;
 
-import java.util.Set;
-import java.util.UUID;
+import dev.ikm.server.cosmos.calculator.CalculatorService;
+import dev.ikm.server.cosmos.ike.Facade;
+import dev.ikm.server.cosmos.observatory.StringToFacade;
+import dev.ikm.tinkar.terms.TinkarTermV2;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 
 @Controller
 public class ConstellationController {
