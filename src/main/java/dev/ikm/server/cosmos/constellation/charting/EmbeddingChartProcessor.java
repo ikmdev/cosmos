@@ -159,3 +159,4 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		chartingContext.progressUpdate().accept(chartingContext.batchSize());
 	}
 }
+	
