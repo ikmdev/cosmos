@@ -1,9 +1,11 @@
 package dev.ikm.server.cosmos.constellation.charting;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
+import dev.ikm.tinkar.terms.TinkarTerm;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
@@ -75,18 +78,37 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		// Generate a descriptive name for the embedding based on the concept's
 		// attributes
 		StringBuilder nameBuilder = new StringBuilder();
-		nameBuilder.append("Concept: " + generateConcept(nid, chartingContext)).append(". ");
-		nameBuilder.append("Category: " + generateCategory(nid, chartingContext)).append(". ");
-		nameBuilder.append("Synonyms: " + generateSynonyms(nid, chartingContext)).append(". ");
-		nameBuilder.append("Description: " + generateDescription(nid, chartingContext)).append(". ");
-		nameBuilder.append("Available Semantic Features: " + generateSemanticFeatures(nid, chartingContext))
-				.append(". ");
+		String conceptContext = generateConcept(nid, chartingContext);
+		String categoryContext = generateCategory(nid, chartingContext);
+		String synonymsContext = generateSynonyms(nid, chartingContext);
+		String descriptionContext = generateDescription(nid, chartingContext);
+		Set<String> semanticFeaturesContext = generateSemanticFeatures(nid, chartingContext);
+
+		if (!conceptContext.isEmpty()) {
+			nameBuilder.append("Concept: " + conceptContext).append(". ");
+		}
+		if (!categoryContext.isEmpty()) {
+			nameBuilder.append("Category: " + categoryContext).append(". ");
+		}
+		if (!synonymsContext.isEmpty()) {
+			nameBuilder.append("Synonyms: " + synonymsContext).append(". ");
+		}
+		if (!descriptionContext.isEmpty()) {
+			nameBuilder.append("Description: " + descriptionContext).append(". ");
+		}
+		if (!semanticFeaturesContext.isEmpty()) {
+			nameBuilder.append("Available Semantic Features:");
+			semanticFeaturesContext.forEach(feature -> {
+				nameBuilder.append(" " + feature);
+			});
+		}
+
 		// Create metadata for the embedding - this will help to filter based on
 		// constellation used in prompts
 		Metadata metadata = Metadata.from(Map.of(
 				"id", nid,
 				"constellationId", constelationId.toString()));
-		return new EmbeddingData(TextSegment.from(nameBuilder.toString()), metadata);
+		return new EmbeddingData(TextSegment.from(nameBuilder.toString().substring(0, nameBuilder.toString().length())), metadata);
 	}
 
 	private String generateConcept(int nid, ChartingContext chartingContext) {
@@ -98,11 +120,9 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		IntIdSet intIdSet = chartingContext.chart().navigationCalculator().ancestorsOf(nid);
 		int[] nids = intIdSet.toArray();
 
-		for (int i = 0; i < nids.length && i < 4; i++) {
-			if (i != TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid()) {
-				categoryBuilder.append(
-						chartingContext.chart().languageCalculator().getDescriptionTextOrNid(nids[i]))
-						.append(", ");
+		for (int i = 0; i < nids.length && i < 3; i++) {
+			if (nids[i] != TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid()) {
+				categoryBuilder.append(chartingContext.chart().languageCalculator().getDescriptionTextOrNid(nids[i])).append(", ");
 			}
 		}
 
@@ -125,8 +145,8 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		return "";
 	}
 
-	private String generateSemanticFeatures(int nid, ChartingContext chartingContext) {
-		StringBuilder semanticFeaturesBuilder = new StringBuilder();
+	private Set<String> generateSemanticFeatures(int nid, ChartingContext chartingContext) {
+		Set<String> semanticFeaturesContext = new HashSet<>();
 		PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
 			Latest<SemanticEntityVersion> latestSemanticEntityVersion = chartingContext.chart().stampCalculator()
 					.latest(semanticNid);
@@ -140,11 +160,12 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 							.getDescriptionTextOrNid(patternEntityVersion.nid());
 					String purpose = chartingContext.chart().languageCalculator()
 							.getDescriptionTextOrNid(patternEntityVersion.semanticPurposeNid());
-					semanticFeaturesBuilder.append(semanticName + " (Provides " + purpose + "), ");
+					semanticFeaturesContext.add(semanticName + " which provides " + purpose + " data.");
 				}
 			}
 		});
-		return semanticFeaturesBuilder.toString().substring(0, semanticFeaturesBuilder.length() - 2);
+		// return semanticFeaturesBuilder.toString().substring(0, semanticFeaturesBuilder.length() - 2);
+		return semanticFeaturesContext;
 	}
 
 	private void processBatch(List<EmbeddingData> embeddingBatch, ChartingContext chartingContext) {
@@ -159,4 +180,3 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		chartingContext.progressUpdate().accept(chartingContext.batchSize());
 	}
 }
-	
