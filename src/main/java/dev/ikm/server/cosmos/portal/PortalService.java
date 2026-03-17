@@ -27,10 +27,10 @@ public class PortalService {
 		this.htmlRenderer = HtmlRenderer.builder().build();
 	}
 
-	public String converse(String sessionId, String userMessage, MultipartFile userAttachment, UUID constellationId) {
+	public String converse(String sessionId, String userMessage, String attachedData, UUID constellationId) {
 		ConstellationEntity constellationEntity = constellationDB.get(constellationId);
 
-		String aiResponse = cosmosAgent.chat(sessionId, constellationEntity.portalPrompt(), userMessage);
+		String aiResponse = cosmosAgent.chat(sessionId, constellationEntity.portalPrompt(), attachedData, userMessage);
 		Node markdownDocument = markdownParser.parse(aiResponse);
 		return htmlRenderer.render(markdownDocument);
 	}

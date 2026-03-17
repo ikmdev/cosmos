@@ -1,5 +1,6 @@
 package dev.ikm.server.cosmos.portal;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -34,7 +35,8 @@ public class PortalController {
 		model.addAttribute("titleDisplayName", "Portal");
 		model.addAttribute("footerText", "Gateway to the Cosmos AI");
 		model.addAttribute("sessionId", UUID.randomUUID());
-		constellationService.retrieveAllConstellations().ifPresent(constelations -> model.addAttribute("constellations", constelations));
+		constellationService.retrieveAllConstellations()
+				.ifPresent(constelations -> model.addAttribute("constellations", constelations));
 	}
 
 	@GetMapping("/portal")
@@ -64,7 +66,6 @@ public class PortalController {
 		boolean hasMessage = message != null && !message.isBlank();
 		boolean hasFile = file != null && !file.isEmpty();
 
-
 		// The client-side script should prevent empty submissions, but we validate
 		// again.
 		if ((!hasMessage && !hasFile) || constellationId == null) {
@@ -74,7 +75,24 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		String responseHtml = chatService.converse(sessionId.toString(), message, file, constellationId);
+		String fileData = "";
+
+		// If a file was attached, extract the text
+		if (file != null && !file.isEmpty()) {
+			try {
+				fileData = new String(file.getBytes(), StandardCharsets.UTF_8);
+				// 2. Safely truncate if it exceeds the limit
+				int maxLength = 50000;
+				if (fileData.length() > maxLength) {
+					fileData = fileData.substring(0, maxLength)
+							+ "\n\n... [SYSTEM NOTE: File truncated due to context size limits.]";
+				}
+			} catch (Exception e) {
+				return "System Error: Could not read the uploaded file.";
+			}
+		}
+
+		String responseHtml = chatService.converse(sessionId.toString(), message, fileData, constellationId);
 		model.addAttribute("responseMessage", responseHtml);
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
