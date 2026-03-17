@@ -76,24 +76,20 @@
                     <p class="lead text-muted">AI prompt style interaction with the cosmos.</p>
                 </div>
                 <div>
-                    <div class="form-check form-switch d-flex align-items-center">
-                        <input class="form-check-input" type="checkbox" role="switch" id="constellation-integration-toggle" name="constellationIntegrationToggle">
-                        <label class="form-check-label ms-2" for="constellation-integration-toggle">
-                            <i class="bi bi-plug-fill me-1"></i> Integrate Constellation
-                        </label>
-                    </div>
+                    <select class="form-select" id="constellationId" name="constellationId" aria-label="Select Constellation">
+                        <option value="" selected>Select a Constellation...</option>
+                        <option th:each="constellation : ${constellations}" 
+                                th:value="${constellation.id}" 
+                                th:text="${constellation.name}">
+                        </option>
+                    </select>
                 </div>
             </div>
 
             <div class="chat-container bg-white shadow-sm">
                 <!-- Message Display Area -->
                 <div class="chat-messages" id="chat-messages">
-                    <!-- Example Bot Message -->
-                    <div class="d-flex mb-3 message-bot">
-                        <div class="p-3 message-content">
-                            <p class="mb-0">Hello! How can I assist you today? You can ask me questions or upload a file for analysis.</p>
-                        </div>
-                    </div>
+                   
                     <!-- HTMX indicator for chat response, will be shown during request -->
                     <div id="chat-indicator" class="htmx-indicator d-flex mb-3 message-bot">
                         <div class="p-3 message-content">
@@ -116,12 +112,12 @@
                         </span>
                     </div>
                     <form id="chat-form"
-                          hx-post="/portal/chat"
+                          th:attr="hx-post=@{/portal/chat/{id}(id=${sessionId})}"
                           hx-target="#chat-indicator"
                           hx-swap="outerHTML"
                           hx-indicator="#chat-indicator"
                           hx-encoding="multipart/form-data"
-                          hx-include="#constellation-integration-toggle">
+                          hx-include="#constellationId">
                         <div class="input-group">
                             <input id="chat-input" name="message" type="text" class="form-control form-control-lg"
                                    placeholder="Type your message here..." aria-label="Chat message input" autofocus>

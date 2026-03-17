@@ -13,5 +13,9 @@ public interface CosmosAgent {
             @MemoryId String sessionId,
             @V("custom_system_prompt") String systemPrompt,
             @UserMessage String userMessage);
+    
+    String chat(
+            @MemoryId String sessionId,
+            @UserMessage String userMessage);
 
 }

@@ -33,6 +33,7 @@ public class PortalController {
 		model.addAttribute("activePage", "portal");
 		model.addAttribute("titleDisplayName", "Portal");
 		model.addAttribute("footerText", "Gateway to the Cosmos AI");
+		model.addAttribute("sessionId", UUID.randomUUID());
 		constellationService.retrieveAllConstellations().ifPresent(constelations -> model.addAttribute("constellations", constelations));
 	}
 
@@ -55,7 +56,7 @@ public class PortalController {
 	}
 
 	@PostMapping("/portal/chat/{sessionId}")
-	public String postChatMessage(@PathVariable String sessionId,
+	public String postChatMessage(@PathVariable("sessionId") UUID sessionId,
 			@RequestParam(name = "message", required = false) String message,
 			@RequestParam(name = "file", required = false) MultipartFile file,
 			@RequestParam(name = "constellationId", required = false) UUID constellationId,
@@ -72,7 +73,7 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		String responseHtml = chatService.converse(sessionId, message, file, constellationId);
+		String responseHtml = chatService.converse(sessionId.toString(), message, file, constellationId);
 		model.addAttribute("responseMessage", responseHtml);
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
