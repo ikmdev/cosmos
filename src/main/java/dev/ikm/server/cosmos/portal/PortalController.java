@@ -75,25 +75,8 @@ public class PortalController {
 			return "fragments/portal/chat :: indicator-only";
 		}
 
-		String fileData = "";
-
-		// If a file was attached, extract the text
-		if (file != null && !file.isEmpty()) {
-			try {
-				fileData = new String(file.getBytes(), StandardCharsets.UTF_8);
-				// 2. Safely truncate if it exceeds the limit
-				int maxLength = 50000;
-				if (fileData.length() > maxLength) {
-					fileData = fileData.substring(0, maxLength)
-							+ "\n\n... [SYSTEM NOTE: File truncated due to context size limits.]";
-				}
-			} catch (Exception e) {
-				return "System Error: Could not read the uploaded file.";
-			}
-		}
-
-		String responseHtml = chatService.converse(sessionId.toString(), message, fileData, constellationId);
-		model.addAttribute("responseMessage", responseHtml);
+		chatService.converse(sessionId.toString(), message, file, constellationId)
+				.ifPresent(responseHtml -> model.addAttribute("responseMessage", responseHtml));
 		return "fragments/portal/chat :: bot-response-and-indicator";
 	}
 }

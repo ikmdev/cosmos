@@ -15,7 +15,6 @@ import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
-import dev.ikm.tinkar.terms.TinkarTerm;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
@@ -106,9 +105,10 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		// Create metadata for the embedding - this will help to filter based on
 		// constellation used in prompts
 		Metadata metadata = Metadata.from(Map.of(
-				"id", nid,
+				"nid", nid,
 				"constellationId", constelationId.toString()));
-		return new EmbeddingData(TextSegment.from(nameBuilder.toString().substring(0, nameBuilder.toString().length())), metadata);
+		return new EmbeddingData(TextSegment.from(nameBuilder.toString().substring(0, nameBuilder.toString().length())),
+				metadata);
 	}
 
 	private String generateConcept(int nid, ChartingContext chartingContext) {
@@ -122,7 +122,8 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 
 		for (int i = 0; i < nids.length && i < 3; i++) {
 			if (nids[i] != TinkarTermV2.INTEGRATED_KNOWLEDGE_MANAGEMENT.nid()) {
-				categoryBuilder.append(chartingContext.chart().languageCalculator().getDescriptionTextOrNid(nids[i])).append(", ");
+				categoryBuilder.append(chartingContext.chart().languageCalculator().getDescriptionTextOrNid(nids[i]))
+						.append(", ");
 			}
 		}
 
@@ -164,7 +165,8 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 				}
 			}
 		});
-		// return semanticFeaturesBuilder.toString().substring(0, semanticFeaturesBuilder.length() - 2);
+		// return semanticFeaturesBuilder.toString().substring(0,
+		// semanticFeaturesBuilder.length() - 2);
 		return semanticFeaturesContext;
 	}
 
