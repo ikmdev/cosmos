@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.ikm.server.cosmos.constellation.ConstellationEntity;
-import dev.langchain4j.data.document.parser.markdown.MarkdownDocumentParser;
 
 @Service
 public class PortalService {
@@ -18,14 +17,12 @@ public class PortalService {
 	private final CosmosAgent cosmosAgent;
 	private final ConcurrentMap<UUID, ConstellationEntity> constellationDB;
 
-	private final MarkdownDocumentParser markdownDocumentParser;
 	private final Parser markdownParser;
 	private final HtmlRenderer htmlRenderer;
 
 	public PortalService(ConcurrentMap<UUID, ConstellationEntity> constellationDB, CosmosAgent cosmosAgent) {
 		this.constellationDB = constellationDB;
 		this.cosmosAgent = cosmosAgent;
-		this.markdownDocumentParser = new MarkdownDocumentParser();
 		this.markdownParser = Parser.builder().build();
 		this.htmlRenderer = HtmlRenderer.builder().build();
 	}

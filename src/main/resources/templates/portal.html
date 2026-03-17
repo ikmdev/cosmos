@@ -142,6 +142,7 @@
                 const filePreviewArea = document.getElementById('file-preview-area');
                 const filePreviewName = document.getElementById('file-preview-name');
                 const clearFileButton = document.getElementById('clear-file-button');
+                const constellationSelect = document.getElementById('constellationId');
 
                 function scrollChatToBottom() {
                     // A small delay ensures the new content is rendered before scrolling
@@ -157,6 +158,41 @@
                         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match];
                     });
                 }
+
+                function validateChatSubmission() {
+                    const messageText = chatInput.value.trim();
+                    const file = fileInput.files[0];
+                    let isValid = true;
+
+                    if (!constellationSelect.value) {
+                        constellationSelect.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        constellationSelect.classList.remove('is-invalid');
+                    }
+
+                    if (!messageText && !file) {
+                        isValid = false;
+                    }
+
+                    return isValid;
+                }
+
+                // Prevent submission early if invalid (stops HTMX indicator flash)
+                chatForm.addEventListener('submit', function(e) {
+                    if (!validateChatSubmission()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                    }
+                });
+
+                // Remove invalid styling when the user selects a constellation
+                constellationSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        this.classList.remove('is-invalid');
+                    }
+                });
 
                 // Handle file selection to show the preview
                 fileInput.addEventListener('change', function() {
@@ -180,35 +216,31 @@
                     const messageText = chatInput.value.trim();
                     const file = fileInput.files[0];
 
-                    if (messageText || file) {
-                        const indicator = document.getElementById('chat-indicator');
-                        let userMessageContent = '';
+                    const indicator = document.getElementById('chat-indicator');
+                    let userMessageContent = '';
 
-                        if (file) {
-                            userMessageContent += `<p class="mb-1"><i class="bi bi-file-earmark-arrow-up me-1"></i><em>${escapeHTML(file.name)}</em></p>`;
-                        }
-                        if (messageText) {
-                            userMessageContent += `<p class="mb-0">${escapeHTML(messageText)}</p>`;
-                        }
-
-                        const userMessageHTML = `
-                            <div class="d-flex mb-3 message-user">
-                                <div class="p-3 message-content">
-                                    ${userMessageContent}
-                                </div>
-                            </div>
-                        `;
-
-                        // Insert the user's message right before the indicator
-                        indicator?.insertAdjacentHTML('beforebegin', userMessageHTML);
-
-                        scrollChatToBottom();
-                        chatInput.value = ''; // Clear the input field immediately
-                        fileInput.value = ''; // Clear the file input
-                        filePreviewArea.classList.add('d-none'); // Hide the preview
-                    } else {
-                        evt.preventDefault(); // Prevent sending an empty message
+                    if (file) {
+                        userMessageContent += `<p class="mb-1"><i class="bi bi-file-earmark-arrow-up me-1"></i><em>${escapeHTML(file.name)}</em></p>`;
                     }
+                    if (messageText) {
+                        userMessageContent += `<p class="mb-0">${escapeHTML(messageText)}</p>`;
+                    }
+
+                    const userMessageHTML = `
+                        <div class="d-flex mb-3 message-user">
+                            <div class="p-3 message-content">
+                                ${userMessageContent}
+                            </div>
+                        </div>
+                    `;
+
+                    // Insert the user's message right before the indicator
+                    indicator?.insertAdjacentHTML('beforebegin', userMessageHTML);
+
+                    scrollChatToBottom();
+                    chatInput.value = ''; // Clear the input field immediately
+                    fileInput.value = ''; // Clear the file input
+                    filePreviewArea.classList.add('d-none'); // Hide the preview
                 });
 
                 // After the bot response is swapped in, scroll and focus
@@ -224,7 +256,9 @@
                 chatInput.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        htmx.trigger('#chat-form', 'submit');
+                        if (validateChatSubmission()) {
+                            htmx.trigger('#chat-form', 'submit');
+                        }
                     }
                 });
 

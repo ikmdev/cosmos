@@ -64,9 +64,10 @@ public class PortalController {
 		boolean hasMessage = message != null && !message.isBlank();
 		boolean hasFile = file != null && !file.isEmpty();
 
+
 		// The client-side script should prevent empty submissions, but we validate
 		// again.
-		if (!hasMessage && !hasFile) {
+		if ((!hasMessage && !hasFile) || constellationId == null) {
 			// If a blank message gets through, return the indicator to be swapped with
 			// itself,
 			// resulting in no visual change for the user.
