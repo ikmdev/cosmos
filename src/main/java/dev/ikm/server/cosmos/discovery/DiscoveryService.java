@@ -1,5 +1,15 @@
 package dev.ikm.server.cosmos.discovery;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import dev.ikm.server.cosmos.calculator.CalculatorService;
 import dev.ikm.server.cosmos.ike.Facade;
 import dev.ikm.server.cosmos.ike.IkeRepository;
@@ -18,14 +28,6 @@ import dev.ikm.tinkar.entity.StampEntity;
 import dev.ikm.tinkar.entity.StampEntityVersion;
 import dev.ikm.tinkar.terms.EntityFacade;
 import dev.ikm.tinkar.terms.EntityProxy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DiscoveryService {
@@ -48,9 +50,12 @@ public class DiscoveryService {
 
 		int maxResults = explorerSearchForm.maxResults() != null ? explorerSearchForm.maxResults() : 1;
 
+		Pageable pageable = PageRequest.of(0, maxResults);
+
+
 		Page<Facade> searchResults = searchService.searchConcepts(
 				explorerSearchForm.query(),
-				Pageable.ofSize(maxResults),
+				pageable,
 				SearchService.SortType.SEMANTIC_SCORE);
 
 		List<Node> nodes = searchResults.getContent().stream()

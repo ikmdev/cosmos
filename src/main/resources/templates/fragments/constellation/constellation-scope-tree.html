@@ -11,7 +11,7 @@
                 <!-- Clickable area for navigation -->
                 <div class="flex-grow-1 text-primary" style="cursor: pointer;"
                      th:data-nid="${parent.facade.id.nid}"
-                     hx-get="/observatory/scope/traverse"
+                     hx-get="/constellation/scope/traverse"
                      hx-vals="js:{nid: this.dataset.nid}"
                      hx-target="#scope-tree-container"
                      hx-swap="innerHTML"
@@ -27,10 +27,11 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <button class="dropdown-item"
-                                    th:attr="hx-post=@{/observatory/scope/add(nid=${parent.facade.id.nid})}"
+                            <button type="button" class="dropdown-item"
+                                    th:attr="hx-post=@{/constellation/scope/add(nid=${parent.facade.id.nid})}"
                                     hx-target="#includedScopeContainer"
-                                    hx-swap="beforeend">
+                                    hx-swap="beforeend"
+                                    hx-indicator="#scope-activity-indicator">
                                 <i class="bi bi-plus-circle me-2"></i>Add Scope
                             </button>
                         </li>
@@ -52,10 +53,11 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <button class="dropdown-item"
-                                    th:attr="hx-post=@{/observatory/scope/add(nid=${scope.facade.id.nid})}"
+                            <button type="button" class="dropdown-item"
+                                    th:attr="hx-post=@{/constellation/scope/add(nid=${scope.facade.id.nid})}"
                                     hx-target="#includedScopeContainer"
-                                    hx-swap="beforeend">
+                                    hx-swap="beforeend"
+                                    hx-indicator="#scope-activity-indicator">
                                 <i class="bi bi-plus-circle me-2"></i>Add Scope
                             </button>
                         </li>
@@ -67,7 +69,7 @@
                     <!-- Clickable area for navigation -->
                     <div class="flex-grow-1" style="cursor: pointer;" th:classappend="${!child.isLeaf ? 'text-primary' : 'text-secondary'}"
                          th:data-nid="${child.facade.id.nid}"
-                         hx-get="/observatory/scope/traverse"
+                         hx-get="/constellation/scope/traverse"
                          hx-vals="js:{nid: this.dataset.nid}"
                          hx-target="#scope-tree-container"
                          hx-swap="innerHTML"
@@ -83,10 +85,11 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="dropdown-item"
-                                        th:attr="hx-post=@{/observatory/scope/add(nid=${child.facade.id.nid})}"
+                                <button type="button" class="dropdown-item"
+                                        th:attr="hx-post=@{/constellation/scope/add(nid=${child.facade.id.nid})}"
                                         hx-target="#includedScopeContainer"
-                                        hx-swap="beforeend">
+                                        hx-swap="beforeend"
+                                        hx-indicator="#scope-activity-indicator">
                                     <i class="bi bi-plus-circle me-2"></i>Add Scope
                                 </button>
                             </li>

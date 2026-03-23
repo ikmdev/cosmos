@@ -1,26 +1,88 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Constellation Form</title>
+	<title>Constellation Form</title>
 </head>
+
 <body>
-<form th:fragment="constellation-form"
-      x-data
-      @htmx:after-request="if($event.detail.successful) $el.reset()"
-      action="#"
-      th:action="@{/constellation}"
-      th:object="${constellationForm}"
-      method="post"
-      hx-post="/constellation"
-      hx-target="#constellation-table-body"
-      hx-swap="afterbegin"
-      hx-trigger="submit">
-    <div class="mb-3">
-        <label for="nameInput">Name</label>
-        <input th:field="*{name}" type="text" class="form-control" id="nameInput"
-               placeholder="Constellation Name" autocomplete="off">
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+	<form th:fragment="constellation-form" id="constellation-form" th:data-root-id="${rootId}" x-data="{ easymde: null }" @htmx:after-request="if($event.detail.successful && $event.detail.elt.id === 'constellation-form') { 
+			$el.reset(); 
+			if (easymde) easymde.value(''); 
+			document.querySelectorAll('#includedScopeContainer li:not(.scope-list-placeholder)').forEach(e => e.remove());
+			document.querySelectorAll('#scope-search-results li:not(.search-placeholder)').forEach(e => e.remove());
+			htmx.ajax('GET', '/constellation/scope/traverse?nid=' + $el.dataset.rootId, '#scope-tree-container');
+			const collapseEl = document.getElementById('createConstellationCollapse');
+			if (collapseEl) {
+				bootstrap.Collapse.getOrCreateInstance(collapseEl).hide();
+			}
+		}"
+		action="#" th:action="@{/constellation}" th:object="${constellationForm}" method="post" hx-post="/constellation"
+		hx-target="#constellation-table-body" hx-swap="afterbegin" hx-trigger="submit">
+		<style>
+			#includedScopeContainer:has(li:not(.scope-list-placeholder)) .scope-list-placeholder {
+				display: none;
+			}
+			#scope-search-results:has(li:not(.search-placeholder)) .search-placeholder {
+				display: none;
+			}
+		</style>
+		<div class="mb-3">
+			<label for="nameInput">Name</label>
+			<input th:field="*{name}" type="text" class="form-control" id="nameInput" placeholder="Constellation Name"
+				autocomplete="off">
+		</div>
+		<div class="mb-3">
+			<label for="portalPromptInput">Portal Prompt</label>
+			<textarea th:field="*{portalPrompt}" class="form-control" id="portalPromptInput" x-init="easymde = new EasyMDE({ element: $el, forceSync: true, spellChecker: false, minHeight: '100px' })"
+				placeholder="Optional prompt for the constellation's portal" rows="3"></textarea>
+		</div>
+		<div class="mb-3">
+			<label for="includedScopesSelect">Included Scopes</label>
+			<div id="scope-activity-indicator" class="progress htmx-indicator mb-2" style="height: 5px;">
+				<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+					aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-md-6">
+					<div id="scope-search">
+						<div class="input-group">
+							<span class="input-group-text" id="scope-search-button">
+								<i class="bi bi-search"></i>
+							</span>
+							<input type="text" class="form-control" placeholder="Search scopes..." name="query"
+								aria-label="Search scopes" id="scope-search-input" hx-get="/constellation/scope/search"
+								hx-vals='{"page": "0"}' hx-trigger="keyup changed delay:600ms"
+								hx-target="#scope-search-results" hx-swap="innerHTML"
+								hx-indicator="#scope-activity-indicator">
+						</div>
+						<ul class="list-group" id="scope-search-results" style="max-height: 300px; overflow-y: auto;">
+							<li class="search-placeholder list-group-item text-muted fst-italic">
+								Start typing to search for scopes.
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div id="scope-tree-container">
+						<th:block
+							th:replace="~{fragments/constellation/constellation-scope-tree :: scope-tree(scope=${scope}, children=${children})}">
+						</th:block>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-md-12">
+					<ul id="includedScopeContainer" class="list-group" style="max-height: 300px; overflow-y: auto;">
+						<li class="scope-list-placeholder list-group-item text-muted fst-italic">
+							No scopes selected.
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<button type="submit" class="btn btn-primary">Create</button>
+	</form>
 </body>
+
 </html>

@@ -13,8 +13,35 @@
 
         <tr th:fragment="constellation-row(constellation)" th:id="${'constellation-' + constellation.id}">
             <td th:text="${constellation.phase}"></td>
-            <td th:text="${constellation.step}"></td>
             <td th:text="${constellation.name}"></td>
+             <td>
+                <th:block th:each="scope : ${constellation.scopes}">
+                    <span class="badge bg-info-subtle text-info-emphasis me-1 mb-1" th:text="${scope.name}"></span>
+                </th:block>
+            </td>
+            <td>
+                <th:block th:if="${not #strings.isEmpty(constellation.portalPrompt)}">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" th:data-bs-target="'#promptModal-' + ${constellation.id}">
+                        <i class="bi bi-filetype-md me-1"></i>View
+                    </button>
+                    
+                    <!-- Prompt Modal -->
+                    <div class="modal fade" th:id="'promptModal-' + ${constellation.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" th:text="${constellation.name + ' - Prompt'}">Portal Prompt</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body bg-light">
+                                    <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;" th:text="${constellation.portalPrompt}"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+                <span th:unless="${not #strings.isEmpty(constellation.portalPrompt)}" class="text-muted fst-italic">None</span>
+            </td>
             <td th:text="${constellation.created}"></td>
             <td th:text="${constellation.processed}"></td>
             <td th:text="${constellation.duration}"></td>
@@ -29,7 +56,7 @@
                     <ul class="dropdown-menu">
                         <!-- Actions for constellations that are not yet completed -->
                         <th:block th:if="${!constellation.isCompleted}">
-                            <li th:if="${constellation.phase() == 'Forming'}"><hr class="dropdown-divider"></li>
+                            <li th:if="${constellation.phase == 'Forming'}"><hr class="dropdown-divider"></li>
                             <li>
                                 <button class="dropdown-item"
                                         th:attr="hx-get=@{/constellations/status/{id}(id=${constellation.id})}"

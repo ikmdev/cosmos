@@ -1,4 +1,4 @@
-package dev.ikm.server.cosmos.constellation.definition;
+package dev.ikm.server.cosmos.portal.definition;
 
 import dev.ikm.tinkar.terms.EntityProxy.Concept;
 

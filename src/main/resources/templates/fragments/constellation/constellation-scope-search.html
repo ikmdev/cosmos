@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<head>
+    <title>Observatory Table Row</title>
+</head>
+
+<body>
+    <header></header>
+    <main>
+        <th:block th:fragment="search-results-list">
+            <!-- Renders the results for the current page -->
+            <li th:each="result : ${scopeSearchResultsPage.content}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                th:data-nid="${result.id.nid}" hx-get="/constellation/scope/traverse"
+                hx-vals="js:{nid: this.dataset.nid}" hx-target="#scope-tree-container" hx-swap="innerHTML"
+                hx-indicator="#scope-activity-indicator">
+
+                <span th:text="${result.name}">Search Result Text</span>
+            </li>
+
+            <!-- If there is a next page, render the 'Load More' button -->
+            <li th:if="${!scopeSearchResultsPage.last}" class="list-group-item p-0">
+                <button class="btn btn-outline-secondary w-100 border-0"
+                    th:hx-get="@{/constellation/scope/search(query=${query}, page=${scopeSearchResultsPage.number + 1})}"
+                    hx-swap="outerHTML" hx-target="closest li" hx-indicator="#scope-activity-indicator">Load
+                    More...</button>
+            </li>
+
+            <!-- If the search returned no results on the first page for a non-empty query, show a message. -->
+            <li th:if="${scopeSearchResultsPage.empty and scopeSearchResultsPage.first and query != null and !query.trim().isEmpty()}"
+                class="search-placeholder list-group-item text-muted fst-italic">
+                No scopes found for '<span th:text="${query}"></span>'.
+            </li>
+
+            <!-- If the query is empty/cleared, show the initial placeholder text. -->
+            <li th:if="${scopeSearchResultsPage.empty and (query == null or query.trim().isEmpty())}"
+                class="search-placeholder list-group-item text-muted fst-italic">
+                Start typing to search for scopes.
+            </li>
+        </th:block>
+    </main>
+</body>
+
+</html>

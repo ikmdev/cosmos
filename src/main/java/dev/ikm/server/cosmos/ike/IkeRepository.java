@@ -44,7 +44,6 @@ public class IkeRepository {
 	private final IkeDatabaseConfig ikeDatabaseConfig;
 	private final CalculatorService calculatorService;
 
-	@Autowired
 	public IkeRepository(IkeDatabaseConfig ikeDatabaseConfig, CalculatorService calculatorService) {
 		this.ikeDatabaseConfig = ikeDatabaseConfig;
 		this.calculatorService = calculatorService;

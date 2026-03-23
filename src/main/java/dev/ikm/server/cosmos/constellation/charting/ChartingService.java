@@ -1,28 +1,21 @@
 package dev.ikm.server.cosmos.constellation.charting;
 
+import java.time.Instant;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
 import dev.ikm.server.cosmos.constellation.Action;
 import dev.ikm.server.cosmos.constellation.Chart;
 import dev.ikm.server.cosmos.constellation.ConstellationRepository;
 import dev.ikm.server.cosmos.constellation.Phase;
-import dev.ikm.server.cosmos.ike.Facade;
-import dev.ikm.server.cosmos.ike.IkeRepository;
 import dev.ikm.server.cosmos.observatory.ObservatoryRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * A dedicated service for running long-running, asynchronous charting tasks.
@@ -32,28 +25,22 @@ public class ChartingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChartingService.class);
 
-	private final Neo4jClient neo4jClient;
 	private final ConstellationRepository constellationRepository;
-	private final ObservatoryRepository observatoryRepository;
-	private final IkeRepository ikeRepository;
 	private final BlockingQueue<Chart> chartingQueue;
-	private final List<ChartProcessor> chartProcessors;
+	private final EmbeddingChartProcessor embeddingChartProcessor;
+	private final DeleteChartProcessor deleteChartProcessor;
+	private final int batchSize = 100; // This can be made configurable as needed
 
 	private Thread consumerThread;
 
-
-	@Autowired
-	public ChartingService(Neo4jClient neo4jClient,
-						   ConstellationRepository constellationRepository,
-						   ObservatoryRepository observatoryRepository,
-						   IkeRepository ikeRepository,
-						   List<ChartProcessor> chartProcessors) {
-		this.neo4jClient = neo4jClient;
-		this.observatoryRepository = observatoryRepository;
+	public ChartingService(ConstellationRepository constellationRepository,
+			ObservatoryRepository observatoryRepository,
+			EmbeddingChartProcessor embeddingChartProcessor,
+			DeleteChartProcessor deleteChartProcessor) {
 		this.constellationRepository = constellationRepository;
-		this.ikeRepository = ikeRepository;
 		this.chartingQueue = new ArrayBlockingQueue<>(100); // Reduced size for local dev
-		this.chartProcessors = chartProcessors;
+		this.embeddingChartProcessor = embeddingChartProcessor;
+		this.deleteChartProcessor = deleteChartProcessor;
 	}
 
 	/**
@@ -68,18 +55,18 @@ public class ChartingService {
 				try {
 					Chart chart = chartingQueue.take(); // Blocks until an item is available
 					LOG.info("Pulled constellation {} from queue for charting.", chart.constellationId());
+
 					if (chart.action() == Action.DELETE) {
 						performChartDelete(chart);
-					} else if (chart.action() == Action.CREATE) {
-						constellationRepository.updatePhase(chart.constellationId(), Phase.CHARTING);
+					} else {
 						performCharting(chart);
 					}
-
 				} catch (InterruptedException e) {
 					LOG.warn("Charting queue consumer was interrupted.", e);
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
-					// Catching exceptions here ensures the consumer loop doesn't die if one charting process fails.
+					// Catching exceptions here ensures the consumer loop doesn't die if one
+					// charting process fails.
 					LOG.error("Unhandled exception during charting process. Continuing to next item.", e);
 				}
 			}
@@ -97,7 +84,8 @@ public class ChartingService {
 
 	/**
 	 * Asynchronously adds a constellation to the charting queue.
-	 * The @Async annotation allows the calling thread (e.g., from the controller) to return immediately.
+	 * The @Async annotation allows the calling thread (e.g., from the controller)
+	 * to return immediately.
 	 *
 	 * @param chart The ID of the constellation to chart.
 	 */
@@ -112,17 +100,6 @@ public class ChartingService {
 		}
 	}
 
-	private void performChartDelete(Chart chart) {
-		String cypherQuery = """
-				MATCH (n {constellationId: $constellationId})
-				DETACH DELETE n
-				""";
-		neo4jClient.query(cypherQuery)
-				.bind(chart.constellationId().toString())
-				.to("constellationId")
-				.run();
-	}
-
 	/**
 	 * The actual, synchronous charting logic for a single constellation.
 	 * This method is called by the single-threaded queue consumer.
@@ -130,38 +107,25 @@ public class ChartingService {
 	private void performCharting(Chart chart) {
 		LOG.info("Starting to chart constellation: {}", chart.constellationId());
 
-		//Map Facades to their descendants or concepts within "scope" of the knowledge graph
-		Map<Facade, Set<Integer>> scopedConcepts = extractConcepts(chart, chart.scopes());
+		ChartingContext chartingContext = new ChartingContext(chart, progress -> {
+			constellationRepository.updateProgress(chart.constellationId(), progress);
+			LOG.info("Charting progress for constellation {}: {}%", chart.constellationId(), progress);
+		}, batchSize); // Batch size can be adjusted as needed
 
-		//Create ChartContext and fire off ChartProcessors
-		ChartingContext chartContext = new ChartingContext(
-				chart,
-				scopedConcepts,
-				neo4jClient,
-				progressUpdate -> {
-					switch (progressUpdate.step()) {
-						case PROCESS_CONCEPTS -> constellationRepository.updateConceptCount(chart.constellationId(), progressUpdate.processedCount());
-						case PROCESS_HIERARCHY, PROCESS_SEMANTICS, PROCESS_LOGICAL_DEFINITIONS ->
-								constellationRepository.updateSemanticCount(chart.constellationId(), progressUpdate.processedCount());
-					}
-				});
-
-		//Apply ChartContext to each ChartProcessor
-		for (ChartProcessor processor : chartProcessors) {
-			processor.process(chartContext, 5_000);
-		}
+		constellationRepository.updatePhase(chart.constellationId(), Phase.CHARTING);
+		embeddingChartProcessor.process(chartingContext);
 
 		constellationRepository.updateCompleted(chart.constellationId(), Instant.now());
 		constellationRepository.updatePhase(chart.constellationId(), Phase.CHARTED);
 		LOG.info("Finished charting constellation: {}", chart.constellationId());
 	}
 
-	private Map<Facade, Set<Integer>> extractConcepts(Chart chart, Set<Facade> scopes) {
-		Map<Facade, Set<Integer>> scopedConcepts = new HashMap<>();
-		for (Facade scope : scopes) {
-			scopedConcepts.put(scope, chart.navigationCalculator().descendentsOf(scope.id().nid()).mapToSet(nid -> nid));
-		}
-		return scopedConcepts;
-	}
+	private void performChartDelete(Chart chart) {
+		LOG.info("Starting to delete charts for constellation: {}", chart.constellationId());
 
+		deleteChartProcessor.process(new ChartingContext(chart, progress -> {
+		}, batchSize));
+
+		LOG.info("Finished deleting charts for constellation: {}", chart.constellationId());
+	}
 }

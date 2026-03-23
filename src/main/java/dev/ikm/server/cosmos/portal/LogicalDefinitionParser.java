@@ -1,22 +1,22 @@
-package dev.ikm.server.cosmos.constellation.charting;
+package dev.ikm.server.cosmos.portal;
 
-import dev.ikm.server.cosmos.constellation.definition.Clause;
-import dev.ikm.server.cosmos.constellation.definition.Definition;
-import dev.ikm.server.cosmos.constellation.definition.Reference;
-import dev.ikm.server.cosmos.constellation.definition.Role;
-import dev.ikm.server.cosmos.constellation.definition.RoleGroup;
-import dev.ikm.server.cosmos.constellation.definition.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import dev.ikm.server.cosmos.portal.definition.Clause;
+import dev.ikm.server.cosmos.portal.definition.Definition;
+import dev.ikm.server.cosmos.portal.definition.Reference;
+import dev.ikm.server.cosmos.portal.definition.Role;
+import dev.ikm.server.cosmos.portal.definition.RoleGroup;
+import dev.ikm.server.cosmos.portal.definition.Type;
 import dev.ikm.tinkar.entity.graph.DiTreeEntity;
 import dev.ikm.tinkar.entity.graph.EntityVertex;
 import dev.ikm.tinkar.terms.EntityProxy.Concept;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LogicalDefinitionParser {
 
-	private final DiTreeEntity diTreeEntity;
+    private final DiTreeEntity diTreeEntity;
 
 	public LogicalDefinitionParser(DiTreeEntity diTreeEntity) {
 		this.diTreeEntity = diTreeEntity;
@@ -140,4 +140,5 @@ public class LogicalDefinitionParser {
 			throw new IllegalStateException("Unknown definition type");
 		}
 	}
+
 }
