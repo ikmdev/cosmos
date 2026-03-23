@@ -66,7 +66,6 @@ public class ContextService {
 					.queryEmbedding(queryEmbedding)
 					.filter(filter)
 					.maxResults(3) // Keep it tight for the MVP
-					.minScore(0.7) // Only return high-confidence matches
 					.build();
 			EmbeddingSearchResult<TextSegment> result = embeddingStore.search(searchRequest);
 
