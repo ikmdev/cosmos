@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import dev.ikm.server.cosmos.portal.CosmosAgent;
+import dev.ikm.server.cosmos.portal.CosmosOptimizer;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -44,4 +45,11 @@ public class AgentConfig {
 				.chatMemoryProvider(chatMemoryProvider)
 				.build();
 	}
+
+	@Bean
+    public CosmosOptimizer queryOptimizer(ChatModel chatModel) {
+        return AiServices.builder(CosmosOptimizer.class)
+                .chatModel(chatModel)
+                .build();
+    }
 }

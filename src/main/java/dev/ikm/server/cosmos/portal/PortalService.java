@@ -17,14 +17,16 @@ public class PortalService {
 	private final static Logger LOG = LoggerFactory.getLogger(PortalService.class.getName());
 
 	private final CosmosAgent cosmosAgent;
+	private final CosmosOptimizer cosmosOptimizer;
 	private final ConcurrentMap<UUID, ConstellationEntity> constellationDB;
 	private final ContextService contextService;
 	private final FormattingService formattingService;
 
 	public PortalService(ConcurrentMap<UUID, ConstellationEntity> constellationDB, CosmosAgent cosmosAgent,
-			ContextService contextService, FormattingService formattedService) {
+			CosmosOptimizer cosmosOptimizer, ContextService contextService, FormattingService formattedService) {
 		this.constellationDB = constellationDB;
 		this.cosmosAgent = cosmosAgent;
+		this.cosmosOptimizer = cosmosOptimizer;
 		this.contextService = contextService;
 		this.formattingService = formattedService;
 	}
@@ -32,17 +34,16 @@ public class PortalService {
 	public Optional<String> converse(String sessionId, String userMessage, MultipartFile uploadedFile,
 			UUID constellationId) {
 		ConstellationEntity constellationEntity = constellationDB.get(constellationId);
-		String ragContext = contextService.buildRAGContext(userMessage, constellationId);
+		String optimizedUserMessage = cosmosOptimizer.optimizeForSearch(userMessage);
+		String ragContext = contextService.buildRAGContext(optimizedUserMessage, constellationId);
 		String attachmentContext = contextService.buildAttachmentContext(uploadedFile);
-
-		LOG.info("\n" + "SessionId: {}\n\n" + "System Prompt: {}\n\n" + "RAG Context: {}\n\n"
-				+ "Attachment Context: {}\n\n" + "User Prompt: {}\n",
-				sessionId, constellationEntity.portalPrompt(), ragContext, attachmentContext,
-				userMessage);
-
 		String aiResponse = cosmosAgent.chat(sessionId, constellationEntity.portalPrompt(), ragContext,
-				attachmentContext,
-				userMessage);
+				attachmentContext, userMessage);
+		LOG.info("\n" + "SessionId: {}\n\n" + "System Prompt: {}\n\n" + "RAG Context: {}\n\n"
+				+ "Attachment Context: {}\n\n" + "User Prompt: {}\n\n" + "Optimized Prompt: {}\n\n"
+				+ "AI Response: {}\n",
+				sessionId, constellationEntity.portalPrompt(), ragContext, attachmentContext,
+				userMessage, optimizedUserMessage, aiResponse);
 		return Optional.of(formattingService.formatAIResponse(aiResponse));
 	}
 }
