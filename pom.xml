@@ -70,7 +70,9 @@
 		<htmx-spring-boot-thymeleaf.version>4.0.1</htmx-spring-boot-thymeleaf.version>
 
 		<!-- LangChain4j  -->
-		<langchain4j-bom.version>1.12.2</langchain4j-bom.version>
+		<langchain4j.version>1.12.2</langchain4j.version>
+		<langchain4j-community.version>1.12.2-beta22</langchain4j-community.version>
+		<commonmark.version>0.27.1</commonmark.version>
 
 		<!-- Misc -->
 		<jboss-threads.version>3.9.1</jboss-threads.version>
@@ -150,6 +152,33 @@
 				<groupId>io.github.wimdeblauwe</groupId>
 				<artifactId>htmx-spring-boot-thymeleaf</artifactId>
 				<version>${htmx-spring-boot-thymeleaf.version}</version>
+			</dependency>
+
+			<!-- Langchain4j -->
+			<dependency>
+				<groupId>dev.langchain4j</groupId>
+				<artifactId>langchain4j-ollama</artifactId>
+				<version>${langchain4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.langchain4j</groupId>
+				<artifactId>langchain4j</artifactId>
+				<version>${langchain4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.langchain4j</groupId>
+				<artifactId>langchain4j-document-parser-markdown</artifactId>
+				<version>${langchain4j-community.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.langchain4j</groupId>
+				<artifactId>langchain4j-community-lucene</artifactId>
+				<version>${langchain4j-community.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.commonmark</groupId>
+				<artifactId>commonmark</artifactId>
+				<version>${commonmark.version}</version>
 			</dependency>
 
 			<!-- Misc. -->
@@ -245,27 +274,22 @@
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-ollama</artifactId>
-			<version>1.12.2</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j</artifactId>
-			<version>1.12.2</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-document-parser-markdown</artifactId>
-			<version>1.12.2-beta22</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-community-lucene</artifactId>
-			<version>1.12.1-beta21</version>
 		</dependency>
 		<dependency>
 			<groupId>org.commonmark</groupId>
 			<artifactId>commonmark</artifactId>
-			<version>0.27.1</version>
 		</dependency>
 
 		<!-- Misc. -->
