@@ -1,5 +1,6 @@
 package dev.ikm.server.cosmos.constellation.charting;
 
+import dev.ikm.server.cosmos.calculator.CalculatorService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,8 +14,10 @@ import org.springframework.stereotype.Component;
 import dev.ikm.tinkar.common.id.IntIdSet;
 import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
+import dev.ikm.tinkar.entity.Field;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
+import dev.ikm.tinkar.terms.EntityProxy;
 import dev.ikm.tinkar.terms.TinkarTermV2;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
@@ -34,15 +37,19 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 @Component
 public class EmbeddingChartProcessor implements ChartProcessor {
 
+	private final CalculatorService calculatorService;
+
 	private record EmbeddingData(TextSegment name, Metadata metadata) {
 	}
 
 	private final EmbeddingStore<TextSegment> embeddingStore;
 	private final EmbeddingModel embeddingModel;
 
-	public EmbeddingChartProcessor(EmbeddingStore<TextSegment> embeddingStore, EmbeddingModel embeddingModel) {
+	public EmbeddingChartProcessor(EmbeddingStore<TextSegment> embeddingStore, EmbeddingModel embeddingModel,
+			CalculatorService calculatorService) {
 		this.embeddingStore = embeddingStore;
 		this.embeddingModel = embeddingModel;
+		this.calculatorService = calculatorService;
 	}
 
 	@Override
@@ -81,7 +88,7 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		String categoryContext = generateCategory(nid, chartingContext);
 		String synonymsContext = generateSynonyms(nid, chartingContext);
 		String descriptionContext = generateDescription(nid, chartingContext);
-		Set<String> semanticFeaturesContext = generateSemanticFeatures(nid, chartingContext);
+		String semanticFeaturesContext = generateSemanticFeatures(nid, chartingContext);
 
 		if (!conceptContext.isEmpty()) {
 			nameBuilder.append("Concept: " + conceptContext).append(". ");
@@ -96,10 +103,7 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 			nameBuilder.append("Description: " + descriptionContext).append(". ");
 		}
 		if (!semanticFeaturesContext.isEmpty()) {
-			nameBuilder.append("Available Semantic Features:");
-			semanticFeaturesContext.forEach(feature -> {
-				nameBuilder.append(" " + feature);
-			});
+			nameBuilder.append("Available Semantic Features:" + semanticFeaturesContext).append(".");
 		}
 
 		// Create metadata for the embedding - this will help to filter based on
@@ -146,7 +150,7 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		return "";
 	}
 
-	private Set<String> generateSemanticFeatures(int nid, ChartingContext chartingContext) {
+	private String generateSemanticFeatures(int nid, ChartingContext chartingContext) {
 		Set<String> semanticFeaturesContext = new HashSet<>();
 		PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
 			Latest<SemanticEntityVersion> latestSemanticEntityVersion = chartingContext.chart().stampCalculator()
@@ -155,27 +159,46 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 				SemanticEntityVersion semanticEntityVersion = latestSemanticEntityVersion.get();
 				Latest<PatternEntityVersion> latestPatternEntityVersion = chartingContext.chart().stampCalculator()
 						.latest(semanticEntityVersion.patternNid());
-				if (latestPatternEntityVersion.isPresent() && !patternsToSkip().contains(latestPatternEntityVersion.get().nid())) {
+				if (latestPatternEntityVersion.isPresent()
+						&& !patternsToSkip().contains(latestPatternEntityVersion.get().nid())) {
 					PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
-					String purpose = chartingContext.chart().languageCalculator()
-							.getDescriptionTextOrNid(patternEntityVersion.semanticPurposeNid());
-					semanticFeaturesContext.add(purpose + ", ");
+					String meaning;
+					if (patternEntityVersion.nid() == TinkarTermV2.IDENTIFIER_PATTERN.nid()) {
+						Latest<Field<Object>> latestIdentifierSourceField = chartingContext.chart().stampCalculator()
+								.getFieldForSemanticWithMeaning(semanticEntityVersion.nid(),
+										TinkarTermV2.IDENTIFIER_SOURCE.nid());
+						if (latestIdentifierSourceField.isPresent()) {
+							EntityProxy value = (EntityProxy) latestIdentifierSourceField.get().value(); 
+							meaning = chartingContext.chart().languageCalculator().getDescriptionTextOrNid(value);
+						} else {
+							meaning = chartingContext.chart().languageCalculator()
+								.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+						}
+					} else {
+						meaning = chartingContext.chart().languageCalculator()
+								.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+					}
+					semanticFeaturesContext.add(meaning);
 				}
 			}
 		});
-		// return semanticFeaturesBuilder.toString().substring(0,
-		// semanticFeaturesBuilder.length() - 2);
-		return semanticFeaturesContext;
+
+		// [ ]Implement semantic of semanticds to get captured
+		StringBuilder sb = new StringBuilder();
+		for (String feature : semanticFeaturesContext) {
+			sb.append(feature + ", ");
+		}
+		return sb.toString().substring(0, sb.length() - 2);
 	}
 
 	private List<Integer> patternsToSkip() {
-        return List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
-                TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
-                TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
-                TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
-                TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
-                TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
-    }
+		return List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
+				TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
+				TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
+				TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
+				TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
+				TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
+	}
 
 	private void processBatch(List<EmbeddingData> embeddingBatch, ChartingContext chartingContext) {
 		// Generate embeddings values from string names
