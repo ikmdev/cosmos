@@ -155,13 +155,11 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 				SemanticEntityVersion semanticEntityVersion = latestSemanticEntityVersion.get();
 				Latest<PatternEntityVersion> latestPatternEntityVersion = chartingContext.chart().stampCalculator()
 						.latest(semanticEntityVersion.patternNid());
-				if (latestPatternEntityVersion.isPresent()) {
+				if (latestPatternEntityVersion.isPresent() && !patternsToSkip().contains(latestPatternEntityVersion.get().nid())) {
 					PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
-					String semanticName = chartingContext.chart().languageCalculator()
-							.getDescriptionTextOrNid(patternEntityVersion.nid());
 					String purpose = chartingContext.chart().languageCalculator()
 							.getDescriptionTextOrNid(patternEntityVersion.semanticPurposeNid());
-					semanticFeaturesContext.add(semanticName + " which provides " + purpose + " data.");
+					semanticFeaturesContext.add(purpose + ", ");
 				}
 			}
 		});
@@ -169,6 +167,15 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		// semanticFeaturesBuilder.length() - 2);
 		return semanticFeaturesContext;
 	}
+
+	private List<Integer> patternsToSkip() {
+        return List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
+                TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
+                TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
+                TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
+                TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
+                TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
+    }
 
 	private void processBatch(List<EmbeddingData> embeddingBatch, ChartingContext chartingContext) {
 		// Generate embeddings values from string names
@@ -179,6 +186,6 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 				.map(embeddingData -> TextSegment.from(embeddingData.name().text(), embeddingData.metadata()))
 				.toList();
 		embeddingStore.addAll(embeddings, segmentsWithMetaData);
-		chartingContext.progressUpdate().accept(chartingContext.batchSize());
+		chartingContext.progressUpdate().accept(embeddingBatch.size());
 	}
 }

@@ -28,7 +28,7 @@ public record ConstellationEntity(
 	}
 
 	public ConstellationEntity with(long processed) {
-		return new ConstellationEntity(id, observatoryId, phase, name, scopes, portalPrompt, processed, created, completed);
+		return new ConstellationEntity(id, observatoryId, phase, name, scopes, portalPrompt, processed() + processed, created, completed);
 	}
 
 	public boolean isCompleted() {

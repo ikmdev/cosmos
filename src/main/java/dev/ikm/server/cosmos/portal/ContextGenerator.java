@@ -163,19 +163,22 @@ public class ContextGenerator {
         roleGroup.roles().forEach(role -> roleContext(stringBuilder, role, true));
     }
 
-    private String semanticDataContext(int nid) {
-        List<Integer> patternFilter = List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
+    private List<Integer> patternsToSkip() {
+        return List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
                 TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
                 TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
                 TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
                 TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
                 TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
+    }
+
+    private String semanticDataContext(int nid) {
         StringBuilder semanticDataBuilder = new StringBuilder();
         PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
             Latest<SemanticEntityVersion> latestSemanticVersion = calculatorService.getStampCalculator()
                     .latest(semanticNid);
             if (latestSemanticVersion.isPresent()
-                    && !patternFilter.contains(latestSemanticVersion.get().patternNid())) {
+                    && !patternsToSkip().contains(latestSemanticVersion.get().patternNid())) {
                 SemanticEntityVersion semanticEntityVersion = latestSemanticVersion.get();
                 Latest<PatternEntityVersion> latestPattern = calculatorService.getStampCalculator()
                         .latest(semanticEntityVersion.patternNid());
