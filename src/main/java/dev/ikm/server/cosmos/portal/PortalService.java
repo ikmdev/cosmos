@@ -39,9 +39,13 @@ public class PortalService {
 		String attachmentContext = contextService.buildAttachmentContext(uploadedFile);
 		String aiResponse = cosmosAgent.chat(sessionId, constellationEntity.portalPrompt(), ragContext,
 				attachmentContext, userMessage);
-		LOG.info("\n" + "SessionId: {}\n\n" + "System Prompt: {}\n\n" + "RAG Context: {}\n\n"
-				+ "Attachment Context: {}\n\n" + "User Prompt: {}\n\n" + "Optimized Prompt: {}\n\n"
-				+ "AI Response: {}\n",
+		LOG.info("\n================\nSessionId\n================\n {}\n" +
+				"\n================\nSystem Prompt\n================\n {}\n" +
+				"\n================\nRAG Context\n================\n {}\n" +
+				"\n================\nAttachment Context\n================\n {}\n" +
+				"\n================\nUser Prompt\n================\n {}\n" +
+				"\n================\nOptimized Prompt\n================\n {}\n" +
+				"\n================\nAI Response\n================\n {}\n",
 				sessionId, constellationEntity.portalPrompt(), ragContext, attachmentContext,
 				userMessage, optimizedUserMessage, aiResponse);
 		return Optional.of(formattingService.formatAIResponse(aiResponse));

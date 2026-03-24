@@ -3,12 +3,8 @@ package dev.ikm.server.cosmos.portal;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import javax.management.RuntimeErrorException;
 
 import org.springframework.stereotype.Component;
 
@@ -26,7 +22,6 @@ import dev.ikm.tinkar.common.id.PublicIdSet;
 import dev.ikm.tinkar.common.service.PrimitiveData;
 import dev.ikm.tinkar.common.util.time.DateTimeUtil;
 import dev.ikm.tinkar.coordinate.stamp.calculator.Latest;
-import dev.ikm.tinkar.entity.Entity;
 import dev.ikm.tinkar.entity.EntityVersion;
 import dev.ikm.tinkar.entity.PatternEntityVersion;
 import dev.ikm.tinkar.entity.SemanticEntityVersion;
@@ -36,19 +31,10 @@ import dev.ikm.tinkar.terms.TinkarTermV2;
 @Component
 public class ContextGenerator {
 
-    private final RequestLoggingConfig requestLoggingConfig;
     private final CalculatorService calculatorService;
-    private final List<Integer> patternFilter;
 
-    public ContextGenerator(CalculatorService calculatorService, RequestLoggingConfig requestLoggingConfig) {
+    public ContextGenerator(CalculatorService calculatorService) {
         this.calculatorService = calculatorService;
-        this.requestLoggingConfig = requestLoggingConfig;
-        this.patternFilter = List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
-                TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
-                TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
-                TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
-                TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
-                TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
     }
 
     public String generate(List<Integer> nids) {
@@ -178,6 +164,12 @@ public class ContextGenerator {
     }
 
     private String semanticDataContext(int nid) {
+        List<Integer> patternFilter = List.of(TinkarTermV2.DESCRIPTION_PATTERN.nid(),
+                TinkarTermV2.EL_PLUS_PLUS_INFERRED_AXIOMS_PATTERN.nid(),
+                TinkarTermV2.EL_PLUS_PLUS_STATED_AXIOMS_PATTERN.nid(),
+                TinkarTermV2.STATED_NAVIGATION_PATTERN.nid(),
+                TinkarTermV2.INFERRED_NAVIGATION_PATTERN.nid(),
+                TinkarTermV2.OWL_AXIOM_SYNTAX_PATTERN.nid());
         StringBuilder semanticDataBuilder = new StringBuilder();
         PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
             Latest<SemanticEntityVersion> latestSemanticVersion = calculatorService.getStampCalculator()
