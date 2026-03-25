@@ -88,7 +88,7 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		String categoryContext = generateCategory(nid, chartingContext);
 		String synonymsContext = generateSynonyms(nid, chartingContext);
 		String descriptionContext = generateDescription(nid, chartingContext);
-		String semanticFeaturesContext = generateSemanticFeatures(nid, chartingContext);
+		String semanticFeaturesContext = generateSemanticFeaturesForConcept(nid, chartingContext);
 
 		if (!conceptContext.isEmpty()) {
 			nameBuilder.append("Concept: " + conceptContext).append(". ");
@@ -150,45 +150,59 @@ public class EmbeddingChartProcessor implements ChartProcessor {
 		return "";
 	}
 
-	private String generateSemanticFeatures(int nid, ChartingContext chartingContext) {
+	private String generateSemanticFeaturesForConcept(int nid, ChartingContext chartingContext) {
 		Set<String> semanticFeaturesContext = new HashSet<>();
 		PrimitiveData.get().forEachSemanticNidForComponent(nid, semanticNid -> {
 			Latest<SemanticEntityVersion> latestSemanticEntityVersion = chartingContext.chart().stampCalculator()
 					.latest(semanticNid);
 			if (latestSemanticEntityVersion.isPresent()) {
 				SemanticEntityVersion semanticEntityVersion = latestSemanticEntityVersion.get();
-				Latest<PatternEntityVersion> latestPatternEntityVersion = chartingContext.chart().stampCalculator()
-						.latest(semanticEntityVersion.patternNid());
-				if (latestPatternEntityVersion.isPresent()
-						&& !patternsToSkip().contains(latestPatternEntityVersion.get().nid())) {
-					PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
-					String meaning;
-					if (patternEntityVersion.nid() == TinkarTermV2.IDENTIFIER_PATTERN.nid()) {
-						Latest<Field<Object>> latestIdentifierSourceField = chartingContext.chart().stampCalculator()
-								.getFieldForSemanticWithMeaning(semanticEntityVersion.nid(),
-										TinkarTermV2.IDENTIFIER_SOURCE.nid());
-						if (latestIdentifierSourceField.isPresent()) {
-							EntityProxy value = (EntityProxy) latestIdentifierSourceField.get().value(); 
-							meaning = chartingContext.chart().languageCalculator().getDescriptionTextOrNid(value);
-						} else {
-							meaning = chartingContext.chart().languageCalculator()
-								.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
-						}
-					} else {
-						meaning = chartingContext.chart().languageCalculator()
-								.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
-					}
-					semanticFeaturesContext.add(meaning);
-				}
+				generateSemanticFeatureContext(semanticEntityVersion, semanticFeaturesContext, chartingContext);
 			}
 		});
 
-		// [ ]Implement semantic of semanticds to get captured
 		StringBuilder sb = new StringBuilder();
 		for (String feature : semanticFeaturesContext) {
 			sb.append(feature + ", ");
 		}
 		return sb.toString().substring(0, sb.length() - 2);
+	}
+
+	private void generateSemanticFeatureContext(SemanticEntityVersion semanticEntityVersion,
+			Set<String> semanticFeaturesContext, ChartingContext chartingContext) {
+		Latest<PatternEntityVersion> latestPatternEntityVersion = chartingContext.chart().stampCalculator()
+				.latest(semanticEntityVersion.patternNid());
+		if (latestPatternEntityVersion.isPresent()
+				&& !patternsToSkip().contains(latestPatternEntityVersion.get().nid())) {
+			PatternEntityVersion patternEntityVersion = latestPatternEntityVersion.get();
+			String meaning;
+			if (patternEntityVersion.nid() == TinkarTermV2.IDENTIFIER_PATTERN.nid()) {
+				Latest<Field<Object>> latestIdentifierSourceField = chartingContext.chart().stampCalculator()
+						.getFieldForSemanticWithMeaning(semanticEntityVersion.nid(),
+								TinkarTermV2.IDENTIFIER_SOURCE.nid());
+				if (latestIdentifierSourceField.isPresent()) {
+					EntityProxy value = (EntityProxy) latestIdentifierSourceField.get().value();
+					meaning = chartingContext.chart().languageCalculator().getDescriptionTextOrNid(value);
+				} else {
+					meaning = chartingContext.chart().languageCalculator()
+							.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+				}
+			} else {
+				meaning = chartingContext.chart().languageCalculator()
+						.getDescriptionTextOrNid(patternEntityVersion.semanticMeaningNid());
+			}
+			semanticFeaturesContext.add(meaning);
+		}
+
+		//Recursive Semantic of Semantic
+		PrimitiveData.get().forEachSemanticNidForComponent(semanticEntityVersion.nid(), newSemanticNid -> {
+			Latest<SemanticEntityVersion> latestSemanticEntityVersion = chartingContext.chart().stampCalculator()
+					.latest(newSemanticNid);
+			if (latestSemanticEntityVersion.isPresent()) {
+				SemanticEntityVersion newSemanticEntityVersion = latestSemanticEntityVersion.get();
+				generateSemanticFeatureContext(newSemanticEntityVersion, semanticFeaturesContext, chartingContext);
+			}
+		});
 	}
 
 	private List<Integer> patternsToSkip() {
