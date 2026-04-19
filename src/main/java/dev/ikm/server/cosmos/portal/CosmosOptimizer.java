@@ -23,6 +23,6 @@ public interface CosmosOptimizer {
             Input: Is an Albumin of 3.1 too low?
             Output: Albumin Reference Range Expected Value
             </EXAMPLES>
-                """)
+                        """)
     String optimizeForSearch(@UserMessage String rawUserQuery);
 }
